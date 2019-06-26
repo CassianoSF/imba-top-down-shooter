@@ -62,11 +62,9 @@ tag App
         schedule interval: 1
         document.addEventListener 'keydown', do |e|
             keydown e
-            render
+
         document.addEventListener 'keyup', do |e|
             keyup e
-            render
-        render
 
     def aim e
         console.log e.event
