@@ -17,7 +17,7 @@ tag Player < svg:g
             animation = "textures/handgun/reload/survivor-reload_handgun_"
             animation-size = 14
             trigger :reload
-            Imba.setTimeout 350, do
+            Imba.setTimeout 1000, do
                 animation = "textures/handgun/move/survivor-move_handgun_"
                 animation-size = 19
 
