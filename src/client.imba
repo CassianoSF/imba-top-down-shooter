@@ -4,12 +4,24 @@ tag Player < svg:g
     prop rotation
     prop time default: 0
     prop shoot
+    prop ammo
+    prop animation default: "textures/handgun/move/survivor-move_handgun_"
+    prop animation-size default: 19
 
     def mount
         schedule interval: 30
 
     def tick
         time++
+        if ammo == 0
+            animation = "textures/handgun/reload/survivor-reload_handgun_"
+            animation-size = 14
+            trigger :reload
+            Imba.setTimeout 350, do
+                animation = "textures/handgun/move/survivor-move_handgun_"
+                animation-size = 19
+
+
         render
 
     def render
@@ -18,7 +30,7 @@ tag Player < svg:g
             <svg:g transform="translate({-50}, {-50})">
                 <svg:defs>
                     <svg:pattern #survivor patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="textures/handgun/move/survivor-move_handgun_{time % 19}.png" width="100" height="100">
+                        <svg:image href="{animation}{time % animation-size}.png" width="100" height="100">
                 <svg:rect height=100 width=100 fill="url(#survivor)">
 
 tag Ground < svg:g
@@ -57,6 +69,7 @@ tag App
     prop keys default: {}
     prop player-rotation default: 0
     prop shoot
+    prop ammo default: 10
 
     def mount
         schedule interval: 1
@@ -78,9 +91,12 @@ tag App
 
     def giveAShoot e
         shoot = true
+        ammo -= 1
         Imba.setTimeout 100, do
             shoot = false
 
+    def reload
+        ammo = 10
 
     def tick
         if keys:KeyA
@@ -97,7 +113,7 @@ tag App
         <self :mousedown.giveAShoot :mousemove.aim style="height: 700px; width: 1000px; background-color: black">
             <svg:svg height="700px" width="1000px" transform="scale(1,-1)">
                 <Ground pos=pos>
-                <Player pos=pos rotation=player-rotation shoot=shoot>
+                <Player :reload.reload ammo=ammo pos=pos rotation=player-rotation shoot=shoot>
 
 Imba.mount <App>
 
