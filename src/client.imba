@@ -146,7 +146,7 @@ let guns =
 
 let player = Player.new
     invertory: guns
-    gun: guns:knife
+    gun: guns:handgun
     pos:
         x: 0
         y: 0
