@@ -136,6 +136,10 @@ class Bullet
         window.setTimeout( (do
             pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 30
             pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
+            if pos:x**2 + pos:y**2 > 10000000
+                delete self
+                bullets.pop
+                return
             fly
         ), 1);
 
