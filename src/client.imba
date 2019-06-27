@@ -149,6 +149,14 @@ class Bullet
         fly
 
 
+class Crosshair
+    prop x
+    prop y
+
+    def initialize
+        for k, v of ($1) 
+            self["_{k}"] = ($1)[k] if $1
+
 let game = Game.new 
     keys: {}
     time: 0
@@ -197,6 +205,8 @@ let player = Player.new
     animations: animations:player
     game: game
 
+
+let crosshair = Crosshair.new(x:0, y:0)
 
 tag Survival < svg:g
     attr transform
@@ -251,6 +261,16 @@ tag Projectile < svg:g
             <svg:rect height=1 width=100 fill="yellow">
 
 
+tag Aim < svg:g
+    attr transform
+    prop crosshair
+
+    def render
+        <self transform="translate({crosshair.x}, {crosshair.y + window:innerHeight})">
+            <svg:circle r=10 stroke="rgb(60,255,60)">
+            <svg:circle r=8 fill="rgb(60,255,60)">
+            <svg:circle r=2 fill="black">
+
 tag App
 
     def mount
@@ -276,6 +296,8 @@ tag App
             e.preventDefault
 
     def aim e
+        crosshair.x = e:x
+        crosshair.y = -e:y
         player.rotation = Math.atan2(e:x -  window:innerWidth/2, e:y -  window:innerHeight/2)/3.1415*180.0 - 90;
 
     def keydown e
@@ -310,6 +332,7 @@ tag App
                 <svg:g transform=("translate({x}, {y})")>
                     <Ground player=player>
                     <Survival player=player game=game>
+                <Aim crosshair=crosshair>
                 for bullet in bullets
                     <Projectile bullet=bullet player=player>
 Imba.mount <App>
