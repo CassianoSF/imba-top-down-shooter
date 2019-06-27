@@ -1,5 +1,3 @@
-Audio.new('sounds/theme1.mp3').play
-
 class Game
     prop keys
     prop time
@@ -205,6 +203,7 @@ tag App
     attr width
 
     def mount
+        Audio.new('sounds/theme1.mp3').play
         schedule interval: 40
         document.addEventListener 'keydown', do |e|
             keydown e
