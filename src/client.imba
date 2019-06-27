@@ -245,9 +245,12 @@ tag App
         render
 
     def render
+        let x = player.shooting ? 2 : 0
+        let y = player.shooting ? 2 : 0
         <self style="height: 700px; width: 1000px; background-color: black">
             <svg:svg height="700px" width="1000px" transform="scale(1,-1)">
-                <Ground player=player>
-                <Survival player=player game=game>
+                <svg:g transform=("translate({x}, {y})")>
+                    <Ground player=player>
+                    <Survival player=player game=game>
 Imba.mount <App>
 
