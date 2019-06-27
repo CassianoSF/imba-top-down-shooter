@@ -6,6 +6,8 @@ class Game
         for k, v of ($1) 
             self["_{k}"] = ($1)[k] if $1
 
+let bullets = []
+
 class Player
     prop invertory
     prop gun
@@ -50,11 +52,21 @@ class Player
 
     def shoot
         if gun.ammo and can-shoot
-            Audio.new('sounds/shotgun_shot.wav').play
+            let audio = Audio.new('sounds/shotgun_shot.wav')
+            audio.play
+            bullets.push Bullet.new
+                pos: 
+                    # x: Math.sin((rotation + 90)* 3.1415 / 180)
+                    x: 0
+                    y: Math.cos((rotation + 90)* 3.1415 / 180) *  -100
+                direction: rotation
             gun.ammo -= 1
             can-shoot = no
             shooting = yes
             animation = animations[gun.name]:shoot
+            Imba.setTimeout 10000, do
+                delete audio
+
             Imba.setTimeout 1000/gun.rate, do
                 can-shoot = yes
 
@@ -73,13 +85,19 @@ class Player
 
     def reload
         if gun.ammo != gun.cap
-            Audio.new('sounds/shotgun_reload.wav').play
+            let audio = Audio.new('sounds/shotgun_reload.wav')
+            let audio2 = Audio.new('sounds/shotgun_pump.wav')
+            audio.play
+            audio2.play
             can-shoot = no
             reloading = yes
             animation = animations[gun.name]:reload
             Imba.setTimeout gun.reload-time, do
                 can-shoot = yes
                 reloading = no
+                delete audio
+                audio2.pause
+                delete audio2
                 gun.ammo = gun.cap
 
     def initialize
@@ -106,6 +124,23 @@ class Animation
     def initialize
         for k, v of ($1) 
             self["_{k}"] = ($1)[k] if $1
+
+
+class Bullet
+    prop direction
+    prop pos
+
+    def fly
+        window.setTimeout( (do
+            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 15
+            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 15
+            fly
+        ), 1);
+
+    def initialize
+        for k, v of ($1) 
+            self["_{k}"] = ($1)[k] if $1
+        fly
 
 
 let game = Game.new 
@@ -155,6 +190,7 @@ let player = Player.new
     speed: 10
     animations: animations:player
 
+
 tag Survival < svg:g
     attr transform
     prop player
@@ -197,6 +233,16 @@ tag Shot < svg:g
                 <svg:pattern #shot patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                     <svg:image href="textures/shoot/shoot/muzzle_flash_0.png" width="100" height="100">
             <svg:rect height=100 width=100 fill="url(#shot)">
+
+tag Projectile < svg:g
+    attr transform
+    prop bullet
+    prop player
+
+    def render
+        <self transform="translate({500 + bullet.pos:x }, {300 - bullet.pos:y}) rotate({bullet.direction})">
+            <svg:rect height=1 width=30 fill="yellow">
+
 
 tag App
     attr height
@@ -252,5 +298,7 @@ tag App
                 <svg:g transform=("translate({x}, {y})")>
                     <Ground player=player>
                     <Survival player=player game=game>
+                    for bullet in bullets
+                        <Projectile bullet=bullet player=player>
 Imba.mount <App>
 
