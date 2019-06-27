@@ -20,6 +20,7 @@ class Player
     prop running
     prop reputation
     prop animations
+    prop game
 
     prop shooting
     prop reloading
@@ -51,39 +52,39 @@ class Player
                     pos:y -= step
 
     def shoot
+        game.time = 0
         if gun.ammo and can-shoot
             let audio = Audio.new('sounds/shotgun_shot.wav')
             audio.play
             bullets.push Bullet.new
                 pos: 
-                    # x: Math.sin((rotation + 90)* 3.1415 / 180)
-                    x: 0
-                    y: Math.cos((rotation + 90)* 3.1415 / 180) *  -100
+                    # x: 0
+                    x: Math.sin((rotation + 90)* 3.1415 / 180) * 100
+                    y: Math.cos((rotation + 90)* 3.1415 / 180) * 100
                 direction: rotation
             gun.ammo -= 1
             can-shoot = no
             shooting = yes
             animation = animations[gun.name]:shoot
-            Imba.setTimeout 10000, do
-                delete audio
+            window.setTimeout ((do delete audio), 10000)
 
-            Imba.setTimeout 1000/gun.rate, do
-                can-shoot = yes
+            window.setTimeout((do can-shoot = yes), 1000/gun.rate)
 
-            Imba.setTimeout 50, do
-                shooting = no
+            window.setTimeout((do shooting = no), 50)
 
     def attack
+        game.time = 0
         if can-attack
-            gun.ammo -= 1
             can-attack = no
             attacking = yes
             animation = animations[gun.name]:attack
-            Imba.setTimeout 1000, do
+            window.setTimeout(( do
                 can-attack = yes
                 attacking = no        
+            ), 600)
 
     def reload
+        game.time = 0
         if gun.ammo != gun.cap
             let audio = Audio.new('sounds/shotgun_reload.wav')
             let audio2 = Audio.new('sounds/shotgun_pump.wav')
@@ -92,13 +93,14 @@ class Player
             can-shoot = no
             reloading = yes
             animation = animations[gun.name]:reload
-            Imba.setTimeout gun.reload-time, do
+            window.setTimeout((do
                 can-shoot = yes
                 reloading = no
                 delete audio
                 audio2.pause
                 delete audio2
                 gun.ammo = gun.cap
+            ), gun.reload-time)
 
     def initialize
         for k, v of ($1) 
@@ -132,8 +134,8 @@ class Bullet
 
     def fly
         window.setTimeout( (do
-            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 15
-            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 15
+            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 30
+            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
             fly
         ), 1);
 
@@ -189,6 +191,7 @@ let player = Player.new
     animation: animations:player:knife:idle
     speed: 10
     animations: animations:player
+    game: game
 
 
 tag Survival < svg:g
@@ -197,7 +200,7 @@ tag Survival < svg:g
     prop game
 
     def render
-        <self transform="translate(500, 350) rotate({player.rotation})">
+        <self transform="translate({ window:innerWidth/2 }, { window:innerHeight/2 }) rotate({player.rotation})">
             <Shot> if player.shooting
             <svg:g transform="translate({-50}, {-50})">
                 <svg:defs>
@@ -240,17 +243,18 @@ tag Projectile < svg:g
     prop player
 
     def render
-        <self transform="translate({500 + bullet.pos:x }, {300 - bullet.pos:y}) rotate({bullet.direction})">
-            <svg:rect height=1 width=30 fill="yellow">
+        <self transform="translate({ window:innerWidth/2 + bullet.pos:x}, { window:innerHeight/2 - bullet.pos:y}) rotate({bullet.direction})">
+            <svg:rect height=1 width=100 fill="yellow">
 
 
 tag App
-    attr height
-    attr width
 
     def mount
-        Audio.new('sounds/theme1.mp3').play
+        window:innerHeight
+        window:innerWidth
+
         schedule interval: 40
+        Audio.new('sounds/theme1.mp3').play
         document.addEventListener 'keydown', do |e|
             keydown e
 
@@ -261,10 +265,14 @@ tag App
             aim e
 
         document.addEventListener 'mousedown' do |e|
-            shoot
+            shoot if e:button == 0
+            player.attack if e:button == 2
+
+        document.addEventListener 'contextmenu', do |e|
+            e.preventDefault
 
     def aim e
-        player.rotation = Math.atan2(e:x - 500, e:y - 350)/3.1415*180.0 - 90;
+        player.rotation = Math.atan2(e:x -  window:innerWidth/2, e:y -  window:innerHeight/2)/3.1415*180.0 - 90;
 
     def keydown e
         player.gun = player.invertory:knife   if e:code == :Digit1 and player.invertory:knife
@@ -293,12 +301,12 @@ tag App
     def render
         let x = player.shooting ? 2 : 0
         let y = player.shooting ? 2 : 0
-        <self style="height: 700px; width: 1000px; background-color: black">
-            <svg:svg height="700px" width="1000px" transform="scale(1,-1)">
+        <self .container>
+            <svg:svg .game transform="scale(1,-1)">
                 <svg:g transform=("translate({x}, {y})")>
                     <Ground player=player>
                     <Survival player=player game=game>
-                    for bullet in bullets
-                        <Projectile bullet=bullet player=player>
+                for bullet in bullets
+                    <Projectile bullet=bullet player=player>
 Imba.mount <App>
 
