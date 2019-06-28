@@ -1,6 +1,8 @@
 class Game
     prop keys
     prop time
+    prop height
+    prop width
 
     def initialize 
         for k, v of ($1) 
@@ -65,8 +67,8 @@ class Player
             bullets.push Bullet.new
                 pos: 
                     # x: 0
-                    x: Math.sin((rotation + 90)* 3.1415 / 180) * 100
-                    y: Math.cos((rotation + 90)* 3.1415 / 180) * 100
+                    x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
+                    y: Math.cos((rotation + 90)* 3.1415 / 180) * 100 - pos:y
                 direction: rotation
             gun.ammo -= 1
             can-shoot = no
@@ -136,10 +138,21 @@ class Bullet
     prop direction
     prop pos
 
+
+    def angleToZombie zombie, game
+        let dx = zombie.pos:x - pos:x + game.width/2;
+        let dy = zombie.pos:y - pos:y + game.height/2;
+        -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
+
+    def update zombies, game
+        let angle = angleToZombie zombies[0], game
+        console.log(angle, pos, zombies[0].pos)
+
+
     def fly
         window.setTimeout( (do
-            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 30
-            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
+            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 0.5
+            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 0.5
             if pos:x**2 + pos:y**2 > 10000000
                 delete self
                 bullets.shift
@@ -160,6 +173,56 @@ class Crosshair
     def initialize
         for k, v of ($1) 
             self["_{k}"] = ($1)[k] if $1
+
+
+class Zombie
+    prop pos
+    prop rotation
+    prop animation
+    prop animations
+    prop life
+    prop speed
+    prop id
+    prop turn
+    prop aggro
+
+    def distanceToPlayer player, game
+        let dx = player.pos:x - pos:x + game.width/2;
+        let dy = player.pos:y - pos:y + game.height/2;
+        (dy**2 + dx**2)**0.5
+
+    def angleToPlayer player, game
+        let dx = player.pos:x - pos:x + game.width/2;
+        let dy = player.pos:y - pos:y + game.height/2;
+        -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
+
+    def update player, game
+        if rotation < 1000 # <<< Weird 🤔 console.log rotation
+            let distance = distanceToPlayer(player, game)
+            let angle-diff = angleToPlayer(player, game) - rotation
+            if distance > 50
+                pos:x += Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
+                pos:y += -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
+            if (angle-diff**2)**0.5 < 30 and distance < 500 or distance < 100 
+                aggro = yes
+        unless aggro
+            if 5000 % game.time == 0
+                turn = [:turn_left, :turn_right][parseInt(Math.random * 3)]
+                speed = 1 or parseInt(Math.random * 3)
+
+            if turn == :turn_right
+                rotation += 1
+            if turn == :turn_left
+                rotation -= 1
+        else
+            speed = 10
+            rotation = angleToPlayer player, game
+
+    def initialize
+        for k, v of ($1) 
+            self["_{k}"] = ($1)[k] if $1
+
+
 
 let game = Game.new 
     keys: {}
@@ -183,6 +246,16 @@ let animations =
         walk:         Animation.new(path: "textures/feet/walk/survivor-walk_", size: 19)
         strafe_left:  Animation.new(path: "textures/feet/strafe_left/survivor-strafe_left_", size: 19)
         strafe_right: Animation.new(path: "textures/feet/strafe_right/survivor-strafe_right_", size: 19)
+    zombie:
+        idle:    Animation.new(path: "textures/zombie/idle/skeleton-idle_", size: 16)
+        attack:  Animation.new(path: "textures/zombie/attack/skeleton-attack_", size: 8)
+        move:    Animation.new(path: "textures/zombie/move/skeleton-move_", size: 18)
+
+
+let zombies = []
+for i in Array.from(Array.new(1))
+    zombies.push(Zombie.new(id: Math.random, pos: {x: Math.random * 1000, y: Math.random * 1000}, rotation: Math.random*360, animation: animations:zombie:idle, animations: animations:zombie, life: 100, speed: 1))
+
 
 let guns = 
     knife: Gun.new
@@ -220,13 +293,34 @@ let player = Player.new
 
 let crosshair = Crosshair.new(x:0, y:0)
 
+tag Undead < svg:g
+    attr transform
+    prop player
+    prop game
+    prop zombie
+
+    # def mount
+    #     schedule interval: 16.66
+
+    # def tick
+    #     render
+
+    def render
+        zombie.update player, game
+        <self transform=("translate({zombie.pos:x},{zombie.pos:y}) rotate({zombie.rotation})")>
+            <svg:g transform="translate({-50}, {-50})">
+                <svg:defs>
+                    <svg:pattern id="zombie{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
+                        <svg:image href="{zombie.animation.path}{game.time % zombie.animation.size}.png" width="100" height="100">
+                <svg:rect height=100 width=100 fill="url(#zombie{zombie.id})">
+
 tag Survival < svg:g
     attr transform
     prop player
     prop game
 
     def render
-        <self transform="translate({ window:innerWidth/2 }, { window:innerHeight/2 }) rotate({player.rotation})">
+        <self transform="translate({ window:innerWidth/2 + player.pos:x}, { window:innerHeight/2 + player.pos:y}) rotate({player.rotation})">
             <Shot> if player.shooting
             <svg:g transform="translate({-50}, {-50})">
                 <svg:defs>
@@ -249,7 +343,7 @@ tag Ground < svg:g
 
 
     def render
-        <self height=70000 width=70000 transform="translate({-player.pos:x - 35000},{-player.pos:y - 35000})">
+        <self height=70000 width=70000 transform="translate({ - 35000},{ - 35000})">
             <svg:g>
                 <svg:defs>
                     <svg:pattern #floor_2 patternUnits="userSpaceOnUse" width="700" height="700" patternContentUnits="userSpaceOnUse">
@@ -328,6 +422,8 @@ tag App
         player.attack if [:flashlight, :knife].includes player.gun.name
 
     def tick
+        game.width = window:innerWidth
+        game.height = window:innerHeight
         let directions = []
         directions.push :left  if game.keys:KeyA
         directions.push :right if game.keys:KeyD
@@ -343,11 +439,14 @@ tag App
         let y = player.shooting ? 2 : 0
         <self .container>
             <svg:svg .game transform="scale(1,-1)">
-                <svg:g transform=("translate({x}, {y})")>
+                <svg:g transform=("translate({x - player.pos:x}, {y - player.pos:y})")>
                     <Ground player=player>
                     <Survival player=player game=game>
+                    for zombie in zombies
+                        <Undead zombie=zombie player=player game=game>
+                    for bullet in bullets
+                        bullet.update zombies, game
+                        <Projectile bullet=bullet player=player>
                 <Aim crosshair=crosshair>
-                for bullet in bullets
-                    <Projectile bullet=bullet player=player>
 Imba.mount <App>
 
