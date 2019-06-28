@@ -67,8 +67,8 @@ class Player
             bullets.push Bullet.new
                 pos: 
                     # x: 0
-                    x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
-                    y: Math.cos((rotation + 90)* 3.1415 / 180) * 100 - pos:y
+                    x: Math.sin((rotation + 90)* 3.1415 / 180) * 50 + pos:x
+                    y: Math.cos((rotation + 90)* 3.1415 / 180) * 50 - pos:y
                 direction: rotation
             gun.ammo -= 1
             can-shoot = no
@@ -138,27 +138,27 @@ class Bullet
     prop direction
     prop pos
 
+    def distanceToZombie zombie, game
+        let dx = zombie.pos:x - (pos:x + game.width/2)
+        let dy = zombie.pos:y - (-pos:y + game.height/2)
+        (dy**2 + dx**2)**0.5
 
-    def angleToZombie zombie, game
-        let dx = zombie.pos:x - pos:x + game.width/2;
-        let dy = zombie.pos:y - pos:y + game.height/2;
-        -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
-
-    def update zombies, game
-        let angle = angleToZombie zombies[0], game
-        console.log(angle, pos, zombies[0].pos)
-
+    def update zombies, game, player
+        for zombie in zombies
+            if distanceToZombie(zombie, game) < 75
+                console.log :hit
+                zombie.knockback(player, game)
 
     def fly
         window.setTimeout( (do
-            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 0.5
-            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 0.5
+            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 1
+            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 1
             if pos:x**2 + pos:y**2 > 10000000
                 delete self
                 bullets.shift
                 return
             fly
-        ), 1);
+        ), 0.1);
 
     def initialize
         for k, v of ($1) 
@@ -186,6 +186,10 @@ class Zombie
     prop turn
     prop aggro
 
+    def knockback player, game
+        pos:x -= Math.sin((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 30
+        pos:y -= -Math.cos((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 30
+
     def distanceToPlayer player, game
         let dx = player.pos:x - pos:x + game.width/2;
         let dy = player.pos:y - pos:y + game.height/2;
@@ -197,14 +201,13 @@ class Zombie
         -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
 
     def update player, game
-        if rotation < 1000 # <<< Weird 🤔 console.log rotation
-            let distance = distanceToPlayer(player, game)
-            let angle-diff = angleToPlayer(player, game) - rotation
-            if distance > 50
-                pos:x += Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
-                pos:y += -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
-            if (angle-diff**2)**0.5 < 30 and distance < 500 or distance < 100 
-                aggro = yes
+        let distance = distanceToPlayer(player, game)
+        let angle-diff = angleToPlayer(player, game) - rotation
+        if distance > 50
+            pos:x += Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
+            pos:y += -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
+        if (angle-diff**2)**0.5 < 30 and distance < 500 or distance < 100 
+            aggro = yes
         unless aggro
             if 5000 % game.time == 0
                 turn = [:turn_left, :turn_right][parseInt(Math.random * 3)]
@@ -445,7 +448,7 @@ tag App
                     for zombie in zombies
                         <Undead zombie=zombie player=player game=game>
                     for bullet in bullets
-                        bullet.update zombies, game
+                        bullet.update zombies, game, player
                         <Projectile bullet=bullet player=player>
                 <Aim crosshair=crosshair>
 Imba.mount <App>
