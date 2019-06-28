@@ -52,9 +52,9 @@ class Player
                 when :right
                     pos:x += step
                 when :down
-                    pos:y += step        
+                    pos:y -= step        
                 when :up
-                    pos:y -= step
+                    pos:y += step
 
     def shoot
         reload unless gun.ammo
@@ -72,11 +72,9 @@ class Player
             can-shoot = no
             shooting = yes
             animation = animations[gun.name]:shoot
-            window.setTimeout ((do delete audio), 10000)
-
+            window.setTimeout((do delete audio),    10000)
             window.setTimeout((do can-shoot = yes), 1000/gun.rate)
-
-            window.setTimeout((do shooting = no), 50)
+            window.setTimeout((do shooting = no),   50)
 
     def attack
         if can-attack
@@ -144,7 +142,7 @@ class Bullet
             pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
             if pos:x**2 + pos:y**2 > 10000000
                 delete self
-                bullets.pop
+                bullets.shift
                 return
             fly
         ), 1);
@@ -251,7 +249,7 @@ tag Ground < svg:g
 
 
     def render
-        <self height=70000 width=70000 transform="translate({-player.pos:x - 35000},{player.pos:y - 35000})">
+        <self height=70000 width=70000 transform="translate({-player.pos:x - 35000},{-player.pos:y - 35000})">
             <svg:g>
                 <svg:defs>
                     <svg:pattern #floor_2 patternUnits="userSpaceOnUse" width="700" height="700" patternContentUnits="userSpaceOnUse">
