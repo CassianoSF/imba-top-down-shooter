@@ -151,8 +151,8 @@ class Bullet
 
     def fly
         window.setTimeout( (do
-            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 1
-            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 1
+            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 20
+            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 20
             if pos:x**2 + pos:y**2 > 10000000
                 delete self
                 bullets.shift
@@ -256,7 +256,7 @@ let animations =
 
 
 let zombies = []
-for i in Array.from(Array.new(1))
+for i in Array.from(Array.new(20))
     zombies.push(Zombie.new(id: Math.random, pos: {x: Math.random * 1000, y: Math.random * 1000}, rotation: Math.random*360, animation: animations:zombie:idle, animations: animations:zombie, life: 100, speed: 1))
 
 
