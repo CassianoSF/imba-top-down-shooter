@@ -15,11 +15,13 @@ class Player
     prop rotation
     prop can-shoot
     prop can-attack
-    prop animation
     prop speed
     prop running
     prop reputation
+    prop animation
     prop animations
+    prop feet-animation
+    prop feet-animations
     prop game
 
     prop shooting
@@ -28,6 +30,9 @@ class Player
     prop attacking
 
     def move directions
+        feet-animation = feet-animations:run if running and directions:length
+        feet-animation = feet-animations:walk if !running and directions:length
+        feet-animation = feet-animations:idle if !directions:length
         let step
         if !reloading and !shooting and !attacking 
             animation = animations[gun.name]:move if directions:length
@@ -52,8 +57,9 @@ class Player
                     pos:y -= step
 
     def shoot
-        game.time = 0
+        reload unless gun.ammo
         if gun.ammo and can-shoot
+            game.time = 0
             let audio = Audio.new('sounds/shotgun_shot.wav')
             audio.play
             bullets.push Bullet.new
@@ -73,8 +79,8 @@ class Player
             window.setTimeout((do shooting = no), 50)
 
     def attack
-        game.time = 0
         if can-attack
+            game.time = 0
             can-attack = no
             attacking = yes
             animation = animations[gun.name]:attack
@@ -84,8 +90,8 @@ class Player
             ), 600)
 
     def reload
-        game.time = 0
         if gun.ammo != gun.cap
+            game.time = 0
             let audio = Audio.new('sounds/shotgun_reload.wav')
             let audio2 = Audio.new('sounds/shotgun_pump.wav')
             audio.play
@@ -173,6 +179,12 @@ let animations =
             attack: Animation.new(path: "textures/handgun/meleeattack/survivor-meleeattack_handgun_", size: 14)
             shoot:  Animation.new(path: "textures/handgun/shoot/survivor-shoot_handgun_", size: 2)
             reload: Animation.new(path: "textures/handgun/reload/survivor-reload_handgun_", size: 14)
+    feet:
+        idle:         Animation.new(path: "textures/feet/idle/survivor-idle_", size: 1)
+        run:          Animation.new(path: "textures/feet/run/survivor-run_", size: 19)
+        walk:         Animation.new(path: "textures/feet/walk/survivor-walk_", size: 19)
+        strafe_left:  Animation.new(path: "textures/feet/strafe_left/survivor-strafe_left_", size: 19)
+        strafe_right: Animation.new(path: "textures/feet/strafe_right/survivor-strafe_right_", size: 19)
 
 let guns = 
     knife: Gun.new
@@ -200,9 +212,11 @@ let player = Player.new
     rotation: 0
     can-shoot: yes
     can-attack: yes
-    animation: animations:player:knife:idle
     speed: 10
+    animation: animations:player:knife:idle
     animations: animations:player
+    feet-animation: animations:feet:idle
+    feet-animations: animations:feet
     game: game
 
 
@@ -217,6 +231,10 @@ tag Survival < svg:g
         <self transform="translate({ window:innerWidth/2 }, { window:innerHeight/2 }) rotate({player.rotation})">
             <Shot> if player.shooting
             <svg:g transform="translate({-50}, {-50})">
+                <svg:defs>
+                    <svg:pattern #legs patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
+                        <svg:image href="{player.feet-animation.path}{game.time % player.feet-animation.size}.png" width="100" height="100">
+                <svg:rect height=100 width=100 fill="url(#legs)">
                 <svg:defs>
                     <svg:pattern #survivor patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                         <svg:image href="{player.animation.path}{game.time % player.animation.size}.png" width="100" height="100">
@@ -274,11 +292,9 @@ tag Aim < svg:g
 tag App
 
     def mount
-        window:innerHeight
-        window:innerWidth
+        # Audio.new('sounds/theme1.mp3').play
 
         schedule interval: 40
-        Audio.new('sounds/theme1.mp3').play
         document.addEventListener 'keydown', do |e|
             keydown e
 
