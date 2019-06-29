@@ -59,16 +59,15 @@ class Player
                     pos:y += step
 
     def shoot
-        reload unless gun.ammo
+        reload unless gun.ammo or reloading
         if gun.ammo and can-shoot
-            game.time = 0
             let audio = Audio.new('sounds/shotgun_shot.wav')
             audio.play
             bullets.push Bullet.new
                 pos: 
                     # x: 0
-                    x: Math.sin((rotation + 90)* 3.1415 / 180) * 50 + pos:x
-                    y: Math.cos((rotation + 90)* 3.1415 / 180) * 50 - pos:y
+                    x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
+                    y: Math.cos((rotation + 90)* 3.1415 / 180) * 100 - pos:y
                 direction: rotation
             gun.ammo -= 1
             can-shoot = no
@@ -146,19 +145,18 @@ class Bullet
     def update zombies, game, player
         for zombie in zombies
             if distanceToZombie(zombie, game) < 75
-                console.log :hit
                 zombie.knockback(player, game)
 
     def fly
         window.setTimeout( (do
-            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 20
-            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 20
+            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 30
+            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
             if pos:x**2 + pos:y**2 > 10000000
                 delete self
                 bullets.shift
                 return
             fly
-        ), 0.1);
+        ), 1);
 
     def initialize
         for k, v of ($1) 
@@ -211,14 +209,14 @@ class Zombie
         unless aggro
             if 5000 % game.time == 0
                 turn = [:turn_left, :turn_right][parseInt(Math.random * 3)]
-                speed = 1 or parseInt(Math.random * 3)
+                speed = parseInt(Math.random * 3)
 
             if turn == :turn_right
                 rotation += 1
             if turn == :turn_left
                 rotation -= 1
         else
-            speed = 10
+            speed = 6
             rotation = angleToPlayer player, game
 
     def initialize
@@ -257,7 +255,15 @@ let animations =
 
 let zombies = []
 for i in Array.from(Array.new(20))
-    zombies.push(Zombie.new(id: Math.random, pos: {x: Math.random * 1000, y: Math.random * 1000}, rotation: Math.random*360, animation: animations:zombie:idle, animations: animations:zombie, life: 100, speed: 1))
+    zombies.push Zombie.new 
+        id: Math.random
+        pos: {x: Math.random * 1000
+        y: Math.random * 1000}
+        rotation: Math.random*360
+        animation: animations:zombie:idle
+        animations: animations:zombie
+        life: 100
+        speed: 1
 
 
 let guns = 
@@ -275,7 +281,7 @@ let guns =
         cap: 10
         rate: 3
         damage: 33
-        reload-time: 1000
+        reload-time: 1200
 
 let player = Player.new
     invertory: guns
@@ -286,7 +292,7 @@ let player = Player.new
     rotation: 0
     can-shoot: yes
     can-attack: yes
-    speed: 10
+    speed: 4
     animation: animations:player:knife:idle
     animations: animations:player
     feet-animation: animations:feet:idle
@@ -302,19 +308,13 @@ tag Undead < svg:g
     prop game
     prop zombie
 
-    # def mount
-    #     schedule interval: 16.66
-
-    # def tick
-    #     render
-
     def render
         zombie.update player, game
         <self transform=("translate({zombie.pos:x},{zombie.pos:y}) rotate({zombie.rotation})")>
             <svg:g transform="translate({-50}, {-50})">
                 <svg:defs>
                     <svg:pattern id="zombie{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="{zombie.animation.path}{game.time % zombie.animation.size}.png" width="100" height="100">
+                        <svg:image href="{zombie.animation.path}{parseInt(game.time/3) % zombie.animation.size}.png" width="100" height="100">
                 <svg:rect height=100 width=100 fill="url(#zombie{zombie.id})">
 
 tag Survival < svg:g
@@ -322,17 +322,18 @@ tag Survival < svg:g
     prop player
     prop game
 
+
     def render
         <self transform="translate({ window:innerWidth/2 + player.pos:x}, { window:innerHeight/2 + player.pos:y}) rotate({player.rotation})">
             <Shot> if player.shooting
             <svg:g transform="translate({-50}, {-50})">
                 <svg:defs>
                     <svg:pattern #legs patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="{player.feet-animation.path}{game.time % player.feet-animation.size}.png" width="100" height="100">
+                        <svg:image href="{player.feet-animation.path}{parseInt(game.time/3) % player.feet-animation.size}.png" width="100" height="100">
                 <svg:rect height=100 width=100 fill="url(#legs)">
                 <svg:defs>
                     <svg:pattern #survivor patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="{player.animation.path}{game.time % player.animation.size}.png" width="100" height="100">
+                        <svg:image href="{player.animation.path}{parseInt(game.time/3) % player.animation.size}.png" width="100" height="100">
                 <svg:rect height=100 width=100 fill="url(#survivor)">
 
 tag Ground < svg:g
@@ -369,6 +370,9 @@ tag Projectile < svg:g
     prop bullet
     prop player
 
+    def mount
+        schedule interval: 1
+
     def render
         <self transform="translate({ window:innerWidth/2 + bullet.pos:x}, { window:innerHeight/2 - bullet.pos:y}) rotate({bullet.direction})">
             <svg:rect height=1 width=100 fill="yellow">
@@ -387,11 +391,14 @@ tag Aim < svg:g
 tag App
 
     def mount
-        # Audio.new('sounds/theme1.mp3').play
-
-        schedule interval: 40
+        @theme-start = no
+        schedule interval: 16.66666
         document.addEventListener 'keydown', do |e|
             keydown e
+            unless @theme-start
+                Audio.new('sounds/theme1.mp3').play
+                @theme-start=yes
+
 
         document.addEventListener 'keyup', do |e|
             keyup e
