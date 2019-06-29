@@ -142,9 +142,14 @@ class Bullet
         let dy = zombie.pos:y - (-pos:y + game.height/2)
         (dy**2 + dx**2)**0.5
 
+    def angleToZombie zombie, game
+        let dx = zombie.pos:x - pos:x + game.width/2;
+        let dy = zombie.pos:y - pos:y + game.height/2;
+        -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
+
     def update zombies, game, player
         for zombie in zombies
-            if distanceToZombie(zombie, game) < 75
+            if distanceToZombie(zombie, game) < 75 or ((angleToZombie(zombie, game)) < 50 and zombie.distanceToPlayer(player, game) < 100)
                 zombie.knockback(player, game)
 
     def fly
@@ -187,6 +192,7 @@ class Zombie
     def knockback player, game
         pos:x -= Math.sin((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 30
         pos:y -= -Math.cos((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 30
+        aggro = true
 
     def distanceToPlayer player, game
         let dx = player.pos:x - pos:x + game.width/2;
@@ -200,6 +206,10 @@ class Zombie
 
     def update player, game
         let distance = distanceToPlayer(player, game)
+        if distance < 50
+            animation = animations:attack
+        else
+            animation = animations:move
         let angle-diff = angleToPlayer(player, game) - rotation
         if distance > 50
             pos:x += Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
@@ -250,7 +260,7 @@ let animations =
     zombie:
         idle:    Animation.new(path: "textures/zombie/idle/skeleton-idle_", size: 16)
         attack:  Animation.new(path: "textures/zombie/attack/skeleton-attack_", size: 8)
-        move:    Animation.new(path: "textures/zombie/move/skeleton-move_", size: 18)
+        move:    Animation.new(path: "textures/zombie/move/skeleton-move_", size: 16)
 
 
 let zombies = []
