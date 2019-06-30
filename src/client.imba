@@ -472,10 +472,12 @@ tag App
 
         document.addEventListener 'mousedown' do |e|
             game.keys['leftbutton'] = yes if e:button == 0
+            game.keys['rightbutton'] = yes if e:button == 2
             shoot if e:button == 0
             player.attack(zombies) if e:button == 2
 
         document.addEventListener 'mouseup' do |e|
+            game.keys['rightbutton'] = no if e:button == 2
             game.keys['leftbutton'] = no if e:button == 0
 
         document.addEventListener 'contextmenu', do |e|
@@ -504,6 +506,7 @@ tag App
 
     def tick
         shoot if game.keys:leftbutton
+        player.attack if game.keys:rightbutton
         game.width = window:innerWidth
         game.height = window:innerHeight
         let directions = []

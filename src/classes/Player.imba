@@ -115,7 +115,7 @@ export class Player
             let damage = 5
             let damage = 25 if gun.name == :knife
             for zombie in zombies
-                if zombie.distanceToPlayer < 100 and angleToZombie(zombie) < 180
+                if zombie.distanceToPlayer < 150 and angleToZombie(zombie) < 180
                     zombie.takeHit({damage: (do damage), power: (do 50)})
 
             can-attack = no
