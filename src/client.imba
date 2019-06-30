@@ -256,6 +256,12 @@ let animations =
             attack: Animation.new(path: "textures/handgun/meleeattack/survivor-meleeattack_handgun_", size: 14)
             shoot:  Animation.new(path: "textures/handgun/shoot/survivor-shoot_handgun_", size: 2)
             reload: Animation.new(path: "textures/handgun/reload/survivor-reload_handgun_", size: 14)
+        rifle:
+            idle:   Animation.new(path: "textures/rifle/idle/survivor-idle_rifle_", size: 19)
+            move:   Animation.new(path: "textures/rifle/move/survivor-move_rifle_", size: 19)
+            attack: Animation.new(path: "textures/rifle/meleeattack/survivor-meleeattack_rifle_", size: 14)
+            shoot:  Animation.new(path: "textures/rifle/shoot/survivor-shoot_rifle_", size: 2)
+            reload: Animation.new(path: "textures/rifle/reload/survivor-reload_rifle_", size: 14)
     feet:
         idle:         Animation.new(path: "textures/feet/idle/survivor-idle_", size: 1)
         run:          Animation.new(path: "textures/feet/run/survivor-run_", size: 19)
@@ -297,6 +303,14 @@ let guns =
         rate: 3
         damage: 33
         reload-time: 1200
+
+    rifle: Gun.new
+        name: :rifle
+        ammo: 30
+        cap: 30
+        rate: 20
+        damage: 10
+        reload-time: 2000
 
 let player = Player.new
     invertory: guns
@@ -423,8 +437,11 @@ tag App
             aim e
 
         document.addEventListener 'mousedown' do |e|
+            game.keys['leftbutton'] = yes if e:button == 0
             shoot if e:button == 0
             player.attack if e:button == 2
+        document.addEventListener 'mouseup' do |e|
+            game.keys['leftbutton'] = no if e:button == 0
 
         document.addEventListener 'contextmenu', do |e|
             e.preventDefault
@@ -437,17 +454,19 @@ tag App
     def keydown e
         player.gun = player.invertory:knife   if e:code == :Digit1 and player.invertory:knife
         player.gun = player.invertory:handgun if e:code == :Digit2 and player.invertory:handgun
+        player.gun = player.invertory:rifle if e:code == :Digit3 and player.invertory:rifle
         player.reload if e:code == :KeyR
-        game.keys[e:code] = true
+        game.keys[e:code] = yes
 
     def keyup e
-        game.keys[e:code] = false
+        game.keys[e:code] = no
 
     def shoot
         player.shoot if [:handgun, :shotgun, :rifle].includes player.gun.name
         player.attack if [:flashlight, :knife].includes player.gun.name
 
     def tick
+        shoot if game.keys:leftbutton
         game.width = window:innerWidth
         game.height = window:innerHeight
         let directions = []
