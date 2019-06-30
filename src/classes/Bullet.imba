@@ -16,26 +16,29 @@ export class Bullet
         let dy = player.pos:y + game.height/2 - zombie.pos:y
         (((player.rotation + (Math.atan2(dx, dy)/3.1415*180.0 - 90) +200) % 360)**2)**0.5
 
+
+    def deleteBullet
+        var index = player.bullets.indexOf(self)
+        player.bullets.splice(index, 1) if (index !== -1)
+        delete self
+
     def update zombies, game, player
         for zombie in zombies
             # long range
             if distanceToZombie(zombie, game) < 75 
                 zombie.takeHit(self)
-                player.bullets.shift
-                delete self
+                deleteBullet
             # close range
             elif ((anglePlayerToZombie(player, zombie, game)) < 30 and zombie.distanceToPlayer(player, game) < 100) and distanceToZombie(zombie, game) < 700
                 zombie.takeHit(self)
-                player.bullets.shift
-                delete self
+                deleteBullet
 
     def fly player
         window.setTimeout( (do
             pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 30
             pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
             if (pos:x**2 + pos:y**2)**0.5 > 10000
-                player.bullets.shift
-                delete self
+                deleteBullet
                 return
             fly player
         ), 1);

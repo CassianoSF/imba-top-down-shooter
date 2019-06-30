@@ -85,7 +85,7 @@ let player = Player.new
 
 
 let zombies = []
-for i in Array.from(Array.new(80))
+for i in Array.from(Array.new(200))
     zombies.push Zombie.new 
         id: Math.random
         pos: {x: Math.random * 1000
