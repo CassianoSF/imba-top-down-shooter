@@ -2,6 +2,7 @@ export class Animation
     prop path
     prop size
     prop time default: 0
+    prop frame-length
 
     def initialize
         for k, v of ($1) 

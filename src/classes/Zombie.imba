@@ -115,8 +115,9 @@ export class Zombie
     def execWalkArround
         unless already-turned
             already-turned = true
-            rotation += [90, 120, 150, 180, 210, 240, 270][parseInt(Math.random * 6)]
-            window.setTimeout((do already-turned = false), 3000)
+            speed = 3
+            rotation += [30, 50, 70, 90, -90, -70, -50, -30][parseInt(Math.random * 7)]
+            window.setTimeout((do already-turned = false), 1000)
         moveForward  
 
 

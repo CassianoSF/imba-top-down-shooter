@@ -55,7 +55,7 @@ export class Player
 
     def shoot
         reload unless gun.ammo or reloading
-        if gun.ammo and can-shoot
+        if gun.ammo and can-shoot and !reloading
             let audio = Audio.new('sounds/shotgun_shot.wav')
             audio.play
             bullets.push Bullet.new 
@@ -87,7 +87,7 @@ export class Player
             ), 600)
 
     def reload
-        if gun.ammo != gun.cap
+        if gun.ammo != gun.cap and !reloading
             game.time = 0
             let audio = Audio.new('sounds/shotgun_reload.wav')
             let audio2 = Audio.new('sounds/shotgun_pump.wav')

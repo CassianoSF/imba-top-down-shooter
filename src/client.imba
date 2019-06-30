@@ -12,31 +12,31 @@ let game = Game.new
 let animations = 
     player:
         knife:
-            idle:   Animation.new(path: "textures/knife/idle/survivor-idle_knife_", size: 19)
-            move:   Animation.new(path: "textures/knife/move/survivor-move_knife_", size: 19)
-            attack: Animation.new(path: "textures/knife/meleeattack/survivor-meleeattack_knife_", size: 14)
+            idle:   Animation.new(path: "textures/knife/idle/survivor-idle_knife_", size: 19, frame-length: 3)
+            move:   Animation.new(path: "textures/knife/move/survivor-move_knife_", size: 19, frame-length: 3)
+            attack: Animation.new(path: "textures/knife/meleeattack/survivor-meleeattack_knife_", size: 14, frame-length: 2)
         handgun:
-            idle:   Animation.new(path: "textures/handgun/idle/survivor-idle_handgun_", size: 19)
-            move:   Animation.new(path: "textures/handgun/move/survivor-move_handgun_", size: 19)
-            attack: Animation.new(path: "textures/handgun/meleeattack/survivor-meleeattack_handgun_", size: 14)
-            shoot:  Animation.new(path: "textures/handgun/shoot/survivor-shoot_handgun_", size: 2)
-            reload: Animation.new(path: "textures/handgun/reload/survivor-reload_handgun_", size: 14)
+            idle:   Animation.new(path: "textures/handgun/idle/survivor-idle_handgun_", size: 19, frame-length: 3)
+            move:   Animation.new(path: "textures/handgun/move/survivor-move_handgun_", size: 19, frame-length: 3)
+            attack: Animation.new(path: "textures/handgun/meleeattack/survivor-meleeattack_handgun_", size: 14, frame-length: 2)
+            shoot:  Animation.new(path: "textures/handgun/shoot/survivor-shoot_handgun_", size: 2, frame-length: 3)
+            reload: Animation.new(path: "textures/handgun/reload/survivor-reload_handgun_", size: 14, frame-length: 3)
         rifle:
-            idle:   Animation.new(path: "textures/rifle/idle/survivor-idle_rifle_", size: 19)
-            move:   Animation.new(path: "textures/rifle/move/survivor-move_rifle_", size: 19)
-            attack: Animation.new(path: "textures/rifle/meleeattack/survivor-meleeattack_rifle_", size: 14)
-            shoot:  Animation.new(path: "textures/rifle/shoot/survivor-shoot_rifle_", size: 2)
-            reload: Animation.new(path: "textures/rifle/reload/survivor-reload_rifle_", size: 14)
+            idle:   Animation.new(path: "textures/rifle/idle/survivor-idle_rifle_", size: 19, frame-length: 3)
+            move:   Animation.new(path: "textures/rifle/move/survivor-move_rifle_", size: 19, frame-length: 3)
+            attack: Animation.new(path: "textures/rifle/meleeattack/survivor-meleeattack_rifle_", size: 14, frame-length: 2)
+            shoot:  Animation.new(path: "textures/rifle/shoot/survivor-shoot_rifle_", size: 2, frame-length: 3)
+            reload: Animation.new(path: "textures/rifle/reload/survivor-reload_rifle_", size: 14, frame-length: 3)
     feet:
-        idle:         Animation.new(path: "textures/feet/idle/survivor-idle_", size: 1)
-        run:          Animation.new(path: "textures/feet/run/survivor-run_", size: 19)
-        walk:         Animation.new(path: "textures/feet/walk/survivor-walk_", size: 19)
-        strafe_left:  Animation.new(path: "textures/feet/strafe_left/survivor-strafe_left_", size: 19)
-        strafe_right: Animation.new(path: "textures/feet/strafe_right/survivor-strafe_right_", size: 19)
+        idle:         Animation.new(path: "textures/feet/idle/survivor-idle_", size: 1, frame-length: 3)
+        run:          Animation.new(path: "textures/feet/run/survivor-run_", size: 19, frame-length: 3)
+        walk:         Animation.new(path: "textures/feet/walk/survivor-walk_", size: 19, frame-length: 3)
+        strafe_left:  Animation.new(path: "textures/feet/strafe_left/survivor-strafe_left_", size: 19, frame-length: 3)
+        strafe_right: Animation.new(path: "textures/feet/strafe_right/survivor-strafe_right_", size: 19, frame-length: 3)
     zombie:
-        idle:    Animation.new(path: "textures/zombie/idle/skeleton-idle_", size: 16)
-        attack:  Animation.new(path: "textures/zombie/attack/skeleton-attack_", size: 8)
-        move:    Animation.new(path: "textures/zombie/move/skeleton-move_", size: 16)
+        idle:    Animation.new(path: "textures/zombie/idle/skeleton-idle_", size: 16, frame-length: 3)
+        attack:  Animation.new(path: "textures/zombie/attack/skeleton-attack_", size: 8, frame-length: 2)
+        move:    Animation.new(path: "textures/zombie/move/skeleton-move_", size: 16, frame-length: 3)
 
 
 let guns = 
@@ -51,7 +51,7 @@ let guns =
 
     handgun: Gun.new
         name: :handgun
-        ammo: 1000
+        ammo: 10
         cap: 10
         rate: 3
         damage: 33
@@ -76,7 +76,7 @@ let player = Player.new
     rotation: 0
     can-shoot: yes
     can-attack: yes
-    speed: 4
+    speed: 3
     animation: animations:player:knife:idle
     animations: animations:player
     feet-animation: animations:feet:idle
@@ -96,7 +96,7 @@ for i in Array.from(Array.new(20))
         state: :random
         life: 100
         speed: 1
-        max-speed: 8
+        max-speed: 6
         game: game
         zombies: zombies
         player: player
@@ -137,11 +137,11 @@ tag Survival < svg:g
             <svg:g transform="translate({-50}, {-50})">
                 <svg:defs>
                     <svg:pattern #legs patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="{player.feet-animation.path}{parseInt(game.time/3) % player.feet-animation.size}.png" width="100" height="100">
+                        <svg:image href="{player.feet-animation.path}{parseInt(game.time/player.animation.frame-length) % player.feet-animation.size}.png" width="100" height="100">
                 <svg:rect height=100 width=100 fill="url(#legs)">
                 <svg:defs>
                     <svg:pattern #survivor patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="{player.animation.path}{parseInt(game.time/3) % player.animation.size}.png" width="100" height="100">
+                        <svg:image href="{player.animation.path}{parseInt(game.time/player.animation.frame-length) % player.animation.size}.png" width="100" height="100">
                 <svg:rect height=100 width=100 fill="url(#survivor)">
 
 tag Ground < svg:g
