@@ -12,31 +12,243 @@ let game = Game.new
 let animations = 
     player:
         knife:
-            idle:   Animation.new(path: "textures/knife/idle/survivor-idle_knife_", size: 19, frame-length: 3)
-            move:   Animation.new(path: "textures/knife/move/survivor-move_knife_", size: 19, frame-length: 3)
-            attack: Animation.new(path: "textures/knife/meleeattack/survivor-meleeattack_knife_", size: 14, frame-length: 2)
+            idle:   Animation.new
+                path: "textures/knife/idle/survivor-idle_knife_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1.15,1.15"
+                    translate: "-5,0"
+
+            move:   Animation.new
+                path: "textures/knife/move/survivor-move_knife_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1.15,1.15"
+                    translate: "-5,0"
+
+            attack: Animation.new
+                path: "textures/knife/meleeattack/survivor-meleeattack_knife_"
+                size: 14
+                frame-length: 2
+                ajust: 
+                    scale: "1.3,1.3"
+                    translate: "-5,5"
+
         handgun:
-            idle:   Animation.new(path: "textures/handgun/idle/survivor-idle_handgun_", size: 19, frame-length: 3)
-            move:   Animation.new(path: "textures/handgun/move/survivor-move_handgun_", size: 19, frame-length: 3)
-            attack: Animation.new(path: "textures/handgun/meleeattack/survivor-meleeattack_handgun_", size: 14, frame-length: 2)
-            shoot:  Animation.new(path: "textures/handgun/shoot/survivor-shoot_handgun_", size: 2, frame-length: 3)
-            reload: Animation.new(path: "textures/handgun/reload/survivor-reload_handgun_", size: 14, frame-length: 3)
+            idle:   Animation.new
+                path: "textures/handgun/idle/survivor-idle_handgun_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1,1"
+                    translate: "0,0"
+
+            move:   Animation.new
+                path: "textures/handgun/move/survivor-move_handgun_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1,1"
+                    translate: "0,0"
+
+            attack: Animation.new
+                path: "textures/handgun/meleeattack/survivor-meleeattack_handgun_"
+                size: 14
+                frame-length: 2
+                ajust: 
+                    scale: "1.2,1.2"
+                    translate: "0,-5"
+
+            shoot:  Animation.new
+                path: "textures/handgun/shoot/survivor-shoot_handgun_"
+                size: 2
+                frame-length: 3
+                ajust: 
+                    scale: "1,1"
+                    translate: "0,0"
+
+            reload: Animation.new
+                path: "textures/handgun/reload/survivor-reload_handgun_"
+                size: 14
+                frame-length: 3
+                ajust: 
+                    scale: "1,1"
+                    translate: "0,0"
+
         rifle:
-            idle:   Animation.new(path: "textures/rifle/idle/survivor-idle_rifle_", size: 19, frame-length: 3)
-            move:   Animation.new(path: "textures/rifle/move/survivor-move_rifle_", size: 19, frame-length: 3)
-            attack: Animation.new(path: "textures/rifle/meleeattack/survivor-meleeattack_rifle_", size: 14, frame-length: 2)
-            shoot:  Animation.new(path: "textures/rifle/shoot/survivor-shoot_rifle_", size: 2, frame-length: 3)
-            reload: Animation.new(path: "textures/rifle/reload/survivor-reload_rifle_", size: 14, frame-length: 3)
+            idle:   Animation.new
+                path: "textures/rifle/idle/survivor-idle_rifle_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+
+            move:   Animation.new
+                path: "textures/rifle/move/survivor-move_rifle_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+
+            attack: Animation.new
+                path: "textures/rifle/meleeattack/survivor-meleeattack_rifle_"
+                size: 14
+                frame-length: 2
+                ajust: 
+                    scale: "1.45,1.45"
+                    translate: "-5,-20"
+
+            shoot:  Animation.new
+                path: "textures/rifle/shoot/survivor-shoot_rifle_"
+                size: 2
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+
+            reload: Animation.new
+                path: "textures/rifle/reload/survivor-reload_rifle_"
+                size: 14
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+        shotgun:
+            idle:   Animation.new
+                path: "textures/shotgun/idle/survivor-idle_shotgun_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+
+            move:   Animation.new
+                path: "textures/shotgun/move/survivor-move_shotgun_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+
+            attack: Animation.new
+                path: "textures/shotgun/meleeattack/survivor-meleeattack_shotgun_"
+                size: 14
+                frame-length: 2
+                ajust: 
+                    scale: "1.45,1.45"
+                    translate: "-5,-20"
+
+            shoot:  Animation.new
+                path: "textures/shotgun/shoot/survivor-shoot_shotgun_"
+                size: 2
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+
+            reload: Animation.new
+                path: "textures/shotgun/reload/survivor-reload_shotgun_"
+                size: 14
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+
+        flashlight:
+            idle:   Animation.new
+                path: "textures/flashlight/idle/survivor-idle_flashlight_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+
+            move:   Animation.new
+                path: "textures/flashlight/move/survivor-move_flashlight_"
+                size: 19
+                frame-length: 3
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "0,-10"
+
+            attack: Animation.new
+                path: "textures/flashlight/meleeattack/survivor-meleeattack_flashlight_"
+                size: 14
+                frame-length: 2
+                ajust: 
+                    scale: "1.25,1.25"
+                    translate: "-5,-10"
+
     feet:
-        idle:         Animation.new(path: "textures/feet/idle/survivor-idle_", size: 1, frame-length: 3)
-        run:          Animation.new(path: "textures/feet/run/survivor-run_", size: 19, frame-length: 3)
-        walk:         Animation.new(path: "textures/feet/walk/survivor-walk_", size: 19, frame-length: 3)
-        strafe_left:  Animation.new(path: "textures/feet/strafe_left/survivor-strafe_left_", size: 19, frame-length: 3)
-        strafe_right: Animation.new(path: "textures/feet/strafe_right/survivor-strafe_right_", size: 19, frame-length: 3)
+        idle:         Animation.new
+            path: "textures/feet/idle/survivor-idle_"
+            size: 1
+            frame-length: 3
+            ajust: 
+                scale: "0.9,0.9"
+                translate: "0,10"
+
+        run:          Animation.new
+            path: "textures/feet/run/survivor-run_"
+            size: 19
+            frame-length: 3
+            ajust: 
+                scale: "0.9,0.9"
+                translate: "0,10"
+
+        walk:         Animation.new
+            path: "textures/feet/walk/survivor-walk_"
+            size: 19
+            frame-length: 3
+            ajust: 
+                scale: "0.9,0.9"
+                translate: "0,10"
+
+        strafe_left:  Animation.new
+            path: "textures/feet/strafe_left/survivor-strafe_left_"
+            size: 19
+            frame-length: 3
+            ajust: 
+                scale: "0.9,0.9"
+                translate: "0,10"
+
+        strafe_right: Animation.new
+            path: "textures/feet/strafe_right/survivor-strafe_right_"
+            size: 19
+            frame-length: 3
+            ajust: 
+                scale: "0.9,0.9"
+                translate: "0,10"
+
     zombie:
-        idle:    Animation.new(path: "textures/zombie/idle/skeleton-idle_", size: 16, frame-length: 3)
-        attack:  Animation.new(path: "textures/zombie/attack/skeleton-attack_", size: 8, frame-length: 2)
-        move:    Animation.new(path: "textures/zombie/move/skeleton-move_", size: 16, frame-length: 3)
+        idle:    Animation.new
+            path: "textures/zombie/idle/skeleton-idle_"
+            size: 16
+            frame-length: 3
+            ajust: 
+                scale: "1,1"
+                translate: "0,0"
+
+        attack:  Animation.new
+            path: "textures/zombie/attack/skeleton-attack_"
+            size: 8
+            frame-length: 2
+            ajust: 
+                scale: "1,1"
+                translate: "0,0"
+
+        move:    Animation.new
+            path: "textures/zombie/move/skeleton-move_"
+            size: 16
+            frame-length: 3
+            ajust: 
+                scale: "1,1"
+                translate: "0,0"
+
 
 
 let guns = 
@@ -68,6 +280,26 @@ let guns =
         reload-time: 2000
         power: 8
         accuracy: 10
+
+    shotgun: Gun.new
+        name: :shotgun
+        ammo: 4
+        cap: 4
+        rate: 0.75
+        damage: 25
+        reload-time: 3000
+        power: 25
+        accuracy: 8
+
+    flashlight: Gun.new
+        name: :flashlight
+        ammo: 0
+        cap: 0
+        rate: 0
+        damage: 0
+        reload-time: 1
+        power: 0
+        accuracy: 0
 
 let player = Player.new
     invertory: guns
@@ -137,16 +369,16 @@ tag Survival < svg:g
 
     def render
         <self transform="translate({ window:innerWidth/2 + player.pos:x}, { window:innerHeight/2 + player.pos:y}) rotate({player.rotation})">
-            <Shot> if player.shooting
+            <Shot gun=player.gun> if player.shooting
             <svg:g transform="translate({-50}, {-50})">
                 <svg:defs>
                     <svg:pattern #legs patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="{player.feet-animation.path}{~~(game.time/player.animation.frame-length) % player.feet-animation.size}.png" width="100" height="100">
-                <svg:rect height=100 width=100 fill="url(#legs)">
+                        <svg:image href="{player.feet-animation.path}{~~(game.time/player.feet-animation.frame-length) % player.feet-animation.size}.png" width="100" height="100">
+                <svg:rect transform="scale({player.feet-animation.ajust:scale}) translate({player.feet-animation.ajust:translate})" height=100 width=100 fill="url(#legs)">
                 <svg:defs>
                     <svg:pattern #survivor patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                         <svg:image href="{player.animation.path}{~~(game.time/player.animation.frame-length) % player.animation.size}.png" width="100" height="100">
-                <svg:rect height=100 width=100 fill="url(#survivor)">
+                <svg:rect transform="scale({player.animation.ajust:scale}) translate({player.animation.ajust:translate})" height=100 width=100 fill="url(#survivor)">
 
 tag Ground < svg:g
     prop player
@@ -167,15 +399,19 @@ tag Ground < svg:g
                 <svg:rect height=70000 width=70000 fill="url(#floor_2)" stroke="white">
 
 tag Shot < svg:g
-    prop rotation
     attr transform
+    prop rotation
+    prop gun
 
     def render
-        <self transform="translate(30, -25)">
+        <self>
             <svg:defs>
                 <svg:pattern #shot patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                     <svg:image href="textures/shoot/shoot/muzzle_flash_0.png" width="100" height="100">
-            <svg:rect height=100 width=100 fill="url(#shot)">
+            if gun.name == :handgun
+                <svg:rect transform="translate(30, -25)" height=100 width=100 fill="url(#shot)">
+            elif gun.name == :rifle
+                <svg:rect transform="translate(55, -30)" height=100 width=100 fill="url(#shot)">
 
 tag Projectile < svg:g
     attr transform
@@ -251,9 +487,11 @@ tag App
         player.rotation = ((Math.atan2(e:x - window:innerWidth/2, e:y - window:innerHeight/2)/3.1415*180.0 - 90) + 720) % 360 
 
     def keydown e
-        player.gun = player.invertory:knife   if e:code == :Digit1 and player.invertory:knife
-        player.gun = player.invertory:handgun if e:code == :Digit2 and player.invertory:handgun
-        player.gun = player.invertory:rifle   if e:code == :Digit3 and player.invertory:rifle
+        player.gun = player.invertory:knife      if e:code == :Digit1 and player.invertory:knife
+        player.gun = player.invertory:handgun    if e:code == :Digit2 and player.invertory:handgun
+        player.gun = player.invertory:rifle      if e:code == :Digit3 and player.invertory:rifle
+        player.gun = player.invertory:shotgun    if e:code == :Digit4 and player.invertory:shotgun
+        player.gun = player.invertory:flashlight if e:code == :KeyF   and player.invertory:flashlight
         player.reload if e:code == :KeyR
         game.keys[e:code] = yes
 
@@ -289,7 +527,7 @@ tag App
                     for zombie in zombies
                         <Undead zombie=zombie player=player game=game>
                     for bullet in player.bullets
-                        <Projectile bullet=bullet player=player>
+                        <Projectile bullet=bullet player=player> if bullet
                 <Hud player=player game=game>
                 <Aim crosshair=crosshair>
 Imba.mount <App>

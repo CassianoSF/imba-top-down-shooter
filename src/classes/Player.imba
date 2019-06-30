@@ -72,25 +72,38 @@ export class Player
                 y: Math.cos((rotation + 90)* 3.1415 / 180) * 150 - pos:y
             }
 
+    def generateBullet
+        bullets.push Bullet.new 
+            player: self
+            pos: bulletInitPos
+            direction: rotation + (Math.random * 200/gun.accuracy - 100/gun.accuracy)
+            power: gun.power
+            damage: gun.damage
+
     def shoot
         reload unless gun.ammo or reloading
         if gun.ammo and can-shoot and !reloading
-            console.log rotation
             let audio = Audio.new('sounds/shotgun_shot.wav')
             audio.play
-            bullets.push Bullet.new 
-                player: self
-                pos: bulletInitPos
-                direction: rotation + (Math.random * 200/gun.accuracy - 100/gun.accuracy)
-                power: gun.power
-                damage: gun.damage
+            if gun.name == :shotgun
+                for i in [0,0,0,0,0,0]
+                    generateBullet
+            else
+                generateBullet
             gun.ammo -= 1
             can-shoot = no
             shooting = yes
+            if gun.name == :shotgun
+                let audio2 = Audio.new('sounds/shotgun_pump.wav')
+                audio2.play
+                window.setTimeout((do audio2.pause and delete audio2), 1500)
+
             animation = animations[gun.name]:shoot
             window.setTimeout((do delete audio),    10000)
             window.setTimeout((do can-shoot = yes), 1000/gun.rate)
-            window.setTimeout((do shooting = no),   20)
+            window.setTimeout((do 
+                shooting = no
+            ),   20)
 
     def attack
         if can-attack
@@ -101,7 +114,7 @@ export class Player
             window.setTimeout(( do
                 can-attack = yes
                 attacking = no        
-            ), 600)
+            ), 17 * 15 * 2)
 
     def reload
         if gun.ammo != gun.cap and !reloading
