@@ -69,13 +69,12 @@ export class Zombie
             pos: 
                 x: Math.random * 3000 
                 y: Math.random * 3000 
-            rotation: Math.random*360
+            rotation: Math.random * 360
             animation: animations:idle
             animations: animations
             state: :random
             life: life+20
             speed: speed
-            state: :aggro
             max-speed: speed+1
             game: game
             zombies: zombies
@@ -94,7 +93,7 @@ export class Zombie
                 execWalkArround
 
     def execAggro
-        if distanceToPlayer < 40
+        if distanceToPlayer < 100
             state = :attack
         elif colide
             state = :walk-arround
@@ -106,18 +105,20 @@ export class Zombie
             moveForward  
         
     def execAttack
-        if distanceToPlayer < 60 and !attacking
+        if distanceToPlayer < 100 and !attacking
             attacking = true
             animation = animations:attack
             window.setTimeout((do 
-                if distanceToPlayer < 90
+                if distanceToPlayer < 100
                     player.takeHit(damage)
                 attacking = false
+                if colide
+                    state = :walk-arround
+                    window.setTimeout((do state = :aggro), 300)
+                else
+                    state = :aggro
             ), 300)
-        elif colide
-            state = :walk-arround
-            window.setTimeout((do state = :aggro), 300)
-        else
+        elif !attacking
             state = :aggro
 
     def execRandom

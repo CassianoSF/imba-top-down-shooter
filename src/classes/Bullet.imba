@@ -11,6 +11,11 @@ export class Bullet
         let dy = zombie.pos:y - (-pos:y + game.height/2)
         (dy**2 + dx**2)**0.5
 
+    def distanceToPlayer
+        let dx = player.pos:x - (pos:x)
+        let dy = player.pos:y - (-pos:y)
+        (dy**2 + dx**2)**0.5
+
     def deleteBullet
         var index = player.bullets.indexOf(self)
         player.bullets.splice(index, 1) if (index !== -1)
@@ -33,7 +38,7 @@ export class Bullet
         window.setTimeout( (do
             pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 30
             pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
-            if (pos:x**2 + pos:y**2)**0.5 > 10000
+            if distanceToPlayer > 5000
                 deleteBullet
                 return
             fly player

@@ -18,6 +18,7 @@ export class Player
     prop bullets default: []
     prop life default: 100
     prop blood-rotation
+    prop cancel-reloading
 
     prop shooting
     prop reloading
@@ -85,6 +86,12 @@ export class Player
             power: gun.power
             damage: gun.damage
 
+    def changeGun to
+        cancel-reloading = yes if reloading
+        reloading = no
+        attacking = no
+        gun = invertory[to]
+
     def shoot
         reload unless gun.ammo or reloading
         if gun.ammo and can-shoot and !reloading
@@ -106,16 +113,14 @@ export class Player
             animation = animations[gun.name]:shoot
             window.setTimeout((do delete audio),    10000)
             window.setTimeout((do can-shoot = yes), 1000/gun.rate)
-            window.setTimeout((do 
-                shooting = no
-            ),   20)
+            window.setTimeout((do shooting = no),30)
 
     def attack zombies
         if can-attack
             let damage = 5
             let damage = 25 if gun.name == :knife
             for zombie in zombies
-                if zombie.distanceToPlayer < 150 and angleToZombie(zombie) < 180
+                if zombie.distanceToPlayer < 120 and angleToZombie(zombie) < 180
                     zombie.takeHit({damage: (do damage), power: (do 50)})
 
             can-attack = no
@@ -137,12 +142,15 @@ export class Player
             reloading = yes
             animation = animations[gun.name]:reload
             window.setTimeout((do
-                can-shoot = yes
                 reloading = no
                 delete audio
                 audio2.pause
                 delete audio2
-                gun.ammo = gun.cap
+                if cancel-reloading
+                    cancel-reloading = no
+                else
+                    can-shoot = yes
+                    gun.ammo = gun.cap
             ), gun.reload-time)
 
     def initialize
