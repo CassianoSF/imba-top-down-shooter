@@ -1,244 +1,9 @@
-class Game
-    prop keys
-    prop time
-    prop height
-    prop width
-
-    def initialize 
-        for k, v of ($1) 
-            self["_{k}"] = ($1)[k] if $1
-
-let bullets = []
-
-class Player
-    prop invertory
-    prop gun
-    prop pos
-    prop rotation
-    prop can-shoot
-    prop can-attack
-    prop speed
-    prop running
-    prop reputation
-    prop animation
-    prop animations
-    prop feet-animation
-    prop feet-animations
-    prop game
-
-    prop shooting
-    prop reloading
-    prop running
-    prop attacking
-
-    def move directions
-        feet-animation = feet-animations:run if running and directions:length
-        feet-animation = feet-animations:walk if !running and directions:length
-        feet-animation = feet-animations:idle if !directions:length
-        let step
-        if !reloading and !shooting and !attacking 
-            animation = animations[gun.name]:move if directions:length
-            animation = animations[gun.name]:idle unless directions:length
-        if directions:length > 1
-            step = speed * 0.7
-        else
-            step = speed
-
-        if running
-            step *= 2
-
-        for d in directions
-            switch d
-                when :left
-                    pos:x -= step
-                when :right
-                    pos:x += step
-                when :down
-                    pos:y -= step        
-                when :up
-                    pos:y += step
-
-    def shoot
-        reload unless gun.ammo or reloading
-        if gun.ammo and can-shoot
-            let audio = Audio.new('sounds/shotgun_shot.wav')
-            audio.play
-            bullets.push Bullet.new
-                pos: 
-                    # x: 0
-                    x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
-                    y: Math.cos((rotation + 90)* 3.1415 / 180) * 100 - pos:y
-                direction: rotation
-            gun.ammo -= 1
-            can-shoot = no
-            shooting = yes
-            animation = animations[gun.name]:shoot
-            window.setTimeout((do delete audio),    10000)
-            window.setTimeout((do can-shoot = yes), 1000/gun.rate)
-            window.setTimeout((do shooting = no),   10)
-
-    def attack
-        if can-attack
-            game.time = 0
-            can-attack = no
-            attacking = yes
-            animation = animations[gun.name]:attack
-            window.setTimeout(( do
-                can-attack = yes
-                attacking = no        
-            ), 600)
-
-    def reload
-        if gun.ammo != gun.cap
-            game.time = 0
-            let audio = Audio.new('sounds/shotgun_reload.wav')
-            let audio2 = Audio.new('sounds/shotgun_pump.wav')
-            audio.play
-            audio2.play
-            can-shoot = no
-            reloading = yes
-            animation = animations[gun.name]:reload
-            window.setTimeout((do
-                can-shoot = yes
-                reloading = no
-                delete audio
-                audio2.pause
-                delete audio2
-                gun.ammo = gun.cap
-            ), gun.reload-time)
-
-    def initialize
-        for k, v of ($1) 
-            self["_{k}"] = ($1)[k] if $1
-
-class Gun
-    prop ammo
-    prop cap
-    prop rate
-    prop damage
-    prop reload-time
-    prop name
-
-    def initialize
-        for k, v of ($1) 
-            self["_{k}"] = ($1)[k] if $1
-
-class Animation
-    prop path
-    prop size
-    prop time default: 0
-
-    def initialize
-        for k, v of ($1) 
-            self["_{k}"] = ($1)[k] if $1
-
-
-class Bullet
-    prop direction
-    prop pos
-    prop i default: 0
-
-    def distanceToZombie zombie, game
-        let dx = zombie.pos:x - (pos:x + game.width/2)
-        let dy = zombie.pos:y - (-pos:y + game.height/2)
-        (dy**2 + dx**2)**0.5
-
-    def anglePlayerToZombie player, zombie, game
-        let dx = player.pos:x + game.width/2 - zombie.pos:x
-        let dy = player.pos:y + game.height/2 - zombie.pos:y
-        (((player.rotation + (Math.atan2(dx, dy)/3.1415*180.0 - 90) +200) % 360)**2)**0.5
-
-    def update zombies, game, player
-        for zombie in zombies
-            # long range
-            if distanceToZombie(zombie, game) < 75 
-                zombie.knockback(player, game)
-            # close range
-            elif ((anglePlayerToZombie(player, zombie, game)) < 30 and zombie.distanceToPlayer(player, game) < 100) and distanceToZombie(zombie, game) < 700
-                zombie.knockback(player, game)
-
-    def fly
-        window.setTimeout( (do
-            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 30
-            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
-            if pos:x**2 + pos:y**2 > 100000000
-                delete self
-                bullets.shift
-                return
-            fly
-        ), 1);
-
-    def initialize
-        for k, v of ($1) 
-            self["_{k}"] = ($1)[k] if $1
-        fly
-
-
-class Crosshair
-    prop x
-    prop y
-
-    def initialize
-        for k, v of ($1) 
-            self["_{k}"] = ($1)[k] if $1
-
-
-class Zombie
-    prop pos
-    prop rotation
-    prop animation
-    prop animations
-    prop life
-    prop speed
-    prop id
-    prop turn
-    prop aggro
-
-    def knockback player, game
-        pos:x -= Math.sin((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 10
-        pos:y -= -Math.cos((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 10
-        aggro = true
-
-    def distanceToPlayer player, game
-        let dx = player.pos:x - pos:x + game.width/2;
-        let dy = player.pos:y - pos:y + game.height/2;
-        (dy**2 + dx**2)**0.5
-
-    def angleToPlayer player, game
-        let dx = player.pos:x - pos:x + game.width/2;
-        let dy = player.pos:y - pos:y + game.height/2;
-        -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
-
-    def update player, game, zombies
-        let distance = distanceToPlayer(player, game)
-        if distance < 50
-            animation = animations:attack
-        else
-            animation = animations:move
-        let angle-diff = angleToPlayer(player, game) - rotation
-        if distance > 50
-            pos:x += Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
-            pos:y += -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
-        if (angle-diff**2)**0.5 < 30 and distance < 500 or distance < 100 
-            aggro = yes
-        unless aggro
-            if 5000 % game.time == 0
-                turn = [:turn_left, :turn_right][parseInt(Math.random * 3)]
-                speed = parseInt(Math.random * 3)
-
-            if turn == :turn_right
-                rotation += 1
-            if turn == :turn_left
-                rotation -= 1
-        else
-            speed = 6
-            rotation = angleToPlayer player, game
-
-    def initialize
-        for k, v of ($1) 
-            self["_{k}"] = ($1)[k] if $1
-
-
+import Game      from './classes/Game'
+import Player    from './classes/Player'
+import Gun       from './classes/Gun'
+import Animation from './classes/Animation'
+import Crosshair from './classes/Crosshair'
+import Zombie    from './classes/Zombie'
 
 let game = Game.new 
     keys: {}
@@ -274,19 +39,6 @@ let animations =
         move:    Animation.new(path: "textures/zombie/move/skeleton-move_", size: 16)
 
 
-let zombies = []
-for i in Array.from(Array.new(20))
-    zombies.push Zombie.new 
-        id: Math.random
-        pos: {x: Math.random * 1000
-        y: Math.random * 1000}
-        rotation: Math.random*360
-        animation: animations:zombie:idle
-        animations: animations:zombie
-        life: 100
-        speed: 1
-
-
 let guns = 
     knife: Gun.new
         name: :knife
@@ -295,6 +47,7 @@ let guns =
         rate: 3
         damage: 50
         reload-time: 0
+        power: 10
 
     handgun: Gun.new
         name: :handgun
@@ -303,6 +56,7 @@ let guns =
         rate: 3
         damage: 33
         reload-time: 1200
+        power: 5
 
     rifle: Gun.new
         name: :rifle
@@ -311,6 +65,7 @@ let guns =
         rate: 20
         damage: 10
         reload-time: 2000
+        power: 8
 
 let player = Player.new
     invertory: guns
@@ -329,6 +84,24 @@ let player = Player.new
     game: game
 
 
+let zombies = []
+for i in Array.from(Array.new(20))
+    zombies.push Zombie.new 
+        id: Math.random
+        pos: {x: Math.random * 1000
+        y: Math.random * 1000}
+        rotation: Math.random*360
+        animation: animations:zombie:idle
+        animations: animations:zombie
+        state: :random
+        life: 100
+        speed: 1
+        max-speed: 8
+        game: game
+        zombies: zombies
+        player: player
+
+
 let crosshair = Crosshair.new(x:0, y:0)
 
 tag Undead < svg:g
@@ -338,13 +111,19 @@ tag Undead < svg:g
     prop zombie
 
     def render
-        zombie.update player, game
+        zombie.update player, game, zombies
         <self transform=("translate({zombie.pos:x},{zombie.pos:y}) rotate({zombie.rotation})")>
             <svg:g transform="translate({-50}, {-50})">
                 <svg:defs>
-                    <svg:pattern id="zombie{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
+                    <svg:pattern id="zombie-{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                         <svg:image href="{zombie.animation.path}{parseInt(game.time/3) % zombie.animation.size}.png" width="100" height="100">
-                <svg:rect height=100 width=100 fill="url(#zombie{zombie.id})">
+                <svg:rect height=100 width=100 fill="url(#zombie-{zombie.id})">
+                if zombie.taking-hit
+                    <svg:g transform=("rotate(-90) translate({-100}, {-50})")>
+                        <svg:defs>
+                            <svg:pattern id="blood-splash-{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
+                                <svg:image href="textures/blood_splash/{zombie.taking-hit}.png" width="100" height="100">
+                        <svg:rect height=100 width=100 fill="url(#blood-splash-{zombie.id})">
 
 tag Survival < svg:g
     attr transform
@@ -429,7 +208,6 @@ tag App
                 # Audio.new('sounds/theme1.mp3').play
                 @theme-start=yes
 
-
         document.addEventListener 'keyup', do |e|
             keyup e
 
@@ -440,6 +218,7 @@ tag App
             game.keys['leftbutton'] = yes if e:button == 0
             shoot if e:button == 0
             player.attack if e:button == 2
+
         document.addEventListener 'mouseup' do |e|
             game.keys['leftbutton'] = no if e:button == 0
 
@@ -454,7 +233,7 @@ tag App
     def keydown e
         player.gun = player.invertory:knife   if e:code == :Digit1 and player.invertory:knife
         player.gun = player.invertory:handgun if e:code == :Digit2 and player.invertory:handgun
-        player.gun = player.invertory:rifle if e:code == :Digit3 and player.invertory:rifle
+        player.gun = player.invertory:rifle   if e:code == :Digit3 and player.invertory:rifle
         player.reload if e:code == :KeyR
         game.keys[e:code] = yes
 
@@ -489,7 +268,7 @@ tag App
                     <Survival player=player game=game>
                     for zombie in zombies
                         <Undead zombie=zombie player=player game=game>
-                    for bullet in bullets
+                    for bullet in player.bullets
                         <Projectile bullet=bullet player=player>
                 <Aim crosshair=crosshair>
 Imba.mount <App>

@@ -1,0 +1,8 @@
+export class Animation
+    prop path
+    prop size
+    prop time default: 0
+
+    def initialize
+        for k, v of ($1) 
+            self["_{k}"] = ($1)[k] if $1
