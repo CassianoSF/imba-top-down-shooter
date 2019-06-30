@@ -85,7 +85,7 @@ let player = Player.new
 
 
 let zombies = []
-for i in Array.from(Array.new(100))
+for i in Array.from(Array.new(2))
     zombies.push Zombie.new 
         id: Math.random
         pos: 
@@ -112,19 +112,20 @@ tag Undead < svg:g
     prop zombie
 
     def render
-        zombie.update player, game, zombies
-        <self transform=("translate({zombie.pos:x},{zombie.pos:y}) rotate({zombie.rotation})")>
-            <svg:g transform="translate({-50}, {-50})">
-                <svg:defs>
-                    <svg:pattern id="zombie-{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="{zombie.animation.path}{parseInt(game.time/3) % zombie.animation.size}.png" width="100" height="100">
-                <svg:rect height=100 width=100 fill="url(#zombie-{zombie.id})">
-                if zombie.taking-hit
-                    <svg:g transform=("rotate(-90) translate({-100}, {-50})")>
-                        <svg:defs>
-                            <svg:pattern id="blood-splash-{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                                <svg:image href="textures/blood_splash/{zombie.taking-hit}.png" width="100" height="100">
-                        <svg:rect height=100 width=100 fill="url(#blood-splash-{zombie.id})">
+        if zombie
+            zombie.update player, game, zombies
+            <self transform=("translate({zombie.pos:x},{zombie.pos:y}) rotate({zombie.rotation})")>
+                <svg:g transform="translate({-50}, {-50})">
+                    <svg:defs>
+                        <svg:pattern id="zombie-{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
+                            <svg:image href="{zombie.animation.path}{~~(game.time/3) % zombie.animation.size}.png" width="100" height="100">
+                    <svg:rect height=100 width=100 fill="url(#zombie-{zombie.id})">
+                    if zombie.taking-hit
+                        <svg:g transform=("rotate(-90) translate({-100}, {-50})")>
+                            <svg:defs>
+                                <svg:pattern id="blood-splash-{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
+                                    <svg:image href="textures/blood_splash/{zombie.taking-hit}.png" width="100" height="100">
+                            <svg:rect height=100 width=100 fill="url(#blood-splash-{zombie.id})">
 
 tag Survival < svg:g
     attr transform
@@ -138,11 +139,11 @@ tag Survival < svg:g
             <svg:g transform="translate({-50}, {-50})">
                 <svg:defs>
                     <svg:pattern #legs patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="{player.feet-animation.path}{parseInt(game.time/player.animation.frame-length) % player.feet-animation.size}.png" width="100" height="100">
+                        <svg:image href="{player.feet-animation.path}{~~(game.time/player.animation.frame-length) % player.feet-animation.size}.png" width="100" height="100">
                 <svg:rect height=100 width=100 fill="url(#legs)">
                 <svg:defs>
                     <svg:pattern #survivor patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="{player.animation.path}{parseInt(game.time/player.animation.frame-length) % player.animation.size}.png" width="100" height="100">
+                        <svg:image href="{player.animation.path}{~~(game.time/player.animation.frame-length) % player.animation.size}.png" width="100" height="100">
                 <svg:rect height=100 width=100 fill="url(#survivor)">
 
 tag Ground < svg:g
@@ -245,7 +246,7 @@ tag App
     def aim e
         crosshair.x = e:x
         crosshair.y = -e:y
-        player.rotation = Math.atan2(e:x - window:innerWidth/2, e:y - window:innerHeight/2)/3.1415*180.0 - 90;
+        player.rotation = ((Math.atan2(e:x - window:innerWidth/2, e:y - window:innerHeight/2)/3.1415*180.0 - 90) + 720) % 360 
 
     def keydown e
         player.gun = player.invertory:knife   if e:code == :Digit1 and player.invertory:knife

@@ -28,7 +28,7 @@ export class Player
     def takeHit damage
         unless taking-hit
             blood-rotation = Math.random * 360
-            taking-hit = parseInt(Math.random * 2 + 1)
+            taking-hit = ~~(Math.random * 2 + 1)
             window.setTimeout((do taking-hit = no), 1200)
         life -= damage
 
@@ -59,17 +59,28 @@ export class Player
                 when :up
                     pos:y += step
 
+
+    def bulletInitPos
+        if (rotation < 360 and rotation > 300) or (rotation < 180 and rotation > 120)
+            return {
+                x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
+                y: Math.cos((rotation + 90)* 3.1415 / 180) * 50 - pos:y
+            }
+        else
+            return {
+                x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
+                y: Math.cos((rotation + 90)* 3.1415 / 180) * 150 - pos:y
+            }
+
     def shoot
         reload unless gun.ammo or reloading
         if gun.ammo and can-shoot and !reloading
+            console.log rotation
             let audio = Audio.new('sounds/shotgun_shot.wav')
             audio.play
             bullets.push Bullet.new 
                 player: self
-                pos: 
-                    # x: 0
-                    x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
-                    y: Math.cos((rotation + 90)* 3.1415 / 180) * 100 - pos:y
+                pos: bulletInitPos
                 direction: rotation
                 power: gun.power
                 damage: gun.damage
