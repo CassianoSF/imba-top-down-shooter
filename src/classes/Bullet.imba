@@ -11,12 +11,6 @@ export class Bullet
         let dy = zombie.pos:y - (-pos:y + game.height/2)
         (dy**2 + dx**2)**0.5
 
-    def anglePlayerToZombie player, zombie, game
-        let dx = player.pos:x + game.width/2 - zombie.pos:x
-        let dy = player.pos:y + game.height/2 - zombie.pos:y
-        (((player.rotation + (Math.atan2(dx, dy)/3.1415*180.0 - 90) +200) % 360)**2)**0.5
-
-
     def deleteBullet
         var index = player.bullets.indexOf(self)
         player.bullets.splice(index, 1) if (index !== -1)
@@ -30,7 +24,7 @@ export class Bullet
                 deleteBullet
                 return
             # close range
-            elif ((anglePlayerToZombie(player, zombie, game)) < 50 and zombie.distanceToPlayer(player, game) < 100) and distanceToZombie(zombie, game) < 700
+            elif player.angleToZombie(zombie) < 80 and zombie.distanceToPlayer < 100 and distanceToZombie(zombie, game) < 700
                 zombie.takeHit(self)
                 deleteBullet
                 return

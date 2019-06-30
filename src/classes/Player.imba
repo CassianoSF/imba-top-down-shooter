@@ -59,6 +59,11 @@ export class Player
                 when :up
                     pos:y += step
 
+    def angleToZombie zombie
+        let dx = pos:x + game.width/2 - zombie.pos:x
+        let dy = pos:y + game.height/2 - zombie.pos:y
+        (((rotation + (Math.atan2(dx, dy)/3.1415*180.0) +200) % 360)**2)**0.5
+
 
     def bulletInitPos
         if (rotation < 360 and rotation > 280) or (rotation < 180 and rotation > 120)
@@ -105,15 +110,20 @@ export class Player
                 shooting = no
             ),   20)
 
-    def attack
+    def attack zombies
         if can-attack
-            game.time = 0
+            let damage = 5
+            let damage = 25 if gun.name == :knife
+            for zombie in zombies
+                if zombie.distanceToPlayer < 100 and angleToZombie(zombie) < 180
+                    zombie.takeHit({damage: (do damage), power: (do 50)})
+
             can-attack = no
             attacking = yes
             animation = animations[gun.name]:attack
             window.setTimeout(( do
                 can-attack = yes
-                attacking = no        
+                attacking = no
             ), 17 * 15 * 2)
 
     def reload

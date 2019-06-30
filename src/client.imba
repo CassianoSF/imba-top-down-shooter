@@ -238,7 +238,7 @@ let animations =
             size: 8
             frame-length: 2
             ajust: 
-                scale: "1,1"
+                scale: "1.3,1.3"
                 translate: "0,0"
 
         move:    Animation.new
@@ -246,7 +246,7 @@ let animations =
             size: 16
             frame-length: 3
             ajust: 
-                scale: "1,1"
+                scale: "1.3,1.3"
                 translate: "0,0"
 
 
@@ -353,7 +353,7 @@ tag Undead < svg:g
                     <svg:defs>
                         <svg:pattern id="zombie-{zombie.id}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                             <svg:image href="{zombie.animation.path}{~~(game.time/3) % zombie.animation.size}.png" width="100" height="100">
-                    <svg:rect height=100 width=100 fill="url(#zombie-{zombie.id})">
+                    <svg:rect transform="scale({zombie.animation.ajust:scale}) translate({zombie.animation.ajust:translate})" height=100 width=100 fill="url(#zombie-{zombie.id})">
                     if zombie.taking-hit
                         <svg:g transform=("rotate(-90) translate({-100}, {-50})")>
                             <svg:defs>
@@ -473,7 +473,7 @@ tag App
         document.addEventListener 'mousedown' do |e|
             game.keys['leftbutton'] = yes if e:button == 0
             shoot if e:button == 0
-            player.attack if e:button == 2
+            player.attack(zombies) if e:button == 2
 
         document.addEventListener 'mouseup' do |e|
             game.keys['leftbutton'] = no if e:button == 0
@@ -500,7 +500,7 @@ tag App
 
     def shoot
         player.shoot if [:handgun, :shotgun, :rifle].includes player.gun.name
-        player.attack if [:flashlight, :knife].includes player.gun.name
+        player.attack(zombies) if [:flashlight, :knife].includes player.gun.name
 
     def tick
         shoot if game.keys:leftbutton

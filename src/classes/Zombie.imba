@@ -18,11 +18,11 @@ export class Zombie
     prop zombies
     prop game
 
-    def takeHit bullet
-        pos:x -= Math.sin((angleToPlayer + 90 ) * 3.1415 / 180) * bullet.power
-        pos:y -= -Math.cos((angleToPlayer + 90 ) * 3.1415 / 180) * bullet.power
+    def takeHit hit
+        pos:x -= Math.sin((angleToPlayer + 90 ) * 3.1415 / 180) * hit.power
+        pos:y -= -Math.cos((angleToPlayer + 90 ) * 3.1415 / 180) * hit.power
         unless taking-hit
-            life -= bullet.damage
+            life -= hit.damage
             taking-hit = ~~(Math.random * 5 + 1)
             window.setTimeout((do taking-hit = no), 50)
         state = :aggro
