@@ -44,7 +44,7 @@ let guns =
         name: :knife
         ammo: 0
         cap: 0
-        rate: 3
+        rate: 2
         damage: 50
         reload-time: 0
         power: 10
@@ -53,7 +53,7 @@ let guns =
         name: :handgun
         ammo: 10
         cap: 10
-        rate: 3
+        rate: 2
         damage: 33
         reload-time: 1200
         power: 5
@@ -62,7 +62,7 @@ let guns =
         name: :rifle
         ammo: 30
         cap: 30
-        rate: 20
+        rate: 10
         damage: 10
         reload-time: 2000
         power: 8
@@ -85,7 +85,7 @@ let player = Player.new
 
 
 let zombies = []
-for i in Array.from(Array.new(20))
+for i in Array.from(Array.new(80))
     zombies.push Zombie.new 
         id: Math.random
         pos: {x: Math.random * 1000
@@ -184,7 +184,7 @@ tag Projectile < svg:g
     def render
         bullet.update zombies, game, player
         <self transform="translate({ window:innerWidth/2 + bullet.pos:x}, { window:innerHeight/2 - bullet.pos:y}) rotate({bullet.direction})">
-            <svg:rect height=1 width=300 fill="yellow">
+            <svg:rect height=1 width=50 fill="yellow">
 
 
 tag Aim < svg:g
@@ -210,18 +210,18 @@ tag Hud < svg:g
                     <svg:defs>
                         <svg:pattern id="blood-hud" patternUnits="userSpaceOnUse" width="{game.width/2}" height="{game.height/2}" patternContentUnits="userSpaceOnUse">
                             <svg:image href="textures/blood_hud/{player.taking-hit}.png" width="{game.width/2}" height="{game.height/2}">
-                    <svg:rect .blood-hud height=game.height/1.5 width=game.width/1.5 fill="url(#blood-hud)">
+                    <svg:rect transform=("rotate({player.blood-rotation})") .blood-hud height=game.height/1.5 width=game.width/1.5 fill="url(#blood-hud)">
 
 
 
 tag App
     def mount
         @theme-start = no
-        schedule interval: 16.66666
+        schedule interval: 17
         document.addEventListener 'keydown', do |e|
             keydown e
             unless @theme-start
-                # Audio.new('sounds/theme1.mp3').play
+                Audio.new('sounds/theme1.mp3').play
                 @theme-start=yes
 
         document.addEventListener 'keyup', do |e|

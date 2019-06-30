@@ -17,6 +17,7 @@ export class Player
     prop game
     prop bullets default: []
     prop life default: 100
+    prop blood-rotation
 
     prop shooting
     prop reloading
@@ -26,6 +27,7 @@ export class Player
 
     def takeHit damage
         unless taking-hit
+            blood-rotation = Math.random * 360
             taking-hit = parseInt(Math.random * 2 + 1)
             window.setTimeout((do taking-hit = no), 1200)
         life -= damage

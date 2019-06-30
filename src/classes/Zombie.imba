@@ -12,6 +12,7 @@ export class Zombie
     prop damage default: 10
     prop already-turned
     prop taking-hit
+    prop attacking
 
     prop player
     prop zombies
@@ -83,11 +84,13 @@ export class Zombie
             moveForward  
         
     def execAttack
-        if distanceToPlayer < 40
+        if distanceToPlayer < 40 and !attacking
+            attacking = true
             animation = animations:attack
             window.setTimeout((do 
                 if distanceToPlayer < 60
                     player.takeHit(damage)
+                attacking = false
             ), 300)
         elif colide
             state = :walk-arround

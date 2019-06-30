@@ -21,9 +21,13 @@ export class Bullet
             # long range
             if distanceToZombie(zombie, game) < 75 
                 zombie.takeHit(self)
+                player.bullets.shift
+                delete self
             # close range
             elif ((anglePlayerToZombie(player, zombie, game)) < 30 and zombie.distanceToPlayer(player, game) < 100) and distanceToZombie(zombie, game) < 700
                 zombie.takeHit(self)
+                player.bullets.shift
+                delete self
 
     def fly player
         window.setTimeout( (do
