@@ -136,27 +136,32 @@ class Animation
 class Bullet
     prop direction
     prop pos
+    prop i default: 0
 
     def distanceToZombie zombie, game
         let dx = zombie.pos:x - (pos:x + game.width/2)
         let dy = zombie.pos:y - (-pos:y + game.height/2)
         (dy**2 + dx**2)**0.5
 
-    def angleToZombie zombie, game
-        let dx = zombie.pos:x - pos:x + game.width/2;
-        let dy = zombie.pos:y - pos:y + game.height/2;
-        -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
+    def anglePlayerToZombie player, zombie, game
+        let dx = player.pos:x + game.width/2 - zombie.pos:x
+        let dy = player.pos:y + game.height/2 - zombie.pos:y
+        (((player.rotation + (Math.atan2(dx, dy)/3.1415*180.0 - 90) +200) % 360)**2)**0.5
 
     def update zombies, game, player
         for zombie in zombies
-            if distanceToZombie(zombie, game) < 75 or ((angleToZombie(zombie, game)) < 50 and zombie.distanceToPlayer(player, game) < 100)
+            # long range
+            if distanceToZombie(zombie, game) < 75 
+                zombie.knockback(player, game)
+            # close range
+            elif ((anglePlayerToZombie(player, zombie, game)) < 30 and zombie.distanceToPlayer(player, game) < 100) and distanceToZombie(zombie, game) < 700
                 zombie.knockback(player, game)
 
     def fly
         window.setTimeout( (do
             pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 30
             pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
-            if pos:x**2 + pos:y**2 > 10000000
+            if pos:x**2 + pos:y**2 > 100000000
                 delete self
                 bullets.shift
                 return
@@ -190,8 +195,8 @@ class Zombie
     prop aggro
 
     def knockback player, game
-        pos:x -= Math.sin((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 30
-        pos:y -= -Math.cos((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 30
+        pos:x -= Math.sin((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 10
+        pos:y -= -Math.cos((angleToPlayer(player, game) + 90 ) * 3.1415 / 180) * 10
         aggro = true
 
     def distanceToPlayer player, game
@@ -204,7 +209,7 @@ class Zombie
         let dy = player.pos:y - pos:y + game.height/2;
         -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
 
-    def update player, game
+    def update player, game, zombies
         let distance = distanceToPlayer(player, game)
         if distance < 50
             animation = animations:attack
@@ -287,7 +292,7 @@ let guns =
 
     handgun: Gun.new
         name: :handgun
-        ammo: 10
+        ammo: 1000
         cap: 10
         rate: 3
         damage: 33
@@ -384,8 +389,9 @@ tag Projectile < svg:g
         schedule interval: 1
 
     def render
+        bullet.update zombies, game, player
         <self transform="translate({ window:innerWidth/2 + bullet.pos:x}, { window:innerHeight/2 - bullet.pos:y}) rotate({bullet.direction})">
-            <svg:rect height=1 width=100 fill="yellow">
+            <svg:rect height=1 width=300 fill="yellow">
 
 
 tag Aim < svg:g
@@ -406,7 +412,7 @@ tag App
         document.addEventListener 'keydown', do |e|
             keydown e
             unless @theme-start
-                Audio.new('sounds/theme1.mp3').play
+                # Audio.new('sounds/theme1.mp3').play
                 @theme-start=yes
 
 
@@ -426,7 +432,7 @@ tag App
     def aim e
         crosshair.x = e:x
         crosshair.y = -e:y
-        player.rotation = Math.atan2(e:x -  window:innerWidth/2, e:y -  window:innerHeight/2)/3.1415*180.0 - 90;
+        player.rotation = Math.atan2(e:x - window:innerWidth/2, e:y - window:innerHeight/2)/3.1415*180.0 - 90;
 
     def keydown e
         player.gun = player.invertory:knife   if e:code == :Digit1 and player.invertory:knife
@@ -465,7 +471,6 @@ tag App
                     for zombie in zombies
                         <Undead zombie=zombie player=player game=game>
                     for bullet in bullets
-                        bullet.update zombies, game, player
                         <Projectile bullet=bullet player=player>
                 <Aim crosshair=crosshair>
 Imba.mount <App>
