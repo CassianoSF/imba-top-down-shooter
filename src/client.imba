@@ -197,8 +197,24 @@ tag Aim < svg:g
             <svg:circle r=8 fill="rgb(60,255,60)">
             <svg:circle r=2 fill="black">
 
-tag App
+tag Hud < svg:g
+    attr height
+    attr width
+    prop player
+    prop game
 
+    def render
+        <self>
+            if player.taking-hit
+                <svg:g transform="translate({game.width/6}, {game.height/6})">
+                    <svg:defs>
+                        <svg:pattern id="blood-hud" patternUnits="userSpaceOnUse" width="{game.width/2}" height="{game.height/2}" patternContentUnits="userSpaceOnUse">
+                            <svg:image href="textures/blood_hud/{player.taking-hit}.png" width="{game.width/2}" height="{game.height/2}">
+                    <svg:rect .blood-hud height=game.height/1.5 width=game.width/1.5 fill="url(#blood-hud)">
+
+
+
+tag App
     def mount
         @theme-start = no
         schedule interval: 16.66666
@@ -270,6 +286,7 @@ tag App
                         <Undead zombie=zombie player=player game=game>
                     for bullet in player.bullets
                         <Projectile bullet=bullet player=player>
+                <Hud player=player game=game>
                 <Aim crosshair=crosshair>
 Imba.mount <App>
 

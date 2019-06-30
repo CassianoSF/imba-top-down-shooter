@@ -22,8 +22,12 @@ export class Player
     prop reloading
     prop running
     prop attacking
+    prop taking-hit
 
     def takeHit damage
+        unless taking-hit
+            taking-hit = parseInt(Math.random * 2 + 1)
+            window.setTimeout((do taking-hit = no), 1200)
         life -= damage
 
     def move directions
