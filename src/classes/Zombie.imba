@@ -21,8 +21,8 @@ export class Zombie
     def takeHit bullet
         pos:x -= Math.sin((angleToPlayer + 90 ) * 3.1415 / 180) * bullet.power
         pos:y -= -Math.cos((angleToPlayer + 90 ) * 3.1415 / 180) * bullet.power
-        life -= bullet.damage
         unless taking-hit
+            life -= bullet.damage
             taking-hit = ~~(Math.random * 5 + 1)
             window.setTimeout((do taking-hit = no), 50)
         state = :aggro
@@ -64,6 +64,22 @@ export class Zombie
     def deleteZombie
         var index = zombies.indexOf(self)
         zombies.splice(index, 1) if (index !== -1)
+        zombies.push Zombie.new 
+            id: Math.random
+            pos: 
+                x: Math.random * 3000 
+                y: Math.random * 3000 
+            rotation: Math.random*360
+            animation: animations:idle
+            animations: animations
+            state: :random
+            life: life+20
+            speed: speed
+            state: :aggro
+            max-speed: speed+1
+            game: game
+            zombies: zombies
+            player: player
 
     def update player, game, zombies
         return deleteZombie if life < 0 
@@ -90,11 +106,11 @@ export class Zombie
             moveForward  
         
     def execAttack
-        if distanceToPlayer < 40 and !attacking
+        if distanceToPlayer < 60 and !attacking
             attacking = true
             animation = animations:attack
             window.setTimeout((do 
-                if distanceToPlayer < 60
+                if distanceToPlayer < 90
                     player.takeHit(damage)
                 attacking = false
             ), 300)

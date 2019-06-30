@@ -6,6 +6,7 @@ export class Gun
     prop reload-time
     prop name
     prop power
+    prop accuracy
 
     def initialize
         for k, v of ($1) 

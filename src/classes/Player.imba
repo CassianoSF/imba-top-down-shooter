@@ -61,7 +61,7 @@ export class Player
 
 
     def bulletInitPos
-        if (rotation < 360 and rotation > 300) or (rotation < 180 and rotation > 120)
+        if (rotation < 360 and rotation > 280) or (rotation < 180 and rotation > 120)
             return {
                 x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
                 y: Math.cos((rotation + 90)* 3.1415 / 180) * 50 - pos:y
@@ -81,7 +81,7 @@ export class Player
             bullets.push Bullet.new 
                 player: self
                 pos: bulletInitPos
-                direction: rotation
+                direction: rotation + (Math.random * 200/gun.accuracy - 100/gun.accuracy)
                 power: gun.power
                 damage: gun.damage
             gun.ammo -= 1

@@ -45,7 +45,7 @@ let guns =
         ammo: 0
         cap: 0
         rate: 2
-        damage: 50
+        damage: 25
         reload-time: 0
         power: 10
 
@@ -54,9 +54,10 @@ let guns =
         ammo: 10
         cap: 10
         rate: 2
-        damage: 33
+        damage: 25
         reload-time: 1200
         power: 5
+        accuracy: 30
 
     rifle: Gun.new
         name: :rifle
@@ -66,6 +67,7 @@ let guns =
         damage: 10
         reload-time: 2000
         power: 8
+        accuracy: 10
 
 let player = Player.new
     invertory: guns
