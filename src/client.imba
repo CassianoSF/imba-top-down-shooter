@@ -85,11 +85,12 @@ let player = Player.new
 
 
 let zombies = []
-for i in Array.from(Array.new(200))
+for i in Array.from(Array.new(100))
     zombies.push Zombie.new 
         id: Math.random
-        pos: {x: Math.random * 1000
-        y: Math.random * 1000}
+        pos: 
+            x: Math.random * 3000 
+            y: Math.random * 3000 
         rotation: Math.random*360
         animation: animations:zombie:idle
         animations: animations:zombie
@@ -206,11 +207,11 @@ tag Hud < svg:g
     def render
         <self>
             if player.taking-hit
-                <svg:g transform="translate({game.width/6}, {game.height/6})">
+                <svg:g transform="">
                     <svg:defs>
                         <svg:pattern id="blood-hud" patternUnits="userSpaceOnUse" width="{game.width/2}" height="{game.height/2}" patternContentUnits="userSpaceOnUse">
                             <svg:image href="textures/blood_hud/{player.taking-hit}.png" width="{game.width/2}" height="{game.height/2}">
-                    <svg:rect transform=("rotate({player.blood-rotation})") .blood-hud height=game.height/1.5 width=game.width/1.5 fill="url(#blood-hud)">
+                    <svg:rect transform=("translate({game.width/4}, {game.width/4}) rotate({player.blood-rotation})") .blood-hud height=game.height/1.5 width=game.width/1.5 fill="url(#blood-hud)">
 
 
 
