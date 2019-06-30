@@ -75,7 +75,7 @@ class Player
             animation = animations[gun.name]:shoot
             window.setTimeout((do delete audio),    10000)
             window.setTimeout((do can-shoot = yes), 1000/gun.rate)
-            window.setTimeout((do shooting = no),   50)
+            window.setTimeout((do shooting = no),   10)
 
     def attack
         if can-attack
