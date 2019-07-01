@@ -319,12 +319,12 @@ let player = Player.new
 
 
 let zombies = []
-for i in Array.from(Array.new(100))
+for i in Array.from(Array.new(30))
     zombies.push Zombie.new 
         id: Math.random
         pos: 
-            x: Math.random * 3000 
-            y: Math.random * 3000 
+            x: Math.random * 1000 
+            y: Math.random * 1000 
         rotation: Math.random*360
         animation: animations:zombie:idle
         animations: animations:zombie
