@@ -36,13 +36,13 @@ export class Bullet
 
     def fly player
         window.setTimeout( (do
-            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 30
-            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 30
+            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 60
+            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 60
             if distanceToPlayer > 5000
                 deleteBullet
                 return
             fly player
-        ), 1);
+        ), 16);
 
     def initialize
         for k, v of ($1) 

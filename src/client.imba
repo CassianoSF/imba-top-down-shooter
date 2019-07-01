@@ -421,10 +421,6 @@ tag Ground < svg:g
     attr width
     attr transform
 
-    def mount
-        schedule interval: 16.666
-
-
     def render
         <self height=70000 width=70000 transform="translate({ - 35000},{ - 35000})">
             <svg:g>
@@ -452,9 +448,6 @@ tag Projectile < svg:g
     attr transform
     prop bullet
     prop player
-
-    def mount
-        schedule interval: 1
 
     def render
         bullet.update zombies, game, player
@@ -511,7 +504,7 @@ tag App
         feet-animation = loadFeetAnimations
     def mount
         @theme-start = no
-        schedule interval: 17
+        schedule interval: 16
         document.addEventListener 'keydown', do |e|
             keydown e
             unless @theme-start

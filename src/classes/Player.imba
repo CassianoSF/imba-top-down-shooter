@@ -129,7 +129,7 @@ export class Player
             window.setTimeout(( do
                 can-attack = yes
                 attacking = no
-            ), 17 * 15 * 2)
+            ), 10 * 15 * 2)
 
     def reload
         if gun.ammo != gun.cap and !reloading
