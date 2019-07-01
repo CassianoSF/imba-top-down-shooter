@@ -3,6 +3,7 @@ export class Animation
     prop size
     prop time default: 0
     prop frame-length
+    prop name
     prop adjust
 
     def initialize

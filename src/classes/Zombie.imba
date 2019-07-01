@@ -62,8 +62,6 @@ export class Zombie
 
 
     def deleteZombie
-        var index = zombies.indexOf(self)
-        zombies.splice(index, 1) if (index !== -1)
         zombies.push Zombie.new 
             id: Math.random
             pos: 
@@ -73,12 +71,14 @@ export class Zombie
             animation: animations:idle
             animations: animations
             state: :random
-            life: life+20
+            life: life + 20
             speed: speed
-            max-speed: speed+1
+            max-speed: speed + 1
             game: game
             zombies: zombies
             player: player
+        var index = zombies.indexOf(self)
+        zombies.splice(index, 1) if (index !== -1)
 
     def update player, game, zombies
         return deleteZombie if life < 0 

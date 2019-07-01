@@ -3,6 +3,8 @@ export class Game
     prop time
     prop height
     prop width
+    prop barrels
+    prop boxes
 
     def initialize 
         for k, v of ($1) 
