@@ -1302,8 +1302,8 @@ var App = Imba.defineTag('App', function(tag){
 				
 				
 				$[17] || _1('svg:g',$,17,0),
-				$[24] || _1(Hud,$,24,0),
-				$[25] || _1(Aim,$,25,0)
+				$[22] || _1(Hud,$,22,0),
+				$[23] || _1(Aim,$,23,0)
 			],1).end((
 				$[1].end((
 					$[2].end((
@@ -1339,20 +1339,14 @@ var App = Imba.defineTag('App', function(tag){
 							bullet = items[i];
 							if (bullet) { $$.push(($0[i] || _1(Projectile,$0,i)).setBullet(bullet).setPlayer(player).end()) };
 						};return $$;
-					})($[21] || _3($,21,$[17])),
-					(function tagLoop($0) {
-						for (let i = 0, items = iter$(game.boxes()), len = $0.taglen = items.length; i < len; i++) {
-							($0[i] || _1(Box,$0,i)).setBox(items[i]).end();
-						};return $0;
-					})($[22] || _2($,22,$[17])),
-					(function tagLoop($0) {
-						for (let i = 0, items = iter$(game.barrels()), len = $0.taglen = items.length; i < len; i++) {
-							($0[i] || _1(Barrel,$0,i)).setBarrel(items[i]).end();
-						};return $0;
-					})($[23] || _2($,23,$[17]))
+					})($[21] || _3($,21,$[17]))
+				
+				
+				
+				
 				],1).end(),
-				$[24].setPlayer(player).setGame(game).end(),
-				$[25].setCrosshair(crosshair).end()
+				$[22].setPlayer(player).setGame(game).end(),
+				$[23].setCrosshair(crosshair).end()
 			,true))
 		,true));
 	};
