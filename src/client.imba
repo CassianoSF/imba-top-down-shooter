@@ -508,7 +508,15 @@ tag App
         document.addEventListener 'keydown', do |e|
             keydown e
             unless @theme-start
-                Audio.new('sounds/theme1.mp3').play
+                let theme0 = Audio.new('sounds/theme0.mp3')
+                theme0:onended = (do theme1.play)
+                let theme1 = Audio.new('sounds/theme1.mp3')
+                theme1:onended = (do theme2.play)
+                let theme2 = Audio.new('sounds/theme2.mp3')
+                theme2:onended = (do theme3.play)
+                let theme3 = Audio.new('sounds/theme3.mp3')
+                theme3:onended = (do theme0.play)
+                theme0.play
                 @theme-start=yes
 
         document.addEventListener 'keyup', do |e|

@@ -71,7 +71,7 @@ export class Zombie
             animation: animations:idle
             animations: animations
             state: :random
-            life: life + 20
+            life: speed * 20
             speed: speed
             max-speed: speed + 1
             game: game
