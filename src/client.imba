@@ -646,10 +646,10 @@ tag App
                         <Undead zombie=zombie player=player game=game>
                     for bullet in player.bullets
                         <Projectile bullet=bullet player=player> if bullet
-                    for box in game.boxes
-                        <Box box=box>
-                    for barrel in game.barrels
-                        <Barrel barrel=barrel>
+                    # for box in game.boxes
+                    #     <Box box=box>
+                    # for barrel in game.barrels
+                    #     <Barrel barrel=barrel>
                 <Hud player=player game=game>
                 <Aim crosshair=crosshair>
 Imba.mount <App>
