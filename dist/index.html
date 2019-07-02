@@ -2,10 +2,16 @@
 <html lang="en">
   <head>
     <title>Hello World</title>
+    <link rel="canonical" href="https://cassianosf.github.io/imba-top-down-shooter/dist/" />
     <meta charset="utf-8">
     <link rel="stylesheet" href="index.css" media="screen">
   </head>
   <body>
+    <script>
+        if (navigator.serviceWorker) {
+            navigator.serviceWorker.register('/dist/sw.js', {scope: '/dist/'})
+        }
+    </script>
     <script src="client.js"></script>
   </body>
 </html>
