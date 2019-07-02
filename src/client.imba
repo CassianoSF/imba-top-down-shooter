@@ -522,7 +522,7 @@ tag App
                 theme1:onended = (do theme2.play)
                 theme2:onended = (do theme3.play)
                 theme3:onended = (do theme0.play)
-                # theme0.play
+                theme0.play
                 @theme-start=yes
 
         document.addEventListener 'keyup', do |e|
@@ -672,5 +672,8 @@ tag App
                     <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2}) scale(1, -1)">
                         <svg:text fill="black">
                             "LOADING.... {~~(Object.keys(images-loaded):length/4.4)}%"
+                    <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2 + 100}) scale(1, -1)">
+                        <svg:text fill="black">
+                            "Tip: ZoomOut to 80%"
 Imba.mount <App>
 

@@ -1085,7 +1085,7 @@ var App = Imba.defineTag('App', function(tag){
 				theme1.onended = function() { return theme2.play(); };
 				theme2.onended = function() { return theme3.play(); };
 				theme3.onended = function() { return theme0.play(); };
-				
+				theme0.play();
 				return self._themeStart = true;
 			};
 		});
@@ -1369,13 +1369,18 @@ var App = Imba.defineTag('App', function(tag){
 					],1).end(),
 					($[28] || _1(Hud,$,28,0)).setPlayer(player).setGame(game).end(),
 					($[29] || _1(Aim,$,29,0)).setCrosshair(crosshair).end()
-				],2,1) : (
+				],2,1) : Imba.static([
 					($[30] || _1('svg:g',$,30,0).setContent(
 						$[31] || _1('svg:text',$,31,30).set('fill',"black")
 					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
 						$[31].setText("LOADING.... " + (~~(Object.keys(this.imagesLoaded()).length / 4.4)) + "%").end()
+					,true)),
+					($[32] || _1('svg:g',$,32,0).setContent(
+						$[33] || _1('svg:text',$,33,32).set('fill',"black").setText("Tip: ZoomOut to 80%")
+					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2 + 100) + ") scale(1, -1)")).end((
+						$[33].end()
 					,true))
-				)
+				],2,2)
 			],1).end()
 		,true));
 	};
