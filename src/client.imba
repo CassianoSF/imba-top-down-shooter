@@ -7,7 +7,6 @@ import Zombie    from './classes/Zombie'
 
 import App from './tags/App'
 
-
 let audios = 
     theme1:            Audio.new('sounds/theme1.mp3')
     theme0:            Audio.new('sounds/theme0.mp3')
@@ -46,11 +45,14 @@ for i in Array.from(Array.new(30))
         rotation: Math.random * 360
         id: Math.random
 
+let crosshair = Crosshair.new(x:0, y:0)
+
 let game = Game.new 
     keys: {}
     time: 0
     barrels: barrels
     boxes: boxes
+    crosshair: crosshair
 
 let animations = 
     player:
@@ -318,8 +320,6 @@ let animations =
                 scale: "1.3,1.3"
                 translate: "0,0"
 
-
-
 let guns = 
     knife: Gun.new
         name: :knife
@@ -386,6 +386,7 @@ let player = Player.new
     feet-animations: animations:feet
     game: game
 
+game.player = player
 
 let zombies = []
 for i in Array.from(Array.new(70))
@@ -404,9 +405,6 @@ for i in Array.from(Array.new(70))
         game: game
         zombies: zombies
         player: player
-
-
-let crosshair = Crosshair.new(x:0, y:0)
 
 Imba.mount <App 
     crosshair=crosshair

@@ -98,6 +98,7 @@ export class Player
 
     def shoot
         reload unless gun.ammo or reloading
+        return attack if [:flashlight, :knife].includes gun.name
         if gun.ammo and can-shoot and !reloading
             let audio = Audio.new('sounds/shotgun_shot.wav')
             audio:volume = 0.6

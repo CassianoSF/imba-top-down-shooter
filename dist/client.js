@@ -379,7 +379,6 @@ var Zombie = __webpack_require__(21).Zombie;
 
 var App = __webpack_require__(22).App;
 
-
 let audios = {
 	theme1: new Audio('sounds/theme1.mp3'),
 	theme0: new Audio('sounds/theme0.mp3'),
@@ -433,11 +432,14 @@ for (let j = 0, items = iter$(Array.from(new Array(30))), len = items.length; j 
 	);
 };
 
+let crosshair = new Crosshair({x: 0,y: 0});
+
 let game = new Game(
 	{keys: {},
 	time: 0,
 	barrels: barrels,
-	boxes: boxes}
+	boxes: boxes,
+	crosshair: crosshair}
 );
 
 let animations = {
@@ -773,8 +775,6 @@ let animations = {
 	}
 };
 
-
-
 let guns = {
 	knife: new Gun(
 		{name: 'knife',
@@ -849,6 +849,7 @@ let player = new Player(
 	game: game}
 );
 
+game.setPlayer(player);
 
 let zombies = [];
 for (let j = 0, items = iter$(Array.from(new Array(70))), len = items.length; j < len; j++) {
@@ -870,9 +871,6 @@ for (let j = 0, items = iter$(Array.from(new Array(70))), len = items.length; j 
 		player: player}
 	));
 };
-
-
-let crosshair = new Crosshair({x: 0,y: 0});
 
 Imba.mount((_1(App)).setCrosshair(crosshair).setZombies(zombies).setPlayer(player).setGuns(guns).setAnimations(animations).setAudios(audios).setBoxes(boxes).setBarrels(barrels).setGame(game).end());
 
@@ -4705,6 +4703,84 @@ Game.prototype.barrels = function(v){ return this._barrels; }
 Game.prototype.setBarrels = function(v){ this._barrels = v; return this; };
 Game.prototype.boxes = function(v){ return this._boxes; }
 Game.prototype.setBoxes = function(v){ this._boxes = v; return this; };
+Game.prototype.themeStarted = function(v){ return this._themeStarted; }
+Game.prototype.setThemeStarted = function(v){ this._themeStarted = v; return this; };
+Game.prototype.player = function(v){ return this._player; }
+Game.prototype.setPlayer = function(v){ this._player = v; return this; };
+Game.prototype.crosshair = function(v){ return this._crosshair; }
+Game.prototype.setCrosshair = function(v){ this._crosshair = v; return this; };
+
+Game.prototype.startTheme = function (){
+	if (this.themeStarted()) { return };
+	this.setThemeStarted(true);
+	let theme0 = new Audio('sounds/theme1.mp3');
+	theme0.volume = 0.5;
+	let theme1 = new Audio('sounds/theme0.mp3');
+	theme1.volume = 0.5;
+	let theme2 = new Audio('sounds/theme2.mp3');
+	theme2.volume = 0.5;
+	let theme3 = new Audio('sounds/theme3.mp3');
+	theme3.volume = 0.5;
+	theme0.onended = function() { return theme1.play(); };
+	theme1.onended = function() { return theme2.play(); };
+	theme2.onended = function() { return theme3.play(); };
+	theme3.onended = function() { return theme0.play(); };
+	return theme0.play();
+};
+
+Game.prototype.initListners = function (){
+	var self = this;
+	document.addEventListener('keydown',function(e) {
+		self.keydown(e);
+		return self.startTheme();
+	});
+	
+	document.addEventListener('keyup',function(e) {
+		return self.keyup(e);
+	});
+	
+	document.addEventListener('mousemove',function(e) {
+		return self.aim(e);
+	});
+	
+	document.addEventListener('mousedown',function(e) {
+		if (e.button == 0) { self.keys().leftbutton = true };
+		if (e.button == 2) { self.keys().rightbutton = true };
+		if (e.button == 0) { self.player().shoot() };
+		if (e.button == 2) { return self.player().attack(self.zombies()) };
+	});
+	
+	document.addEventListener('mouseup',function(e) {
+		if (e.button == 2) { self.keys().rightbutton = false };
+		if (e.button == 0) { return self.keys().leftbutton = false };
+	});
+	
+	return document.addEventListener('contextmenu',function(e) {
+		return e.preventDefault();
+	});
+};
+
+
+Game.prototype.aim = function (e){
+	var v_;
+	this.crosshair().setX(e.x);
+	this.crosshair().setY(-e.y);
+	return (this.player().setRotation(v_ = ((Math.atan2(e.x - window.innerWidth / 2,e.y - window.innerHeight / 2) / 3.1415 * 180.0 - 90) + 720) % 360),v_);
+};
+
+Game.prototype.keydown = function (e){
+	if (e.code == 'Digit1' && this.player().invertory().knife) { this.player().changeGun('knife') };
+	if (e.code == 'Digit2' && this.player().invertory().handgun) { this.player().changeGun('handgun') };
+	if (e.code == 'Digit3' && this.player().invertory().rifle) { this.player().changeGun('rifle') };
+	if (e.code == 'Digit4' && this.player().invertory().shotgun) { this.player().changeGun('shotgun') };
+	if (e.code == 'KeyF' && this.player().invertory().flashlight) { this.player().changeGun('flashlight') };
+	if (e.code == 'KeyR') { this.player().reload() };
+	return this.keys()[e.code] = true;
+};
+
+Game.prototype.keyup = function (e){
+	return this.keys()[e.code] = false;
+};
 
 
 
@@ -4875,6 +4951,7 @@ Player.prototype.changeGun = function (to){
 Player.prototype.shoot = function (){
 	var self = this, gun_;
 	if (!(self.gun().ammo() || self.reloading())) self.reload();
+	if (['flashlight','knife'].includes(self.gun().name())) { return self.attack() };
 	if (self.gun().ammo() && self.canShoot() && !(self.reloading())) {
 		let audio = new Audio('sounds/shotgun_shot.wav');
 		audio.volume = 0.6;
@@ -5371,8 +5448,6 @@ Zombie.prototype.execWalkArround = function (){
 
 function iter$(a){ return a ? (a.toArray ? a.toArray() : a) : []; };
 var Imba = __webpack_require__(1), _2 = Imba.createTagList, _3 = Imba.createTagMap, _1 = Imba.createElement;
-
-
 var Undead = Imba.defineTag('Undead', 'svg:g', function(tag){
 	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
 	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
@@ -5387,23 +5462,21 @@ var Undead = Imba.defineTag('Undead', 'svg:g', function(tag){
 	
 	tag.prototype.render = function (){
 		var $ = this.$;
-		if (this.zombie()) {
-			this.zombie().update(this.player(),this.game(),this.zombies());
-			return this.$open(0).setTransform((("translate(" + (this.zombie().pos().x) + "," + (this.zombie().pos().y) + ") rotate(" + (this.zombie().rotation()) + ")"))).setChildren(
-				$[0] || _1('svg:g',$,0,this)
-			,2).synced((
-				$[0].set('transform',("translate(" + (-50) + ", " + (-50) + ")")).setContent([
-					($[1] || _1('svg:rect',$,1,0).set('height',100).set('width',100)).set('transform',("scale(" + (this.zombie().animation().adjust().scale) + ") translate(" + (this.zombie().animation().adjust().translate) + ")")).set('fill',("url(#zombie-" + (this.zombie().animation().path()) + "-" + (~~(this.game().time() / this.zombie().animation().frameLength() % this.zombie().animation().size())) + ")")).end(),
-					this.zombie().takingHit() ? (
-						($[2] || _1('svg:g',$,2,0).setContent(
-							$[3] || _1('svg:rect',$,3,2).set('height',100).set('width',100)
-						,2)).set('transform',(("rotate(-90) translate(" + (-100) + ", " + (-50) + ")"))).end((
-							$[3].set('fill',("url(#blood-splash-" + (this.zombie().takingHit()) + ")")).end()
-						,true))
-					) : void(0)
-				],1).end()
-			,true));
-		};
+		this.zombie().update(this.player(),this.game(),this.zombies());
+		return this.$open(0).setTransform((("translate(" + (this.zombie().pos().x) + "," + (this.zombie().pos().y) + ") rotate(" + (this.zombie().rotation()) + ")"))).setChildren(
+			$[0] || _1('svg:g',$,0,this)
+		,2).synced((
+			$[0].set('transform',("translate(" + (-50) + ", " + (-50) + ")")).setContent([
+				($[1] || _1('svg:rect',$,1,0).set('height',100).set('width',100)).set('transform',("scale(" + (this.zombie().animation().adjust().scale) + ") translate(" + (this.zombie().animation().adjust().translate) + ")")).set('fill',("url(#zombie-" + (this.zombie().animation().path()) + "-" + (~~(this.game().time() / this.zombie().animation().frameLength() % this.zombie().animation().size())) + ")")).end(),
+				this.zombie().takingHit() ? (
+					($[2] || _1('svg:g',$,2,0).setContent(
+						$[3] || _1('svg:rect',$,3,2).set('height',100).set('width',100)
+					,2)).set('transform',(("rotate(-90) translate(" + (-100) + ", " + (-50) + ")"))).end((
+						$[3].set('fill',("url(#blood-splash-" + (this.zombie().takingHit()) + ")")).end()
+					,true))
+				) : void(0)
+			],1).end()
+		,true));
 	};
 });
 
@@ -5414,7 +5487,6 @@ var Survival = Imba.defineTag('Survival', 'svg:g', function(tag){
 	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
 	tag.prototype.game = function(v){ return this._game; }
 	tag.prototype.setGame = function(v){ this._game = v; return this; };
-	
 	
 	tag.prototype.render = function (){
 		var $ = this.$;
@@ -5498,7 +5570,6 @@ var Projectile = Imba.defineTag('Projectile', 'svg:g', function(tag){
 	};
 });
 
-
 var Aim = Imba.defineTag('Aim', 'svg:g', function(tag){
 	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
 	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
@@ -5543,7 +5614,6 @@ var Hud = Imba.defineTag('Hud', 'svg:g', function(tag){
 	};
 });
 
-
 var Barrel = Imba.defineTag('Barrel', 'svg:g', function(tag){
 	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
 	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
@@ -5569,10 +5639,6 @@ var Box = Imba.defineTag('Box', 'svg:g', function(tag){
 	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
 	tag.prototype.box = function(v){ return this._box; }
 	tag.prototype.setBox = function(v){ this._box = v; return this; };
-	tag.prototype.__images_loaded = {'default': 0,name: 'images_loaded'};
-	tag.prototype.images_loaded = function(v){ return this._images_loaded; }
-	tag.prototype.setImages_loaded = function(v){ this._images_loaded = v; return this; }
-	tag.prototype._images_loaded = 0;
 	
 	tag.prototype.render = function (){
 		var $ = this.$;
@@ -5583,6 +5649,145 @@ var Box = Imba.defineTag('Box', 'svg:g', function(tag){
 		,2).synced((
 			$[0].set('transform',("translate(" + (-50) + ", " + (-50) + ")")).end((
 				$[1].end()
+			,true))
+		,true));
+	};
+});
+
+var Loader = Imba.defineTag('Loader', 'svg:g', function(tag){
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		return this.$open(0).setChildren([
+			// FLOOR
+			$[0] || _1('svg:defs',$,0,this).setContent(
+				$[1] || _1('svg:pattern',$,1,0).setId('floor_2').set('patternUnits',"userSpaceOnUse").set('width',"700").set('height',"700").set('patternContentUnits',"userSpaceOnUse").setContent(
+					$[2] || _1('svg:image',$,2,1).set('href',"textures/the_floor/the_floor/floor_2.png").set('width',"700").set('height',"700")
+				,2)
+			,2),
+			
+			
+			$[3] || _1('svg:defs',$,3,this).setContent(
+				$[4] || _1('svg:pattern',$,4,3).setId('shot').set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+					$[5] || _1('svg:image',$,5,4).set('href',"textures/shoot/shoot/muzzle_flash_0.png").set('width',"100").set('height',"100")
+				,2)
+			,2),
+			
+			$[6] || _1('svg:defs',$,6,this).setContent(
+				$[7] || _1('svg:pattern',$,7,6).set('id',"barrel").set('patternUnits',"userSpaceOnUse").set('width',"50").set('height',"50").set('patternContentUnits',"userSpaceOnUse").setContent(
+					$[8] || _1('svg:image',$,8,7).set('href',"textures/the_floor/the_floor/barrel.png").set('width',"50").set('height',"50")
+				,2)
+			,2),
+			
+			$[9] || _1('svg:defs',$,9,this).setContent(
+				$[10] || _1('svg:pattern',$,10,9).set('id',"box").set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+					$[11] || _1('svg:image',$,11,10).set('href',"textures/the_floor/the_floor/crate_1.png").set('width',"100").set('height',"100")
+				,2)
+			,2),
+			
+			
+			$[12] || _1('svg:defs',$,12,this).setContent(
+				$[13] || _1('svg:pattern',$,13,12).set('id',"blood-hud-1").set('patternUnits',"userSpaceOnUse").set('patternContentUnits',"userSpaceOnUse").setContent(
+					$[14] || _1('svg:image',$,14,13).set('href',"textures/blood_hud/1.png")
+				,2)
+			,2),
+			$[15] || _1('svg:defs',$,15,this).setContent(
+				$[16] || _1('svg:pattern',$,16,15).set('id',"blood-hud-2").set('patternUnits',"userSpaceOnUse").set('patternContentUnits',"userSpaceOnUse").setContent(
+					$[17] || _1('svg:image',$,17,16).set('href',"textures/blood_hud/2.png")
+				,2)
+			,2),
+			
+			
+			(function tagLoop($0) {
+				var t0;
+				for (let i = 0, items = iter$(Array.from(new Array(6))), len = $0.taglen = items.length; i < len; i++) {
+					(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
+						t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+							t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+						,2)
+					,2)).end((
+						t0.$.A.set('id',("blood-splash-" + (i + 1))).end((
+							t0.$.B.set('href',("textures/blood_splash/" + (i + 1) + ".png")).end()
+						,true))
+					,true));
+				};return $0;
+			})($[18] || _2($,18)),
+			
+			
+			(function tagLoop($0) {
+				var t0;
+				for (let i = 0, items = iter$(Array.from(new Array(17))), len = $0.taglen = items.length; i < len; i++) {
+					(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
+						t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+							t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+						,2)
+					,2)).end((
+						t0.$.A.set('id',("zombie-idle-" + i)).end((
+							t0.$.B.set('href',("textures/zombie/idle/skeleton-idle_" + i + ".png")).end()
+						,true))
+					,true));
+				};return $0;
+			})($[19] || _2($,19)),
+			
+			(function tagLoop($0) {
+				var t0;
+				for (let i = 0, items = iter$(Array.from(new Array(17))), len = $0.taglen = items.length; i < len; i++) {
+					(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
+						t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+							t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+						,2)
+					,2)).end((
+						t0.$.A.set('id',("zombie-move-" + i)).end((
+							t0.$.B.set('href',("textures/zombie/move/skeleton-move_" + i + ".png")).end()
+						,true))
+					,true));
+				};return $0;
+			})($[20] || _2($,20)),
+			
+			(function tagLoop($0) {
+				var t0;
+				for (let i = 0, items = iter$(Array.from(new Array(9))), len = $0.taglen = items.length; i < len; i++) {
+					(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
+						t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+							t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+						,2)
+					,2)).end((
+						t0.$.A.set('id',("zombie-attack-" + i)).end((
+							t0.$.B.set('href',("textures/zombie/attack/skeleton-attack_" + i + ".png")).end()
+						,true))
+					,true));
+				};return $0;
+			})($[21] || _2($,21))
+		],1).synced((
+			$[0].end((
+				$[1].end((
+					$[2].end()
+				,true))
+			,true)),
+			$[3].end((
+				$[4].end((
+					$[5].end()
+				,true))
+			,true)),
+			$[6].end((
+				$[7].end((
+					$[8].end()
+				,true))
+			,true)),
+			$[9].end((
+				$[10].end((
+					$[11].end()
+				,true))
+			,true)),
+			$[12].end((
+				$[13].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end((
+					$[14].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end()
+				,true))
+			,true)),
+			$[15].end((
+				$[16].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end((
+					$[17].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end()
+				,true))
 			,true))
 		,true));
 	};
@@ -5637,82 +5842,13 @@ var App = Imba.defineTag('App', function(tag){
 			audio = dict[k];audio.oncanplaythrough = function() { return self.audiosLoaded()[k] = true; };
 		};
 		
-		self._themeStart = false;
 		self.schedule({interval: 16});
-		document.addEventListener('keydown',function(e) {
-			self.keydown(e);
-			if (!self._themeStart) {
-				let theme0 = new Audio('sounds/theme1.mp3');
-				theme0.volume = 0.5;
-				let theme1 = new Audio('sounds/theme0.mp3');
-				theme1.volume = 0.5;
-				let theme2 = new Audio('sounds/theme2.mp3');
-				theme2.volume = 0.5;
-				let theme3 = new Audio('sounds/theme3.mp3');
-				theme3.volume = 0.5;
-				theme0.onended = function() { return theme1.play(); };
-				theme1.onended = function() { return theme2.play(); };
-				theme2.onended = function() { return theme3.play(); };
-				theme3.onended = function() { return theme0.play(); };
-				theme0.play();
-				return self._themeStart = true;
-			};
-		});
-		
-		document.addEventListener('keyup',function(e) {
-			return self.keyup(e);
-		});
-		
-		document.addEventListener('mousemove',function(e) {
-			return self.aim(e);
-		});
-		
-		document.addEventListener('mousedown',function(e) {
-			if (e.button == 0) { self.game().keys().leftbutton = true };
-			if (e.button == 2) { self.game().keys().rightbutton = true };
-			if (e.button == 0) self.shoot();
-			if (e.button == 2) { return self.player().attack(self.zombies()) };
-		});
-		
-		document.addEventListener('mouseup',function(e) {
-			if (e.button == 2) { self.game().keys().rightbutton = false };
-			if (e.button == 0) { return self.game().keys().leftbutton = false };
-		});
-		
-		return document.addEventListener('contextmenu',function(e) {
-			return e.preventDefault();
-		});
-	};
-	
-	tag.prototype.aim = function (e){
-		var v_;
-		this.crosshair().setX(e.x);
-		this.crosshair().setY(-e.y);
-		return (this.player().setRotation(v_ = ((Math.atan2(e.x - window.innerWidth / 2,e.y - window.innerHeight / 2) / 3.1415 * 180.0 - 90) + 720) % 360),v_);
-	};
-	
-	tag.prototype.keydown = function (e){
-		if (e.code == 'Digit1' && this.player().invertory().knife) { this.player().changeGun('knife') };
-		if (e.code == 'Digit2' && this.player().invertory().handgun) { this.player().changeGun('handgun') };
-		if (e.code == 'Digit3' && this.player().invertory().rifle) { this.player().changeGun('rifle') };
-		if (e.code == 'Digit4' && this.player().invertory().shotgun) { this.player().changeGun('shotgun') };
-		if (e.code == 'KeyF' && this.player().invertory().flashlight) { this.player().changeGun('flashlight') };
-		if (e.code == 'KeyR') { this.player().reload() };
-		return this.game().keys()[e.code] = true;
-	};
-	
-	tag.prototype.keyup = function (e){
-		return this.game().keys()[e.code] = false;
-	};
-	
-	tag.prototype.shoot = function (){
-		if (['handgun','shotgun','rifle'].includes(this.player().gun().name())) { this.player().shoot() };
-		if (['flashlight','knife'].includes(this.player().gun().name())) { return this.player().attack(this.zombies()) };
+		return self.game().initListners();
 	};
 	
 	tag.prototype.tick = function (){
 		var game_;
-		if (this.game().keys().leftbutton) this.shoot();
+		if (this.game().keys().leftbutton) { this.player().shoot() };
 		if (this.game().keys().rightbutton) { this.player().attack(this.zombies()) };
 		this.game().setWidth(window.innerWidth);
 		this.game().setHeight(window.innerHeight);
@@ -5725,11 +5861,6 @@ var App = Imba.defineTag('App', function(tag){
 		this.player().move(directions);
 		(game_ = this.game()).setTime(game_.time() + 1);
 		return this.render();
-	};
-	
-	tag.prototype.loadImg = function (){
-		var v_;
-		return (this.setImages_loaded(v_ = this.images_loaded() + 1),v_);
 	};
 	
 	tag.prototype.loadSurvivalAnimations = function (){
@@ -5791,164 +5922,43 @@ var App = Imba.defineTag('App', function(tag){
 			$[0].setContent([
 				self.survivalAnimations(),
 				self.feetAnimation(),
-				
-				($[1] || _1('svg:defs',$,1,0).setContent(
-					$[2] || _1('svg:pattern',$,2,1).setId('floor_2').set('patternUnits',"userSpaceOnUse").set('width',"700").set('height',"700").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[3] || _1('svg:image',$,3,2).set('href',"textures/the_floor/the_floor/floor_2.png").set('width',"700").set('height',"700")
-					,2)
-				,2)).end((
-					$[2].end((
-						$[3].end()
-					,true))
-				,true)),
-				
-				($[4] || _1('svg:defs',$,4,0).setContent(
-					$[5] || _1('svg:pattern',$,5,4).setId('shot').set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[6] || _1('svg:image',$,6,5).set('href',"textures/shoot/shoot/muzzle_flash_0.png").set('width',"100").set('height',"100")
-					,2)
-				,2)).end((
-					$[5].end((
-						$[6].end()
-					,true))
-				,true)),
-				
-				($[7] || _1('svg:defs',$,7,0).setContent(
-					$[8] || _1('svg:pattern',$,8,7).set('id',"barrel").set('patternUnits',"userSpaceOnUse").set('width',"50").set('height',"50").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[9] || _1('svg:image',$,9,8).set('href',"textures/the_floor/the_floor/barrel.png").set('width',"50").set('height',"50")
-					,2)
-				,2)).end((
-					$[8].end((
-						$[9].end()
-					,true))
-				,true)),
-				
-				($[10] || _1('svg:defs',$,10,0).setContent(
-					$[11] || _1('svg:pattern',$,11,10).set('id',"box").set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[12] || _1('svg:image',$,12,11).set('href',"textures/the_floor/the_floor/crate_1.png").set('width',"100").set('height',"100")
-					,2)
-				,2)).end((
-					$[11].end((
-						$[12].end()
-					,true))
-				,true)),
-				
-				
-				
-				($[13] || _1('svg:defs',$,13,0).setContent(
-					$[14] || _1('svg:pattern',$,14,13).set('id',"blood-hud-1").set('patternUnits',"userSpaceOnUse").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[15] || _1('svg:image',$,15,14).set('href',"textures/blood_hud/1.png")
-					,2)
-				,2)).end((
-					$[14].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end((
-						$[15].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end()
-					,true))
-				,true)),
-				($[16] || _1('svg:defs',$,16,0).setContent(
-					$[17] || _1('svg:pattern',$,17,16).set('id',"blood-hud-2").set('patternUnits',"userSpaceOnUse").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[18] || _1('svg:image',$,18,17).set('href',"textures/blood_hud/2.png")
-					,2)
-				,2)).end((
-					$[17].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end((
-						$[18].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end()
-					,true))
-				,true)),
-				
-				
-				
-				(function tagLoop($0) {
-					var t0;
-					for (let i = 0, items = iter$(Array.from(new Array(6))), len = $0.taglen = items.length; i < len; i++) {
-						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
-							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-							,2)
-						,2)).end((
-							t0.$.A.set('id',("blood-splash-" + (i + 1))).end((
-								t0.$.B.set('href',("textures/blood_splash/" + (i + 1) + ".png")).end()
-							,true))
-						,true));
-					};return $0;
-				})($[19] || _2($,19,$[0])),
-				
-				
-				(function tagLoop($0) {
-					var t0;
-					for (let i = 0, items = iter$(Array.from(new Array(17))), len = $0.taglen = items.length; i < len; i++) {
-						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
-							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-							,2)
-						,2)).end((
-							t0.$.A.set('id',("zombie-idle-" + i)).end((
-								t0.$.B.set('href',("textures/zombie/idle/skeleton-idle_" + i + ".png")).end()
-							,true))
-						,true));
-					};return $0;
-				})($[20] || _2($,20,$[0])),
-				
-				(function tagLoop($0) {
-					var t0;
-					for (let i = 0, items = iter$(Array.from(new Array(17))), len = $0.taglen = items.length; i < len; i++) {
-						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
-							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-							,2)
-						,2)).end((
-							t0.$.A.set('id',("zombie-move-" + i)).end((
-								t0.$.B.set('href',("textures/zombie/move/skeleton-move_" + i + ".png")).end()
-							,true))
-						,true));
-					};return $0;
-				})($[21] || _2($,21,$[0])),
-				
-				(function tagLoop($0) {
-					var t0;
-					for (let i = 0, items = iter$(Array.from(new Array(9))), len = $0.taglen = items.length; i < len; i++) {
-						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
-							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-							,2)
-						,2)).end((
-							t0.$.A.set('id',("zombie-attack-" + i)).end((
-								t0.$.B.set('href',("textures/zombie/attack/skeleton-attack_" + i + ".png")).end()
-							,true))
-						,true));
-					};return $0;
-				})($[22] || _2($,22,$[0])),
+				($[1] || _1(Loader,$,1,0)).end(),
 				
 				(Object.keys(self.imagesLoaded()).length == 440 && Object.keys(self.audiosLoaded()).length == 27) ? Imba.static([
-					($[23] || _1('svg:g',$,23,0)).set('transform',(("translate(" + (x - self.player().pos().x) + ", " + (y - self.player().pos().y) + ")"))).setContent([
-						($[24] || _1(Ground,$,24,23)).setPlayer(self.player()).end(),
-						($[25] || _1(Survival,$,25,23)).setPlayer(self.player()).setGame(self.game()).end(),
+					($[2] || _1('svg:g',$,2,0)).set('transform',(("translate(" + (x - self.player().pos().x) + ", " + (y - self.player().pos().y) + ")"))).setContent([
+						($[3] || _1(Ground,$,3,2)).setPlayer(self.player()).end(),
+						($[4] || _1(Survival,$,4,2)).setPlayer(self.player()).setGame(self.game()).end(),
 						(function tagLoop($0) {
-							for (let i = 0, items = iter$(self.zombies()), len = $0.taglen = items.length; i < len; i++) {
-								($0[i] || _1(Undead,$0,i)).setZombies(self.zombies()).setZombie(items[i]).setPlayer(self.player()).setGame(self.game()).end();
-							};return $0;
-						})($[26] || _2($,26,$[23])),
+							var $$ = $0.$iter();
+							for (let i = 0, items = iter$(self.zombies()), len = items.length, zombie; i < len; i++) {
+								zombie = items[i];
+								if (zombie) { $$.push(($0[i] || _1(Undead,$0,i)).setZombies(self.zombies()).setZombie(zombie).setPlayer(self.player()).setGame(self.game()).end()) };
+							};return $$;
+						})($[5] || _3($,5,$[2])),
 						(function tagLoop($0) {
 							var $$ = $0.$iter();
 							for (let i = 0, items = iter$(self.player().bullets()), len = items.length, bullet; i < len; i++) {
 								bullet = items[i];
 								if (bullet) { $$.push(($0[i] || _1(Projectile,$0,i)).setBullet(bullet).setPlayer(self.player()).setZombies(self.zombies()).setGame(self.game()).end()) };
 							};return $$;
-						})($[27] || _3($,27,$[23]))
+						})($[6] || _3($,6,$[2]))
 					
 					
 					
 					
 					],1).end(),
-					($[28] || _1(Hud,$,28,0)).setPlayer(self.player()).setGame(self.game()).end(),
-					($[29] || _1(Aim,$,29,0)).setCrosshair(self.crosshair()).end()
+					($[7] || _1(Hud,$,7,0)).setPlayer(self.player()).setGame(self.game()).end(),
+					($[8] || _1(Aim,$,8,0)).setCrosshair(self.crosshair()).end()
 				],2,1) : Imba.static([
-					($[30] || _1('svg:g',$,30,0).setContent(
-						$[31] || _1('svg:text',$,31,30).set('fill',"black")
+					($[9] || _1('svg:g',$,9,0).setContent(
+						$[10] || _1('svg:text',$,10,9).set('fill',"black")
 					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
-						$[31].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 8.8 + Object.keys(self.audiosLoaded()).length / 0.54)) + "%").end()
+						$[10].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 8.8 + Object.keys(self.audiosLoaded()).length / 0.54)) + "%").end()
 					,true)),
-					($[32] || _1('svg:g',$,32,0).setContent(
-						$[33] || _1('svg:text',$,33,32).set('fill',"black").setText("Tip: ZoomOut to 80%")
+					($[11] || _1('svg:g',$,11,0).setContent(
+						$[12] || _1('svg:text',$,12,11).set('fill',"black").setText("Tip: ZoomOut to 80%")
 					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2 + 100) + ") scale(1, -1)")).end((
-						$[33].end()
+						$[12].end()
 					,true))
 				],2,2)
 			],1).end()
