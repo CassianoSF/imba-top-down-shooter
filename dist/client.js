@@ -5858,7 +5858,7 @@ var App = Imba.defineTag('App', function(tag){
 	tag.prototype.tick = function (){
 		var game_;
 		if (this.game().keys().leftbutton) { this.player().shoot() };
-		if (this.game().keys().rightbutton) { this.player().attack(this.zombies()) };
+		if (this.game().keys().rightbutton) { this.player().attack() };
 		this.game().setWidth(window.innerWidth);
 		this.game().setHeight(window.innerHeight);
 		let directions = [];
@@ -5962,7 +5962,7 @@ var App = Imba.defineTag('App', function(tag){
 					($[9] || _1('svg:g',$,9,0).setContent(
 						$[10] || _1('svg:text',$,10,9).set('fill',"black")
 					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
-						$[10].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 8.8 + Object.keys(self.audiosLoaded()).length / 0.54)) + "%").end()
+						$[10].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 440 * 40 + Object.keys(self.audiosLoaded()).length / Object.keys(self.audios()).length * 60)) + "%").end()
 					,true)),
 					($[11] || _1('svg:g',$,11,0).setContent(
 						$[12] || _1('svg:text',$,12,11).set('fill',"black").setText("Tip: ZoomOut to 80%")
