@@ -110,6 +110,7 @@ export class Zombie
     def execAttack
         if distanceToPlayer < 100 and !attacking
             let audio = Audio.new("sounds/zombie-attack{~~(Math.random * 3)}.ogg")
+            audio:volume = 0.6
             audio.play
             attacking = true
             animation = animations:attack

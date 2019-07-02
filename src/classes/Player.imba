@@ -100,6 +100,7 @@ export class Player
         reload unless gun.ammo or reloading
         if gun.ammo and can-shoot and !reloading
             let audio = Audio.new('sounds/shotgun_shot.wav')
+            audio:volume = 0.6
             audio.play
             if gun.name == :shotgun
                 for i in [0,0,0,0,0,0]
@@ -122,6 +123,7 @@ export class Player
     def attack zombies
         if can-attack
             let audio = Audio.new("sounds/melee{~~(Math.random * 3)}.wav")
+            audio:volume = 0.6
             audio.play
             window.setTimeout((do delete audio), 1500)
             can-attack = no

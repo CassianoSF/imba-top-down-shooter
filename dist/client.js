@@ -371,6 +371,38 @@ var Crosshair = __webpack_require__(20).Crosshair;
 var Zombie = __webpack_require__(21).Zombie;
 
 
+
+let audios = {
+	theme1: new Audio('sounds/theme1.mp3'),
+	theme0: new Audio('sounds/theme0.mp3'),
+	theme2: new Audio('sounds/theme2.mp3'),
+	theme3: new Audio('sounds/theme3.mp3'),
+	shotgun_shot: new Audio('sounds/shotgun_shot.wav'),
+	shotgun_pump: new Audio('sounds/shotgun_pump.wav'),
+	shotgun_reload: new Audio('sounds/shotgun_reload.wav')
+};
+
+for (let j = 0, items = iter$(Object.keys(Array.from(new Array(10)))), len = items.length, i; j < len; j++) {
+	i = items[j];
+	audios[("survivor_yell" + i)] = new Audio(("sounds/survivor_yell/3yell" + i + ".wav"));
+};
+for (let j = 0, items = iter$(Object.keys(Array.from(new Array(4)))), len = items.length, i; j < len; j++) {
+	i = items[j];
+	audios[("zombie_hit" + i)] = new Audio(("sounds/zombie_hit/" + i + ".wav"));
+};
+for (let j = 0, items = iter$(Object.keys(Array.from(new Array(3)))), len = items.length, i; j < len; j++) {
+	i = items[j];
+	audios[("melee" + i)] = new Audio(("sounds/melee" + i + ".wav"));
+};
+for (let j = 0, items = iter$(Object.keys(Array.from(new Array(4)))), len = items.length, i; j < len; j++) {
+	i = items[j];
+	audios[("zombie_hit" + i)] = new Audio(("sounds/zombie_hit/" + i + ".wav"));
+};
+for (let j = 0, items = iter$(Object.keys(Array.from(new Array(3)))), len = items.length, i; j < len; j++) {
+	i = items[j];
+	audios[("zombie-attack" + i)] = new Audio(("sounds/zombie-attack" + i + ".ogg"));
+};
+
 let barrels = [];
 
 for (let j = 0, items = iter$(Array.from(new Array(30))), len = items.length; j < len; j++) {
@@ -1054,6 +1086,10 @@ var App = Imba.defineTag('App', function(tag){
 	tag.prototype._imagesLoaded = {};
 	tag.prototype.shotLoaded = function(v){ return this._shotLoaded; }
 	tag.prototype.setShotLoaded = function(v){ this._shotLoaded = v; return this; };
+	tag.prototype.__audiosLoaded = {'default': {},name: 'audiosLoaded'};
+	tag.prototype.audiosLoaded = function(v){ return this._audiosLoaded; }
+	tag.prototype.setAudiosLoaded = function(v){ this._audiosLoaded = v; return this; }
+	tag.prototype._audiosLoaded = {};
 	
 	tag.prototype.build = function (){
 		var v_;
@@ -1069,6 +1105,13 @@ var App = Imba.defineTag('App', function(tag){
 			i.onload = function() { return self.imagesLoaded()[i.attributes.href.value] = true; };
 		};
 		
+		for (let k in audios){
+			let audio;
+			audio = audios[k];console.log(k);
+			audio.oncanplaythrough = function() { return self.audiosLoaded()[k] = true; };
+		};
+		
+		
 		let shot = new Audio('sounds/shotgun_shot.wav');
 		shot.oncanplaythrough = function() { return (self.setShotLoaded(true),true); };
 		
@@ -1078,9 +1121,13 @@ var App = Imba.defineTag('App', function(tag){
 			self.keydown(e);
 			if (!self._themeStart) {
 				let theme0 = new Audio('sounds/theme1.mp3');
+				theme0.volume = 0.5;
 				let theme1 = new Audio('sounds/theme0.mp3');
+				theme1.volume = 0.5;
 				let theme2 = new Audio('sounds/theme2.mp3');
+				theme2.volume = 0.5;
 				let theme3 = new Audio('sounds/theme3.mp3');
+				theme3.volume = 0.5;
 				theme0.onended = function() { return theme1.play(); };
 				theme1.onended = function() { return theme2.play(); };
 				theme2.onended = function() { return theme3.play(); };
@@ -1213,6 +1260,7 @@ var App = Imba.defineTag('App', function(tag){
 	
 	tag.prototype.render = function (){
 		var $ = this.$;
+		console.log(Object.keys(this.audiosLoaded()).length);
 		let x = player.shooting() ? (Math.random() * 15 - 7.5) : 0;
 		let y = player.shooting() ? (Math.random() * 15 - 7.5) : 0;
 		return this.$open(0).flag('container').setChildren(
@@ -1346,7 +1394,7 @@ var App = Imba.defineTag('App', function(tag){
 					};return $0;
 				})($[22] || _2($,22,$[0])),
 				
-				(Object.keys(this.imagesLoaded()).length == 440 && this.shotLoaded()) ? Imba.static([
+				(Object.keys(this.imagesLoaded()).length == 440 && Object.keys(this.audiosLoaded()).length == 27) ? Imba.static([
 					($[23] || _1('svg:g',$,23,0)).set('transform',(("translate(" + (x - player.pos().x) + ", " + (y - player.pos().y) + ")"))).setContent([
 						($[24] || _1(Ground,$,24,23)).setPlayer(player).end(),
 						($[25] || _1(Survival,$,25,23)).setPlayer(player).setGame(game).end(),
@@ -1373,7 +1421,7 @@ var App = Imba.defineTag('App', function(tag){
 					($[30] || _1('svg:g',$,30,0).setContent(
 						$[31] || _1('svg:text',$,31,30).set('fill',"black")
 					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
-						$[31].setText("LOADING.... " + (~~(Object.keys(this.imagesLoaded()).length / 4.4)) + "%").end()
+						$[31].setText("LOADING.... " + (~~(Object.keys(this.imagesLoaded()).length / 8.8 + Object.keys(this.audiosLoaded()).length / 0.54)) + "%").end()
 					,true)),
 					($[32] || _1('svg:g',$,32,0).setContent(
 						$[33] || _1('svg:text',$,33,32).set('fill',"black").setText("Tip: ZoomOut to 80%")
@@ -5395,6 +5443,7 @@ Player.prototype.shoot = function (){
 	if (!(self.gun().ammo() || self.reloading())) self.reload();
 	if (self.gun().ammo() && self.canShoot() && !(self.reloading())) {
 		let audio = new Audio('sounds/shotgun_shot.wav');
+		audio.volume = 0.6;
 		audio.play();
 		if (self.gun().name() == 'shotgun') {
 			for (let j = 0, items = [0,0,0,0,0,0], len = items.length; j < len; j++) {
@@ -5425,6 +5474,7 @@ Player.prototype.attack = function (zombies){
 	var self = this;
 	if (self.canAttack()) {
 		let audio = new Audio(("sounds/melee" + (~~(Math.random() * 3)) + ".wav"));
+		audio.volume = 0.6;
 		audio.play();
 		window.setTimeout(function() { var v_;
 		return (((v_ = audio),delete audio, v_)); },1500);
@@ -5821,6 +5871,7 @@ Zombie.prototype.execAttack = function (){
 	var self = this, v_;
 	if (self.distanceToPlayer() < 100 && !(self.attacking())) {
 		let audio = new Audio(("sounds/zombie-attack" + (~~(Math.random() * 3)) + ".ogg"));
+		audio.volume = 0.6;
 		audio.play();
 		self.setAttacking(true);
 		self.setAnimation(self.animations().attack);

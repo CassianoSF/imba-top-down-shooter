@@ -6,6 +6,27 @@ import Crosshair from './classes/Crosshair'
 import Zombie    from './classes/Zombie'
 
 
+
+let audios = 
+    theme1:            Audio.new('sounds/theme1.mp3')
+    theme0:            Audio.new('sounds/theme0.mp3')
+    theme2:            Audio.new('sounds/theme2.mp3')
+    theme3:            Audio.new('sounds/theme3.mp3')
+    shotgun_shot:      Audio.new('sounds/shotgun_shot.wav')
+    shotgun_pump:      Audio.new('sounds/shotgun_pump.wav')
+    shotgun_reload:    Audio.new('sounds/shotgun_reload.wav')
+
+for i in Object.keys(Array.from(Array.new(10)))
+    audios["survivor_yell{i}"] = Audio.new("sounds/survivor_yell/3yell{i}.wav")
+for i in Object.keys(Array.from(Array.new(4)))
+    audios["zombie_hit{i}"] = Audio.new("sounds/zombie_hit/{i}.wav")
+for i in Object.keys(Array.from(Array.new(3)))
+    audios["melee{i}"] = Audio.new("sounds/melee{i}.wav")
+for i in Object.keys(Array.from(Array.new(4)))
+    audios["zombie_hit{i}"] = Audio.new("sounds/zombie_hit/{i}.wav")
+for i in Object.keys(Array.from(Array.new(3)))
+    audios["zombie-attack{i}"] = Audio.new("sounds/zombie-attack{i}.ogg")
+
 let barrels = []
 
 for i in Array.from(Array.new(30))
@@ -496,6 +517,7 @@ tag App
     prop feet-animation
     prop images-loaded default: {}
     prop shot-loaded
+    prop audios-loaded default: {}
 
     def build
         survival-animations = loadSurvivalAnimations
@@ -506,6 +528,11 @@ tag App
         for i in images
             i:onload = do images-loaded[i:attributes:href:value] = true
 
+        for k, audio of audios
+            console.log k
+            audio:oncanplaythrough = do audios-loaded[k] = true
+
+
         let shot = Audio.new('sounds/shotgun_shot.wav')
         shot:oncanplaythrough = do shot-loaded = true
 
@@ -515,9 +542,13 @@ tag App
             keydown e
             unless @theme-start
                 let theme0 = Audio.new('sounds/theme1.mp3')
+                theme0:volume = 0.5
                 let theme1 = Audio.new('sounds/theme0.mp3')
+                theme1:volume = 0.5
                 let theme2 = Audio.new('sounds/theme2.mp3')
+                theme2:volume = 0.5
                 let theme3 = Audio.new('sounds/theme3.mp3')
+                theme3:volume = 0.5
                 theme0:onended = (do theme1.play)
                 theme1:onended = (do theme2.play)
                 theme2:onended = (do theme3.play)
@@ -599,6 +630,7 @@ tag App
                         <svg:image href="{anim.path}{i}.png" width="100" height="100">
 
     def render
+        console.log Object.keys(audios-loaded):length
         let x = player.shooting ? Math.random*15 - 7.5 : 0
         let y = player.shooting ? Math.random*15 - 7.5 : 0
         <self .container>
@@ -654,7 +686,7 @@ tag App
                         <svg:pattern id="zombie-attack-{i}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                             <svg:image href="textures/zombie/attack/skeleton-attack_{i}.png" width="100" height="100">
 
-                if Object.keys(images-loaded):length == 440 and shot-loaded
+                if Object.keys(images-loaded):length == 440 and Object.keys(audios-loaded):length == 27
                     <svg:g transform=("translate({x - player.pos:x}, {y - player.pos:y})")>
                         <Ground player=player>
                         <Survival player=player game=game>
@@ -671,7 +703,7 @@ tag App
                 else
                     <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2}) scale(1, -1)">
                         <svg:text fill="black">
-                            "LOADING.... {~~(Object.keys(images-loaded):length/4.4)}%"
+                            "LOADING.... {~~(Object.keys(images-loaded):length/8.8 + Object.keys(audios-loaded):length/0.54)}%"
                     <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2 + 100}) scale(1, -1)">
                         <svg:text fill="black">
                             "Tip: ZoomOut to 80%"
