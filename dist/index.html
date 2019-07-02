@@ -8,6 +8,7 @@
   </head>
   <body>
     <script>
+        console.log(navigator.serviceWorker)
         if (navigator.serviceWorker) {
             navigator.serviceWorker.register('/imba-top-down-shooter/dist/sw.js', {scope: '/imba-top-down-shooter/dist/'})
         }

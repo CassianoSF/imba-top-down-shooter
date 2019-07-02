@@ -184,8 +184,8 @@ export tag App
         game.initListners
 
     def tick
-        player.shoot           if game.keys:leftbutton
-        player.attack(zombies) if game.keys:rightbutton
+        player.shoot  if game.keys:leftbutton
+        player.attack if game.keys:rightbutton
         game.width = window:innerWidth
         game.height = window:innerHeight
         let directions = []
@@ -239,7 +239,7 @@ export tag App
                 else
                     <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2}) scale(1, -1)">
                         <svg:text fill="black">
-                            "LOADING.... {~~(Object.keys(images-loaded):length/8.8 + Object.keys(audios-loaded):length/0.54)}%"
+                            "LOADING.... {~~(Object.keys(images-loaded):length/440 * 40 + Object.keys(audios-loaded):length/Object.keys(audios):length * 60)}%"
                     <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2 + 100}) scale(1, -1)">
                         <svg:text fill="black">
                             "Tip: ZoomOut to 80%"
