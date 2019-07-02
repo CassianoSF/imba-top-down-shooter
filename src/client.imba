@@ -424,9 +424,6 @@ tag Ground < svg:g
     def render
         <self height=70000 width=70000 transform="translate({ - 35000},{ - 35000})">
             <svg:g>
-                <svg:defs>
-                    <svg:pattern #floor_2 patternUnits="userSpaceOnUse" width="700" height="700" patternContentUnits="userSpaceOnUse">
-                        <svg:image href="textures/the_floor/the_floor/floor_2.png" width="700" height="700">
                 <svg:rect height=70000 width=70000 fill="url(#floor_2)" stroke="white">
 
 tag Shot < svg:g
@@ -436,9 +433,6 @@ tag Shot < svg:g
 
     def render
         <self>
-            <svg:defs>
-                <svg:pattern #shot patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                    <svg:image href="textures/shoot/shoot/muzzle_flash_0.png" width="100" height="100">
             if gun.name == :handgun
                 <svg:rect transform="translate(30, -25)" height=100 width=100 fill="url(#shot)">
             elif gun.name == :rifle or gun.name == :shotgun
@@ -474,7 +468,8 @@ tag Hud < svg:g
     def render
         <self>
             if player.taking-hit
-                <svg:rect transform=("translate({game.width/4}, {game.width/4}) rotate({player.blood-rotation})") .blood-hud height=game.height/1.5 width=game.width/1.5 fill="url(#blood-hud-{player.taking-hit})">
+                <svg:g transform="translate({game.width/2}, {game.height/2})">
+                    <svg:rect transform=("rotate({player.blood-rotation})") .blood-hud height=game.height/1.5 width=game.width/1.5 fill="url(#blood-hud-{player.taking-hit})">
 
 
 tag Barrel < svg:g
@@ -489,6 +484,7 @@ tag Barrel < svg:g
 tag Box < svg:g
     attr transform
     prop box
+    prop images_loaded default: 0
 
     def render
         <self transform="translate({box:x},{box:y}) rotate({box:rotation})">
@@ -498,23 +494,33 @@ tag Box < svg:g
 tag App
     prop survival-animations
     prop feet-animation
+    prop images-loaded default: {}
+    prop shot-loaded
 
     def build
         survival-animations = loadSurvivalAnimations
         feet-animation = loadFeetAnimations
+
     def mount
+        let images = Array.from(document.getElementsByTagName('image'))
+        for i in images
+            i:onload = do images-loaded[i:attributes:href:value] = true
+
+        let shot = Audio.new('sounds/shotgun_shot.wav')
+        shot:oncanplaythrough = do shot-loaded = true
+            
         @theme-start = no
         schedule interval: 16
         document.addEventListener 'keydown', do |e|
             keydown e
             unless @theme-start
-                let theme0 = Audio.new('sounds/theme0.mp3')
-                theme0:onended = (do theme1.play)
-                let theme1 = Audio.new('sounds/theme1.mp3')
-                theme1:onended = (do theme2.play)
+                let theme0 = Audio.new('sounds/theme1.mp3')
+                let theme1 = Audio.new('sounds/theme0.mp3')
                 let theme2 = Audio.new('sounds/theme2.mp3')
-                theme2:onended = (do theme3.play)
                 let theme3 = Audio.new('sounds/theme3.mp3')
+                theme0:onended = (do theme1.play)
+                theme1:onended = (do theme2.play)
+                theme2:onended = (do theme3.play)
                 theme3:onended = (do theme0.play)
                 theme0.play
                 @theme-start=yes
@@ -574,6 +580,9 @@ tag App
         game.time += 1
         render
 
+    def loadImg
+        images_loaded += 1
+
     def loadSurvivalAnimations
             # SUVIVAL ANIMATIONS
             for gun, anims of animations:player
@@ -597,6 +606,14 @@ tag App
             <svg:svg .game transform="scale(1,-1)">
                 survival-animations
                 feet-animation
+
+                <svg:defs>
+                    <svg:pattern #floor_2 patternUnits="userSpaceOnUse" width="700" height="700" patternContentUnits="userSpaceOnUse">
+                        <svg:image href="textures/the_floor/the_floor/floor_2.png" width="700" height="700">
+
+                <svg:defs>
+                    <svg:pattern #shot patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
+                        <svg:image href="textures/shoot/shoot/muzzle_flash_0.png" width="100" height="100">
                 # BARREL
                 <svg:defs>
                     <svg:pattern id="barrel" patternUnits="userSpaceOnUse" width="50" height="50" patternContentUnits="userSpaceOnUse">
@@ -638,19 +655,23 @@ tag App
                         <svg:pattern id="zombie-attack-{i}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                             <svg:image href="textures/zombie/attack/skeleton-attack_{i}.png" width="100" height="100">
 
-
-                <svg:g transform=("translate({x - player.pos:x}, {y - player.pos:y})")>
-                    <Ground player=player>
-                    <Survival player=player game=game>
-                    for zombie in zombies
-                        <Undead zombie=zombie player=player game=game>
-                    for bullet in player.bullets
-                        <Projectile bullet=bullet player=player> if bullet
-                    # for box in game.boxes
-                    #     <Box box=box>
-                    # for barrel in game.barrels
-                    #     <Barrel barrel=barrel>
-                <Hud player=player game=game>
-                <Aim crosshair=crosshair>
+                if Object.keys(images-loaded):length == 363 and shot-loaded
+                    <svg:g transform=("translate({x - player.pos:x}, {y - player.pos:y})")>
+                        <Ground player=player>
+                        <Survival player=player game=game>
+                        for zombie in zombies
+                            <Undead zombie=zombie player=player game=game>
+                        for bullet in player.bullets
+                            <Projectile bullet=bullet player=player> if bullet
+                        # for box in game.boxes
+                        #     <Box box=box>
+                        # for barrel in game.barrels
+                        #     <Barrel barrel=barrel>
+                    <Hud player=player game=game>
+                    <Aim crosshair=crosshair>
+                else
+                    <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2}) scale(1, -1)">
+                        <svg:text fill="black">
+                            "LOADING...."
 Imba.mount <App>
 
