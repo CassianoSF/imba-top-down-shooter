@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -290,6 +290,13 @@ module.exports = Imba;
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
+module.exports = __webpack_require__(4);
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
 var Imba = __webpack_require__(0);
 
 Imba.Pointer = function Pointer(){
@@ -358,11 +365,11 @@ Imba.Pointer.prototype.y = function (){
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 function iter$(a){ return a ? (a.toArray ? a.toArray() : a) : []; };
-var Imba = __webpack_require__(3), _2 = Imba.createTagList, _3 = Imba.createTagMap, _1 = Imba.createElement;
+var Imba = __webpack_require__(1), _1 = Imba.createElement;
 var Game = __webpack_require__(15).Game;
 var Player = __webpack_require__(16).Player;
 var Gun = __webpack_require__(18).Gun;
@@ -370,6 +377,7 @@ var Animation = __webpack_require__(19).Animation;
 var Crosshair = __webpack_require__(20).Crosshair;
 var Zombie = __webpack_require__(21).Zombie;
 
+var App = __webpack_require__(22).App;
 
 
 let audios = {
@@ -866,582 +874,8 @@ for (let j = 0, items = iter$(Array.from(new Array(70))), len = items.length; j 
 
 let crosshair = new Crosshair({x: 0,y: 0});
 
-var Undead = Imba.defineTag('Undead', 'svg:g', function(tag){
-	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
-	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
-	tag.prototype.player = function(v){ return this._player; }
-	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
-	tag.prototype.game = function(v){ return this._game; }
-	tag.prototype.setGame = function(v){ this._game = v; return this; };
-	tag.prototype.zombie = function(v){ return this._zombie; }
-	tag.prototype.setZombie = function(v){ this._zombie = v; return this; };
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		if (this.zombie()) {
-			this.zombie().update(player,game,zombies);
-			return this.$open(0).setTransform((("translate(" + (this.zombie().pos().x) + "," + (this.zombie().pos().y) + ") rotate(" + (this.zombie().rotation()) + ")"))).setChildren(
-				$[0] || _1('svg:g',$,0,this)
-			,2).synced((
-				$[0].set('transform',("translate(" + (-50) + ", " + (-50) + ")")).setContent([
-					($[1] || _1('svg:rect',$,1,0).set('height',100).set('width',100)).set('transform',("scale(" + (this.zombie().animation().adjust().scale) + ") translate(" + (this.zombie().animation().adjust().translate) + ")")).set('fill',("url(#zombie-" + (this.zombie().animation().path()) + "-" + (~~(game.time() / this.zombie().animation().frameLength() % this.zombie().animation().size())) + ")")).end(),
-					this.zombie().takingHit() ? (
-						($[2] || _1('svg:g',$,2,0).setContent(
-							$[3] || _1('svg:rect',$,3,2).set('height',100).set('width',100)
-						,2)).set('transform',(("rotate(-90) translate(" + (-100) + ", " + (-50) + ")"))).end((
-							$[3].set('fill',("url(#blood-splash-" + (this.zombie().takingHit()) + ")")).end()
-						,true))
-					) : void(0)
-				],1).end()
-			,true));
-		};
-	};
-});
+Imba.mount((_1(App)).setCrosshair(crosshair).setZombies(zombies).setPlayer(player).setGuns(guns).setAnimations(animations).setAudios(audios).setBoxes(boxes).setBarrels(barrels).setGame(game).end());
 
-var Survival = Imba.defineTag('Survival', 'svg:g', function(tag){
-	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
-	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
-	tag.prototype.player = function(v){ return this._player; }
-	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
-	tag.prototype.game = function(v){ return this._game; }
-	tag.prototype.setGame = function(v){ this._game = v; return this; };
-	
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		return this.$open(0).setTransform(("translate(" + (window.innerWidth / 2 + player.pos().x) + ", " + (window.innerHeight / 2 + player.pos().y) + ") rotate(" + (player.rotation()) + ")")).setChildren([
-			player.shooting() ? (($[0] || _1(Shot,$,0,this)).setGun(player.gun()).end()) : void(0),
-			($[1] || _1('svg:g',$,1,this).setContent([
-				_1('svg:rect',$,2,1).set('height',100).set('width',100),
-				_1('svg:rect',$,3,1).set('height',100).set('width',100)
-			],2)).set('transform',("translate(" + (-50) + ", " + (-50) + ")")).end((
-				$[2].set('transform',("scale(" + (player.feetAnimation().adjust().scale) + ") translate(" + (player.feetAnimation().adjust().translate) + ")")).set('fill',("url(#" + (player.feetAnimation().name()) + "-" + (~~(game.time() / player.feetAnimation().frameLength()) % player.feetAnimation().size()) + ")")).end(),
-				$[3].set('transform',("scale(" + (player.animation().adjust().scale) + ") translate(" + (player.animation().adjust().translate) + ")")).set('fill',("url(#" + (player.animation().name()) + "-" + (~~(game.time() / player.animation().frameLength()) % player.animation().size()) + ")")).end()
-			,true))
-		],1).synced();
-	};
-});
-
-var Ground = Imba.defineTag('Ground', 'svg:g', function(tag){
-	tag.prototype.player = function(v){ return this._player; }
-	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
-	tag.prototype.height = function(v){ return this.getAttribute('height'); }
-	tag.prototype.setHeight = function(v){ this.setAttribute('height',v); return this; };
-	tag.prototype.width = function(v){ return this.getAttribute('width'); }
-	tag.prototype.setWidth = function(v){ this.setAttribute('width',v); return this; };
-	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
-	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		return this.$open(0).setHeight(70000).setWidth(70000).setTransform(("translate(" + (-35000) + "," + (-35000) + ")")).setChildren(
-			$[0] || _1('svg:g',$,0,this).setContent(
-				$[1] || _1('svg:rect',$,1,0).set('height',70000).set('width',70000).set('fill',"url(#floor_2)").set('stroke',"white")
-			,2)
-		,2).synced((
-			$[0].end((
-				$[1].end()
-			,true))
-		,true));
-	};
-});
-
-var Shot = Imba.defineTag('Shot', 'svg:g', function(tag){
-	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
-	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
-	tag.prototype.rotation = function(v){ return this._rotation; }
-	tag.prototype.setRotation = function(v){ this._rotation = v; return this; };
-	tag.prototype.gun = function(v){ return this._gun; }
-	tag.prototype.setGun = function(v){ this._gun = v; return this; };
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		return this.$open(0).setChildren(
-			(this.gun().name() == 'handgun') ? (
-				($[0] || _1('svg:rect',$,0,this).set('transform',"translate(30, -25)").set('height',100).set('width',100).set('fill',"url(#shot)")).end()
-			) : ((this.gun().name() == 'rifle' || this.gun().name() == 'shotgun') ? (
-				($[1] || _1('svg:rect',$,1,this).set('transform',"translate(55, -30)").set('height',100).set('width',100).set('fill',"url(#shot)")).end()
-			) : void(0))
-		,3).synced();
-	};
-});
-
-var Projectile = Imba.defineTag('Projectile', 'svg:g', function(tag){
-	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
-	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
-	tag.prototype.bullet = function(v){ return this._bullet; }
-	tag.prototype.setBullet = function(v){ this._bullet = v; return this; };
-	tag.prototype.player = function(v){ return this._player; }
-	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		this.bullet().update(zombies,game,player);
-		return this.$open(0).setTransform(("translate(" + (window.innerWidth / 2 + this.bullet().pos().x) + ", " + (window.innerHeight / 2 - this.bullet().pos().y) + ") rotate(" + (this.bullet().direction()) + ")")).setChildren(
-			$[0] || _1('svg:rect',$,0,this).set('height',1).set('width',50).set('fill',"yellow")
-		,2).synced((
-			$[0].end()
-		,true));
-	};
-});
-
-
-var Aim = Imba.defineTag('Aim', 'svg:g', function(tag){
-	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
-	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
-	tag.prototype.crosshair = function(v){ return this._crosshair; }
-	tag.prototype.setCrosshair = function(v){ this._crosshair = v; return this; };
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		return this.$open(0).setTransform(("translate(" + (crosshair.x()) + ", " + (crosshair.y() + window.innerHeight) + ")")).setChildren($.$ = $.$ || [
-			_1('svg:circle',$,0,this).set('r',10).set('stroke',"rgb(60,255,60)"),
-			_1('svg:circle',$,1,this).set('r',8).set('fill',"rgb(60,255,60)"),
-			_1('svg:circle',$,2,this).set('r',2).set('fill',"black")
-		],2).synced((
-			$[0].end(),
-			$[1].end(),
-			$[2].end()
-		,true));
-	};
-});
-
-var Hud = Imba.defineTag('Hud', 'svg:g', function(tag){
-	tag.prototype.height = function(v){ return this.getAttribute('height'); }
-	tag.prototype.setHeight = function(v){ this.setAttribute('height',v); return this; };
-	tag.prototype.width = function(v){ return this.getAttribute('width'); }
-	tag.prototype.setWidth = function(v){ this.setAttribute('width',v); return this; };
-	tag.prototype.player = function(v){ return this._player; }
-	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
-	tag.prototype.game = function(v){ return this._game; }
-	tag.prototype.setGame = function(v){ this._game = v; return this; };
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		return this.$open(0).setChildren(
-			player.takingHit() ? (
-				($[0] || _1('svg:g',$,0,this).setContent(
-					$[1] || _1('svg:rect',$,1,0).flag('blood-hud')
-				,2)).set('transform',("translate(" + (game.width() / 2) + ", " + (game.height() / 2) + ")")).end((
-					$[1].set('transform',(("rotate(" + (player.bloodRotation()) + ")"))).set('height',game.height() / 1.5).set('width',game.width() / 1.5).set('fill',("url(#blood-hud-" + (player.takingHit()) + ")")).end()
-				,true))
-			) : void(0)
-		,3).synced();
-	};
-});
-
-
-var Barrel = Imba.defineTag('Barrel', 'svg:g', function(tag){
-	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
-	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
-	tag.prototype.barrel = function(v){ return this._barrel; }
-	tag.prototype.setBarrel = function(v){ this._barrel = v; return this; };
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		return this.$open(0).setTransform(("translate(" + (this.barrel().x) + "," + (this.barrel().y) + ") rotate(" + (this.barrel().rotation) + ")")).setChildren(
-			$[0] || _1('svg:g',$,0,this).setContent(
-				$[1] || _1('svg:rect',$,1,0).set('height',50).set('width',50).set('fill',"url(#barrel)")
-			,2)
-		,2).synced((
-			$[0].set('transform',("translate(" + (-25) + ", " + (-25) + ")")).end((
-				$[1].end()
-			,true))
-		,true));
-	};
-});
-
-var Box = Imba.defineTag('Box', 'svg:g', function(tag){
-	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
-	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
-	tag.prototype.box = function(v){ return this._box; }
-	tag.prototype.setBox = function(v){ this._box = v; return this; };
-	tag.prototype.__images_loaded = {'default': 0,name: 'images_loaded'};
-	tag.prototype.images_loaded = function(v){ return this._images_loaded; }
-	tag.prototype.setImages_loaded = function(v){ this._images_loaded = v; return this; }
-	tag.prototype._images_loaded = 0;
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		return this.$open(0).setTransform(("translate(" + (this.box().x) + "," + (this.box().y) + ") rotate(" + (this.box().rotation) + ")")).setChildren(
-			$[0] || _1('svg:g',$,0,this).setContent(
-				$[1] || _1('svg:rect',$,1,0).set('height',100).set('width',100).set('fill',"url(#box)")
-			,2)
-		,2).synced((
-			$[0].set('transform',("translate(" + (-50) + ", " + (-50) + ")")).end((
-				$[1].end()
-			,true))
-		,true));
-	};
-});
-
-var App = Imba.defineTag('App', function(tag){
-	tag.prototype.survivalAnimations = function(v){ return this._survivalAnimations; }
-	tag.prototype.setSurvivalAnimations = function(v){ this._survivalAnimations = v; return this; };
-	tag.prototype.feetAnimation = function(v){ return this._feetAnimation; }
-	tag.prototype.setFeetAnimation = function(v){ this._feetAnimation = v; return this; };
-	tag.prototype.__imagesLoaded = {'default': {},name: 'imagesLoaded'};
-	tag.prototype.imagesLoaded = function(v){ return this._imagesLoaded; }
-	tag.prototype.setImagesLoaded = function(v){ this._imagesLoaded = v; return this; }
-	tag.prototype._imagesLoaded = {};
-	tag.prototype.shotLoaded = function(v){ return this._shotLoaded; }
-	tag.prototype.setShotLoaded = function(v){ this._shotLoaded = v; return this; };
-	tag.prototype.__audiosLoaded = {'default': {},name: 'audiosLoaded'};
-	tag.prototype.audiosLoaded = function(v){ return this._audiosLoaded; }
-	tag.prototype.setAudiosLoaded = function(v){ this._audiosLoaded = v; return this; }
-	tag.prototype._audiosLoaded = {};
-	
-	tag.prototype.build = function (){
-		var v_;
-		this.setSurvivalAnimations(this.loadSurvivalAnimations());
-		return (this.setFeetAnimation(v_ = this.loadFeetAnimations()),v_);
-	};
-	
-	tag.prototype.mount = function (){
-		var self = this;
-		let images = Array.from(document.getElementsByTagName('image'));
-		for (let j = 0, items = iter$(images), len = items.length, i; j < len; j++) {
-			i = items[j];
-			i.onload = function() { return self.imagesLoaded()[i.attributes.href.value] = true; };
-		};
-		
-		for (let k in audios){
-			let audio;
-			audio = audios[k];console.log(k);
-			audio.oncanplaythrough = function() { return self.audiosLoaded()[k] = true; };
-		};
-		
-		
-		let shot = new Audio('sounds/shotgun_shot.wav');
-		shot.oncanplaythrough = function() { return (self.setShotLoaded(true),true); };
-		
-		self._themeStart = false;
-		self.schedule({interval: 16});
-		document.addEventListener('keydown',function(e) {
-			self.keydown(e);
-			if (!self._themeStart) {
-				let theme0 = new Audio('sounds/theme1.mp3');
-				theme0.volume = 0.5;
-				let theme1 = new Audio('sounds/theme0.mp3');
-				theme1.volume = 0.5;
-				let theme2 = new Audio('sounds/theme2.mp3');
-				theme2.volume = 0.5;
-				let theme3 = new Audio('sounds/theme3.mp3');
-				theme3.volume = 0.5;
-				theme0.onended = function() { return theme1.play(); };
-				theme1.onended = function() { return theme2.play(); };
-				theme2.onended = function() { return theme3.play(); };
-				theme3.onended = function() { return theme0.play(); };
-				theme0.play();
-				return self._themeStart = true;
-			};
-		});
-		
-		document.addEventListener('keyup',function(e) {
-			return self.keyup(e);
-		});
-		
-		document.addEventListener('mousemove',function(e) {
-			return self.aim(e);
-		});
-		
-		document.addEventListener('mousedown',function(e) {
-			if (e.button == 0) { game.keys().leftbutton = true };
-			if (e.button == 2) { game.keys().rightbutton = true };
-			if (e.button == 0) self.shoot();
-			if (e.button == 2) { return player.attack(zombies) };
-		});
-		
-		document.addEventListener('mouseup',function(e) {
-			if (e.button == 2) { game.keys().rightbutton = false };
-			if (e.button == 0) { return game.keys().leftbutton = false };
-		});
-		
-		return document.addEventListener('contextmenu',function(e) {
-			return e.preventDefault();
-		});
-	};
-	
-	tag.prototype.aim = function (e){
-		var v_;
-		crosshair.setX(e.x);
-		crosshair.setY(-e.y);
-		return (player.setRotation(v_ = ((Math.atan2(e.x - window.innerWidth / 2,e.y - window.innerHeight / 2) / 3.1415 * 180.0 - 90) + 720) % 360),v_);
-	};
-	
-	tag.prototype.keydown = function (e){
-		if (e.code == 'Digit1' && player.invertory().knife) { player.changeGun('knife') };
-		if (e.code == 'Digit2' && player.invertory().handgun) { player.changeGun('handgun') };
-		if (e.code == 'Digit3' && player.invertory().rifle) { player.changeGun('rifle') };
-		if (e.code == 'Digit4' && player.invertory().shotgun) { player.changeGun('shotgun') };
-		if (e.code == 'KeyF' && player.invertory().flashlight) { player.changeGun('flashlight') };
-		if (e.code == 'KeyR') { player.reload() };
-		return game.keys()[e.code] = true;
-	};
-	
-	tag.prototype.keyup = function (e){
-		return game.keys()[e.code] = false;
-	};
-	
-	tag.prototype.shoot = function (){
-		if (['handgun','shotgun','rifle'].includes(player.gun().name())) { player.shoot() };
-		if (['flashlight','knife'].includes(player.gun().name())) { return player.attack(zombies) };
-	};
-	
-	tag.prototype.tick = function (){
-		if (game.keys().leftbutton) this.shoot();
-		if (game.keys().rightbutton) { player.attack(zombies) };
-		game.setWidth(window.innerWidth);
-		game.setHeight(window.innerHeight);
-		let directions = [];
-		if (game.keys().KeyA) { directions.push('left') };
-		if (game.keys().KeyD) { directions.push('right') };
-		if (game.keys().KeyS) { directions.push('down') };
-		if (game.keys().KeyW) { directions.push('up') };
-		player.setRunning(game.keys().ShiftLeft);
-		player.move(directions);
-		game.setTime(game.time() + 1);
-		return this.render();
-	};
-	
-	tag.prototype.loadImg = function (){
-		var v_;
-		return (this.setImages_loaded(v_ = this.images_loaded() + 1),v_);
-	};
-	
-	tag.prototype.loadSurvivalAnimations = function (){
-		var dict, t0;
-		let res = [];
-		for (let gun in dict = animations.player){
-			let anims;
-			anims = dict[gun];let res1 = [];
-			for (let action in anims){
-				let anim;
-				anim = anims[action];let res2 = [];
-				for (let i = 0, items = iter$(Array.from(new Array(anim.size()))), len = items.length; i < len; i++) {
-					res2.push((t0 = (t0=_1('svg:defs')).setContent(
-						t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-							t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-						,2)
-					,2)).end((
-						t0.$.A.set('id',("" + (anim.name()) + "-" + i)).end((
-							t0.$.B.set('href',("" + (anim.path()) + i + ".png")).end()
-						,true))
-					,true)));
-				};
-				res1.push(res2);
-			};
-			res.push(res1);
-		};
-		return res;
-	};
-	
-	tag.prototype.loadFeetAnimations = function (){
-		var dict, t0;
-		let res = [];
-		for (let name in dict = animations.feet){
-			let anim;
-			anim = dict[name];let res1 = [];
-			for (let i = 0, items = iter$(Array.from(new Array(anim.size()))), len = items.length; i < len; i++) {
-				res1.push((t0 = (t0=_1('svg:defs')).setContent(
-					t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-						t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-					,2)
-				,2)).end((
-					t0.$.A.set('id',("" + (anim.name()) + "-" + i)).end((
-						t0.$.B.set('href',("" + (anim.path()) + i + ".png")).end()
-					,true))
-				,true)));
-			};
-			res.push(res1);
-		};
-		return res;
-	};
-	
-	tag.prototype.render = function (){
-		var $ = this.$;
-		console.log(Object.keys(this.audiosLoaded()).length);
-		let x = player.shooting() ? (Math.random() * 15 - 7.5) : 0;
-		let y = player.shooting() ? (Math.random() * 15 - 7.5) : 0;
-		return this.$open(0).flag('container').setChildren(
-			$[0] || _1('svg:svg',$,0,this).flag('game').set('transform',"scale(1,-1)")
-		,2).synced((
-			$[0].setContent([
-				this.survivalAnimations(),
-				this.feetAnimation(),
-				
-				($[1] || _1('svg:defs',$,1,0).setContent(
-					$[2] || _1('svg:pattern',$,2,1).setId('floor_2').set('patternUnits',"userSpaceOnUse").set('width',"700").set('height',"700").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[3] || _1('svg:image',$,3,2).set('href',"textures/the_floor/the_floor/floor_2.png").set('width',"700").set('height',"700")
-					,2)
-				,2)).end((
-					$[2].end((
-						$[3].end()
-					,true))
-				,true)),
-				
-				($[4] || _1('svg:defs',$,4,0).setContent(
-					$[5] || _1('svg:pattern',$,5,4).setId('shot').set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[6] || _1('svg:image',$,6,5).set('href',"textures/shoot/shoot/muzzle_flash_0.png").set('width',"100").set('height',"100")
-					,2)
-				,2)).end((
-					$[5].end((
-						$[6].end()
-					,true))
-				,true)),
-				
-				($[7] || _1('svg:defs',$,7,0).setContent(
-					$[8] || _1('svg:pattern',$,8,7).set('id',"barrel").set('patternUnits',"userSpaceOnUse").set('width',"50").set('height',"50").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[9] || _1('svg:image',$,9,8).set('href',"textures/the_floor/the_floor/barrel.png").set('width',"50").set('height',"50")
-					,2)
-				,2)).end((
-					$[8].end((
-						$[9].end()
-					,true))
-				,true)),
-				
-				($[10] || _1('svg:defs',$,10,0).setContent(
-					$[11] || _1('svg:pattern',$,11,10).set('id',"box").set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[12] || _1('svg:image',$,12,11).set('href',"textures/the_floor/the_floor/crate_1.png").set('width',"100").set('height',"100")
-					,2)
-				,2)).end((
-					$[11].end((
-						$[12].end()
-					,true))
-				,true)),
-				
-				
-				
-				($[13] || _1('svg:defs',$,13,0).setContent(
-					$[14] || _1('svg:pattern',$,14,13).set('id',"blood-hud-1").set('patternUnits',"userSpaceOnUse").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[15] || _1('svg:image',$,15,14).set('href',"textures/blood_hud/1.png")
-					,2)
-				,2)).end((
-					$[14].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end((
-						$[15].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end()
-					,true))
-				,true)),
-				($[16] || _1('svg:defs',$,16,0).setContent(
-					$[17] || _1('svg:pattern',$,17,16).set('id',"blood-hud-2").set('patternUnits',"userSpaceOnUse").set('patternContentUnits',"userSpaceOnUse").setContent(
-						$[18] || _1('svg:image',$,18,17).set('href',"textures/blood_hud/2.png")
-					,2)
-				,2)).end((
-					$[17].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end((
-						$[18].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end()
-					,true))
-				,true)),
-				
-				
-				
-				(function tagLoop($0) {
-					var t0;
-					for (let i = 0, items = iter$(Array.from(new Array(6))), len = $0.taglen = items.length; i < len; i++) {
-						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
-							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-							,2)
-						,2)).end((
-							t0.$.A.set('id',("blood-splash-" + (i + 1))).end((
-								t0.$.B.set('href',("textures/blood_splash/" + (i + 1) + ".png")).end()
-							,true))
-						,true));
-					};return $0;
-				})($[19] || _2($,19,$[0])),
-				
-				
-				(function tagLoop($0) {
-					var t0;
-					for (let i = 0, items = iter$(Array.from(new Array(17))), len = $0.taglen = items.length; i < len; i++) {
-						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
-							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-							,2)
-						,2)).end((
-							t0.$.A.set('id',("zombie-idle-" + i)).end((
-								t0.$.B.set('href',("textures/zombie/idle/skeleton-idle_" + i + ".png")).end()
-							,true))
-						,true));
-					};return $0;
-				})($[20] || _2($,20,$[0])),
-				
-				(function tagLoop($0) {
-					var t0;
-					for (let i = 0, items = iter$(Array.from(new Array(17))), len = $0.taglen = items.length; i < len; i++) {
-						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
-							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-							,2)
-						,2)).end((
-							t0.$.A.set('id',("zombie-move-" + i)).end((
-								t0.$.B.set('href',("textures/zombie/move/skeleton-move_" + i + ".png")).end()
-							,true))
-						,true));
-					};return $0;
-				})($[21] || _2($,21,$[0])),
-				
-				(function tagLoop($0) {
-					var t0;
-					for (let i = 0, items = iter$(Array.from(new Array(9))), len = $0.taglen = items.length; i < len; i++) {
-						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
-							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
-								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
-							,2)
-						,2)).end((
-							t0.$.A.set('id',("zombie-attack-" + i)).end((
-								t0.$.B.set('href',("textures/zombie/attack/skeleton-attack_" + i + ".png")).end()
-							,true))
-						,true));
-					};return $0;
-				})($[22] || _2($,22,$[0])),
-				
-				(Object.keys(this.imagesLoaded()).length == 440 && Object.keys(this.audiosLoaded()).length == 27) ? Imba.static([
-					($[23] || _1('svg:g',$,23,0)).set('transform',(("translate(" + (x - player.pos().x) + ", " + (y - player.pos().y) + ")"))).setContent([
-						($[24] || _1(Ground,$,24,23)).setPlayer(player).end(),
-						($[25] || _1(Survival,$,25,23)).setPlayer(player).setGame(game).end(),
-						(function tagLoop($0) {
-							for (let i = 0, len = $0.taglen = zombies.length; i < len; i++) {
-								($0[i] || _1(Undead,$0,i)).setZombie(zombies[i]).setPlayer(player).setGame(game).end();
-							};return $0;
-						})($[26] || _2($,26,$[23])),
-						(function tagLoop($0) {
-							var $$ = $0.$iter();
-							for (let i = 0, items = iter$(player.bullets()), len = items.length, bullet; i < len; i++) {
-								bullet = items[i];
-								if (bullet) { $$.push(($0[i] || _1(Projectile,$0,i)).setBullet(bullet).setPlayer(player).end()) };
-							};return $$;
-						})($[27] || _3($,27,$[23]))
-					
-					
-					
-					
-					],1).end(),
-					($[28] || _1(Hud,$,28,0)).setPlayer(player).setGame(game).end(),
-					($[29] || _1(Aim,$,29,0)).setCrosshair(crosshair).end()
-				],2,1) : Imba.static([
-					($[30] || _1('svg:g',$,30,0).setContent(
-						$[31] || _1('svg:text',$,31,30).set('fill',"black")
-					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
-						$[31].setText("LOADING.... " + (~~(Object.keys(this.imagesLoaded()).length / 8.8 + Object.keys(this.audiosLoaded()).length / 0.54)) + "%").end()
-					,true)),
-					($[32] || _1('svg:g',$,32,0).setContent(
-						$[33] || _1('svg:text',$,33,32).set('fill',"black").setText("Tip: ZoomOut to 80%")
-					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2 + 100) + ") scale(1, -1)")).end((
-						$[33].end()
-					,true))
-				],2,2)
-			],1).end()
-		,true));
-	};
-});
-Imba.mount((_1(App)).end());
-
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(4);
 
 
 /***/ }),
@@ -1865,7 +1299,7 @@ Imba.TagManager = new Imba.TagManagerClass();
 
 __webpack_require__(10);
 __webpack_require__(11);
-__webpack_require__(1);
+__webpack_require__(2);
 __webpack_require__(12);
 __webpack_require__(13);
 
@@ -2019,7 +1453,7 @@ Imba.TagManagerClass.prototype.tryUnmount = function (){
 
 function iter$(a){ return a ? (a.toArray ? a.toArray() : a) : []; };
 var Imba = __webpack_require__(0);
-__webpack_require__(1);
+__webpack_require__(2);
 
 var native$ = [
 	'keydown','keyup','keypress',
@@ -5929,6 +5363,599 @@ Zombie.prototype.execWalkArround = function (){
 
 
 
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+function iter$(a){ return a ? (a.toArray ? a.toArray() : a) : []; };
+var Imba = __webpack_require__(1), _2 = Imba.createTagList, _3 = Imba.createTagMap, _1 = Imba.createElement;
+
+
+var Undead = Imba.defineTag('Undead', 'svg:g', function(tag){
+	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
+	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
+	tag.prototype.player = function(v){ return this._player; }
+	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
+	tag.prototype.game = function(v){ return this._game; }
+	tag.prototype.setGame = function(v){ this._game = v; return this; };
+	tag.prototype.zombie = function(v){ return this._zombie; }
+	tag.prototype.setZombie = function(v){ this._zombie = v; return this; };
+	tag.prototype.zombies = function(v){ return this._zombies; }
+	tag.prototype.setZombies = function(v){ this._zombies = v; return this; };
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		if (this.zombie()) {
+			this.zombie().update(this.player(),this.game(),this.zombies());
+			return this.$open(0).setTransform((("translate(" + (this.zombie().pos().x) + "," + (this.zombie().pos().y) + ") rotate(" + (this.zombie().rotation()) + ")"))).setChildren(
+				$[0] || _1('svg:g',$,0,this)
+			,2).synced((
+				$[0].set('transform',("translate(" + (-50) + ", " + (-50) + ")")).setContent([
+					($[1] || _1('svg:rect',$,1,0).set('height',100).set('width',100)).set('transform',("scale(" + (this.zombie().animation().adjust().scale) + ") translate(" + (this.zombie().animation().adjust().translate) + ")")).set('fill',("url(#zombie-" + (this.zombie().animation().path()) + "-" + (~~(this.game().time() / this.zombie().animation().frameLength() % this.zombie().animation().size())) + ")")).end(),
+					this.zombie().takingHit() ? (
+						($[2] || _1('svg:g',$,2,0).setContent(
+							$[3] || _1('svg:rect',$,3,2).set('height',100).set('width',100)
+						,2)).set('transform',(("rotate(-90) translate(" + (-100) + ", " + (-50) + ")"))).end((
+							$[3].set('fill',("url(#blood-splash-" + (this.zombie().takingHit()) + ")")).end()
+						,true))
+					) : void(0)
+				],1).end()
+			,true));
+		};
+	};
+});
+
+var Survival = Imba.defineTag('Survival', 'svg:g', function(tag){
+	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
+	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
+	tag.prototype.player = function(v){ return this._player; }
+	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
+	tag.prototype.game = function(v){ return this._game; }
+	tag.prototype.setGame = function(v){ this._game = v; return this; };
+	
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		return this.$open(0).setTransform(("translate(" + (window.innerWidth / 2 + this.player().pos().x) + ", " + (window.innerHeight / 2 + this.player().pos().y) + ") rotate(" + (this.player().rotation()) + ")")).setChildren([
+			this.player().shooting() ? (($[0] || _1(Shot,$,0,this)).setGun(this.player().gun()).end()) : void(0),
+			($[1] || _1('svg:g',$,1,this).setContent([
+				_1('svg:rect',$,2,1).set('height',100).set('width',100),
+				_1('svg:rect',$,3,1).set('height',100).set('width',100)
+			],2)).set('transform',("translate(" + (-50) + ", " + (-50) + ")")).end((
+				$[2].set('transform',("scale(" + (this.player().feetAnimation().adjust().scale) + ") translate(" + (this.player().feetAnimation().adjust().translate) + ")")).set('fill',("url(#" + (this.player().feetAnimation().name()) + "-" + (~~(this.game().time() / this.player().feetAnimation().frameLength()) % this.player().feetAnimation().size()) + ")")).end(),
+				$[3].set('transform',("scale(" + (this.player().animation().adjust().scale) + ") translate(" + (this.player().animation().adjust().translate) + ")")).set('fill',("url(#" + (this.player().animation().name()) + "-" + (~~(this.game().time() / this.player().animation().frameLength()) % this.player().animation().size()) + ")")).end()
+			,true))
+		],1).synced();
+	};
+});
+
+var Ground = Imba.defineTag('Ground', 'svg:g', function(tag){
+	tag.prototype.player = function(v){ return this._player; }
+	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
+	tag.prototype.height = function(v){ return this.getAttribute('height'); }
+	tag.prototype.setHeight = function(v){ this.setAttribute('height',v); return this; };
+	tag.prototype.width = function(v){ return this.getAttribute('width'); }
+	tag.prototype.setWidth = function(v){ this.setAttribute('width',v); return this; };
+	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
+	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		return this.$open(0).setHeight(70000).setWidth(70000).setTransform(("translate(" + (-35000) + "," + (-35000) + ")")).setChildren(
+			$[0] || _1('svg:g',$,0,this).setContent(
+				$[1] || _1('svg:rect',$,1,0).set('height',70000).set('width',70000).set('fill',"url(#floor_2)").set('stroke',"white")
+			,2)
+		,2).synced((
+			$[0].end((
+				$[1].end()
+			,true))
+		,true));
+	};
+});
+
+var Shot = Imba.defineTag('Shot', 'svg:g', function(tag){
+	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
+	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
+	tag.prototype.rotation = function(v){ return this._rotation; }
+	tag.prototype.setRotation = function(v){ this._rotation = v; return this; };
+	tag.prototype.gun = function(v){ return this._gun; }
+	tag.prototype.setGun = function(v){ this._gun = v; return this; };
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		return this.$open(0).setChildren(
+			(this.gun().name() == 'handgun') ? (
+				($[0] || _1('svg:rect',$,0,this).set('transform',"translate(30, -25)").set('height',100).set('width',100).set('fill',"url(#shot)")).end()
+			) : ((this.gun().name() == 'rifle' || this.gun().name() == 'shotgun') ? (
+				($[1] || _1('svg:rect',$,1,this).set('transform',"translate(55, -30)").set('height',100).set('width',100).set('fill',"url(#shot)")).end()
+			) : void(0))
+		,3).synced();
+	};
+});
+
+var Projectile = Imba.defineTag('Projectile', 'svg:g', function(tag){
+	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
+	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
+	tag.prototype.bullet = function(v){ return this._bullet; }
+	tag.prototype.setBullet = function(v){ this._bullet = v; return this; };
+	tag.prototype.player = function(v){ return this._player; }
+	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
+	tag.prototype.zombies = function(v){ return this._zombies; }
+	tag.prototype.setZombies = function(v){ this._zombies = v; return this; };
+	tag.prototype.game = function(v){ return this._game; }
+	tag.prototype.setGame = function(v){ this._game = v; return this; };
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		this.bullet().update(this.zombies(),this.game(),this.player());
+		return this.$open(0).setTransform(("translate(" + (window.innerWidth / 2 + this.bullet().pos().x) + ", " + (window.innerHeight / 2 - this.bullet().pos().y) + ") rotate(" + (this.bullet().direction()) + ")")).setChildren(
+			$[0] || _1('svg:rect',$,0,this).set('height',1).set('width',50).set('fill',"yellow")
+		,2).synced((
+			$[0].end()
+		,true));
+	};
+});
+
+
+var Aim = Imba.defineTag('Aim', 'svg:g', function(tag){
+	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
+	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
+	tag.prototype.crosshair = function(v){ return this._crosshair; }
+	tag.prototype.setCrosshair = function(v){ this._crosshair = v; return this; };
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		return this.$open(0).setTransform(("translate(" + (this.crosshair().x()) + ", " + (this.crosshair().y() + window.innerHeight) + ")")).setChildren($.$ = $.$ || [
+			_1('svg:circle',$,0,this).set('r',10).set('stroke',"rgb(60,255,60)"),
+			_1('svg:circle',$,1,this).set('r',8).set('fill',"rgb(60,255,60)"),
+			_1('svg:circle',$,2,this).set('r',2).set('fill',"black")
+		],2).synced((
+			$[0].end(),
+			$[1].end(),
+			$[2].end()
+		,true));
+	};
+});
+
+var Hud = Imba.defineTag('Hud', 'svg:g', function(tag){
+	tag.prototype.height = function(v){ return this.getAttribute('height'); }
+	tag.prototype.setHeight = function(v){ this.setAttribute('height',v); return this; };
+	tag.prototype.width = function(v){ return this.getAttribute('width'); }
+	tag.prototype.setWidth = function(v){ this.setAttribute('width',v); return this; };
+	tag.prototype.player = function(v){ return this._player; }
+	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
+	tag.prototype.game = function(v){ return this._game; }
+	tag.prototype.setGame = function(v){ this._game = v; return this; };
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		return this.$open(0).setChildren(
+			this.player().takingHit() ? (
+				($[0] || _1('svg:g',$,0,this).setContent(
+					$[1] || _1('svg:rect',$,1,0).flag('blood-hud')
+				,2)).set('transform',("translate(" + (this.game().width() / 2) + ", " + (this.game().height() / 2) + ")")).end((
+					$[1].set('transform',(("rotate(" + (this.player().bloodRotation()) + ")"))).set('height',this.game().height() / 1.5).set('width',this.game().width() / 1.5).set('fill',("url(#blood-hud-" + (this.player().takingHit()) + ")")).end()
+				,true))
+			) : void(0)
+		,3).synced();
+	};
+});
+
+
+var Barrel = Imba.defineTag('Barrel', 'svg:g', function(tag){
+	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
+	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
+	tag.prototype.barrel = function(v){ return this._barrel; }
+	tag.prototype.setBarrel = function(v){ this._barrel = v; return this; };
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		return this.$open(0).setTransform(("translate(" + (this.barrel().x) + "," + (this.barrel().y) + ") rotate(" + (this.barrel().rotation) + ")")).setChildren(
+			$[0] || _1('svg:g',$,0,this).setContent(
+				$[1] || _1('svg:rect',$,1,0).set('height',50).set('width',50).set('fill',"url(#barrel)")
+			,2)
+		,2).synced((
+			$[0].set('transform',("translate(" + (-25) + ", " + (-25) + ")")).end((
+				$[1].end()
+			,true))
+		,true));
+	};
+});
+
+var Box = Imba.defineTag('Box', 'svg:g', function(tag){
+	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
+	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
+	tag.prototype.box = function(v){ return this._box; }
+	tag.prototype.setBox = function(v){ this._box = v; return this; };
+	tag.prototype.__images_loaded = {'default': 0,name: 'images_loaded'};
+	tag.prototype.images_loaded = function(v){ return this._images_loaded; }
+	tag.prototype.setImages_loaded = function(v){ this._images_loaded = v; return this; }
+	tag.prototype._images_loaded = 0;
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		return this.$open(0).setTransform(("translate(" + (this.box().x) + "," + (this.box().y) + ") rotate(" + (this.box().rotation) + ")")).setChildren(
+			$[0] || _1('svg:g',$,0,this).setContent(
+				$[1] || _1('svg:rect',$,1,0).set('height',100).set('width',100).set('fill',"url(#box)")
+			,2)
+		,2).synced((
+			$[0].set('transform',("translate(" + (-50) + ", " + (-50) + ")")).end((
+				$[1].end()
+			,true))
+		,true));
+	};
+});
+
+var App = Imba.defineTag('App', function(tag){
+	tag.prototype.survivalAnimations = function(v){ return this._survivalAnimations; }
+	tag.prototype.setSurvivalAnimations = function(v){ this._survivalAnimations = v; return this; };
+	tag.prototype.feetAnimation = function(v){ return this._feetAnimation; }
+	tag.prototype.setFeetAnimation = function(v){ this._feetAnimation = v; return this; };
+	tag.prototype.__imagesLoaded = {'default': {},name: 'imagesLoaded'};
+	tag.prototype.imagesLoaded = function(v){ return this._imagesLoaded; }
+	tag.prototype.setImagesLoaded = function(v){ this._imagesLoaded = v; return this; }
+	tag.prototype._imagesLoaded = {};
+	tag.prototype.__audiosLoaded = {'default': {},name: 'audiosLoaded'};
+	tag.prototype.audiosLoaded = function(v){ return this._audiosLoaded; }
+	tag.prototype.setAudiosLoaded = function(v){ this._audiosLoaded = v; return this; }
+	tag.prototype._audiosLoaded = {};
+	
+	tag.prototype.crosshair = function(v){ return this._crosshair; }
+	tag.prototype.setCrosshair = function(v){ this._crosshair = v; return this; };
+	tag.prototype.zombies = function(v){ return this._zombies; }
+	tag.prototype.setZombies = function(v){ this._zombies = v; return this; };
+	tag.prototype.player = function(v){ return this._player; }
+	tag.prototype.setPlayer = function(v){ this._player = v; return this; };
+	tag.prototype.guns = function(v){ return this._guns; }
+	tag.prototype.setGuns = function(v){ this._guns = v; return this; };
+	tag.prototype.animations = function(v){ return this._animations; }
+	tag.prototype.setAnimations = function(v){ this._animations = v; return this; };
+	tag.prototype.audios = function(v){ return this._audios; }
+	tag.prototype.setAudios = function(v){ this._audios = v; return this; };
+	tag.prototype.boxes = function(v){ return this._boxes; }
+	tag.prototype.setBoxes = function(v){ this._boxes = v; return this; };
+	tag.prototype.barrels = function(v){ return this._barrels; }
+	tag.prototype.setBarrels = function(v){ this._barrels = v; return this; };
+	tag.prototype.game = function(v){ return this._game; }
+	tag.prototype.setGame = function(v){ this._game = v; return this; };
+	
+	tag.prototype.mount = function (){
+		var self = this, dict;
+		self.setSurvivalAnimations(self.loadSurvivalAnimations());
+		self.setFeetAnimation(self.loadFeetAnimations());
+		self.render();
+		let images = Array.from(document.getElementsByTagName('image'));
+		for (let j = 0, items = iter$(images), len = items.length, i; j < len; j++) {
+			i = items[j];
+			i.onload = function() { return self.imagesLoaded()[i.attributes.href.value] = true; };
+		};
+		
+		for (let k in dict = self.audios()){
+			let audio;
+			audio = dict[k];audio.oncanplaythrough = function() { return self.audiosLoaded()[k] = true; };
+		};
+		
+		self._themeStart = false;
+		self.schedule({interval: 16});
+		document.addEventListener('keydown',function(e) {
+			self.keydown(e);
+			if (!self._themeStart) {
+				let theme0 = new Audio('sounds/theme1.mp3');
+				theme0.volume = 0.5;
+				let theme1 = new Audio('sounds/theme0.mp3');
+				theme1.volume = 0.5;
+				let theme2 = new Audio('sounds/theme2.mp3');
+				theme2.volume = 0.5;
+				let theme3 = new Audio('sounds/theme3.mp3');
+				theme3.volume = 0.5;
+				theme0.onended = function() { return theme1.play(); };
+				theme1.onended = function() { return theme2.play(); };
+				theme2.onended = function() { return theme3.play(); };
+				theme3.onended = function() { return theme0.play(); };
+				theme0.play();
+				return self._themeStart = true;
+			};
+		});
+		
+		document.addEventListener('keyup',function(e) {
+			return self.keyup(e);
+		});
+		
+		document.addEventListener('mousemove',function(e) {
+			return self.aim(e);
+		});
+		
+		document.addEventListener('mousedown',function(e) {
+			if (e.button == 0) { self.game().keys().leftbutton = true };
+			if (e.button == 2) { self.game().keys().rightbutton = true };
+			if (e.button == 0) self.shoot();
+			if (e.button == 2) { return self.player().attack(self.zombies()) };
+		});
+		
+		document.addEventListener('mouseup',function(e) {
+			if (e.button == 2) { self.game().keys().rightbutton = false };
+			if (e.button == 0) { return self.game().keys().leftbutton = false };
+		});
+		
+		return document.addEventListener('contextmenu',function(e) {
+			return e.preventDefault();
+		});
+	};
+	
+	tag.prototype.aim = function (e){
+		var v_;
+		this.crosshair().setX(e.x);
+		this.crosshair().setY(-e.y);
+		return (this.player().setRotation(v_ = ((Math.atan2(e.x - window.innerWidth / 2,e.y - window.innerHeight / 2) / 3.1415 * 180.0 - 90) + 720) % 360),v_);
+	};
+	
+	tag.prototype.keydown = function (e){
+		if (e.code == 'Digit1' && this.player().invertory().knife) { this.player().changeGun('knife') };
+		if (e.code == 'Digit2' && this.player().invertory().handgun) { this.player().changeGun('handgun') };
+		if (e.code == 'Digit3' && this.player().invertory().rifle) { this.player().changeGun('rifle') };
+		if (e.code == 'Digit4' && this.player().invertory().shotgun) { this.player().changeGun('shotgun') };
+		if (e.code == 'KeyF' && this.player().invertory().flashlight) { this.player().changeGun('flashlight') };
+		if (e.code == 'KeyR') { this.player().reload() };
+		return this.game().keys()[e.code] = true;
+	};
+	
+	tag.prototype.keyup = function (e){
+		return this.game().keys()[e.code] = false;
+	};
+	
+	tag.prototype.shoot = function (){
+		if (['handgun','shotgun','rifle'].includes(this.player().gun().name())) { this.player().shoot() };
+		if (['flashlight','knife'].includes(this.player().gun().name())) { return this.player().attack(this.zombies()) };
+	};
+	
+	tag.prototype.tick = function (){
+		var game_;
+		if (this.game().keys().leftbutton) this.shoot();
+		if (this.game().keys().rightbutton) { this.player().attack(this.zombies()) };
+		this.game().setWidth(window.innerWidth);
+		this.game().setHeight(window.innerHeight);
+		let directions = [];
+		if (this.game().keys().KeyA) { directions.push('left') };
+		if (this.game().keys().KeyD) { directions.push('right') };
+		if (this.game().keys().KeyS) { directions.push('down') };
+		if (this.game().keys().KeyW) { directions.push('up') };
+		this.player().setRunning(this.game().keys().ShiftLeft);
+		this.player().move(directions);
+		(game_ = this.game()).setTime(game_.time() + 1);
+		return this.render();
+	};
+	
+	tag.prototype.loadImg = function (){
+		var v_;
+		return (this.setImages_loaded(v_ = this.images_loaded() + 1),v_);
+	};
+	
+	tag.prototype.loadSurvivalAnimations = function (){
+		var dict, t0;
+		let res = [];
+		for (let gun in dict = this.animations().player){
+			let anims;
+			anims = dict[gun];let res1 = [];
+			for (let action in anims){
+				let anim;
+				anim = anims[action];let res2 = [];
+				for (let i = 0, items = iter$(Array.from(new Array(anim.size()))), len = items.length; i < len; i++) {
+					res2.push((t0 = (t0=_1('svg:defs')).setContent(
+						t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+							t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+						,2)
+					,2)).end((
+						t0.$.A.set('id',("" + (anim.name()) + "-" + i)).end((
+							t0.$.B.set('href',("" + (anim.path()) + i + ".png")).end()
+						,true))
+					,true)));
+				};
+				res1.push(res2);
+			};
+			res.push(res1);
+		};
+		return res;
+	};
+	
+	tag.prototype.loadFeetAnimations = function (){
+		var dict, t0;
+		let res = [];
+		for (let name in dict = this.animations().feet){
+			let anim;
+			anim = dict[name];let res1 = [];
+			for (let i = 0, items = iter$(Array.from(new Array(anim.size()))), len = items.length; i < len; i++) {
+				res1.push((t0 = (t0=_1('svg:defs')).setContent(
+					t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+						t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+					,2)
+				,2)).end((
+					t0.$.A.set('id',("" + (anim.name()) + "-" + i)).end((
+						t0.$.B.set('href',("" + (anim.path()) + i + ".png")).end()
+					,true))
+				,true)));
+			};
+			res.push(res1);
+		};
+		return res;
+	};
+	
+	tag.prototype.render = function (){
+		var $ = this.$, self = this;
+		let x = self.player().shooting() ? (Math.random() * 15 - 7.5) : 0;
+		let y = self.player().shooting() ? (Math.random() * 15 - 7.5) : 0;
+		return self.$open(0).flag('container').setChildren(
+			$[0] || _1('svg:svg',$,0,self).flag('game').set('transform',"scale(1,-1)")
+		,2).synced((
+			$[0].setContent([
+				self.survivalAnimations(),
+				self.feetAnimation(),
+				
+				($[1] || _1('svg:defs',$,1,0).setContent(
+					$[2] || _1('svg:pattern',$,2,1).setId('floor_2').set('patternUnits',"userSpaceOnUse").set('width',"700").set('height',"700").set('patternContentUnits',"userSpaceOnUse").setContent(
+						$[3] || _1('svg:image',$,3,2).set('href',"textures/the_floor/the_floor/floor_2.png").set('width',"700").set('height',"700")
+					,2)
+				,2)).end((
+					$[2].end((
+						$[3].end()
+					,true))
+				,true)),
+				
+				($[4] || _1('svg:defs',$,4,0).setContent(
+					$[5] || _1('svg:pattern',$,5,4).setId('shot').set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+						$[6] || _1('svg:image',$,6,5).set('href',"textures/shoot/shoot/muzzle_flash_0.png").set('width',"100").set('height',"100")
+					,2)
+				,2)).end((
+					$[5].end((
+						$[6].end()
+					,true))
+				,true)),
+				
+				($[7] || _1('svg:defs',$,7,0).setContent(
+					$[8] || _1('svg:pattern',$,8,7).set('id',"barrel").set('patternUnits',"userSpaceOnUse").set('width',"50").set('height',"50").set('patternContentUnits',"userSpaceOnUse").setContent(
+						$[9] || _1('svg:image',$,9,8).set('href',"textures/the_floor/the_floor/barrel.png").set('width',"50").set('height',"50")
+					,2)
+				,2)).end((
+					$[8].end((
+						$[9].end()
+					,true))
+				,true)),
+				
+				($[10] || _1('svg:defs',$,10,0).setContent(
+					$[11] || _1('svg:pattern',$,11,10).set('id',"box").set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+						$[12] || _1('svg:image',$,12,11).set('href',"textures/the_floor/the_floor/crate_1.png").set('width',"100").set('height',"100")
+					,2)
+				,2)).end((
+					$[11].end((
+						$[12].end()
+					,true))
+				,true)),
+				
+				
+				
+				($[13] || _1('svg:defs',$,13,0).setContent(
+					$[14] || _1('svg:pattern',$,14,13).set('id',"blood-hud-1").set('patternUnits',"userSpaceOnUse").set('patternContentUnits',"userSpaceOnUse").setContent(
+						$[15] || _1('svg:image',$,15,14).set('href',"textures/blood_hud/1.png")
+					,2)
+				,2)).end((
+					$[14].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end((
+						$[15].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end()
+					,true))
+				,true)),
+				($[16] || _1('svg:defs',$,16,0).setContent(
+					$[17] || _1('svg:pattern',$,17,16).set('id',"blood-hud-2").set('patternUnits',"userSpaceOnUse").set('patternContentUnits',"userSpaceOnUse").setContent(
+						$[18] || _1('svg:image',$,18,17).set('href',"textures/blood_hud/2.png")
+					,2)
+				,2)).end((
+					$[17].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end((
+						$[18].set('width',("" + (window.innerWidth / 2))).set('height',("" + (window.innerHeight / 2))).end()
+					,true))
+				,true)),
+				
+				
+				
+				(function tagLoop($0) {
+					var t0;
+					for (let i = 0, items = iter$(Array.from(new Array(6))), len = $0.taglen = items.length; i < len; i++) {
+						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
+							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+							,2)
+						,2)).end((
+							t0.$.A.set('id',("blood-splash-" + (i + 1))).end((
+								t0.$.B.set('href',("textures/blood_splash/" + (i + 1) + ".png")).end()
+							,true))
+						,true));
+					};return $0;
+				})($[19] || _2($,19,$[0])),
+				
+				
+				(function tagLoop($0) {
+					var t0;
+					for (let i = 0, items = iter$(Array.from(new Array(17))), len = $0.taglen = items.length; i < len; i++) {
+						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
+							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+							,2)
+						,2)).end((
+							t0.$.A.set('id',("zombie-idle-" + i)).end((
+								t0.$.B.set('href',("textures/zombie/idle/skeleton-idle_" + i + ".png")).end()
+							,true))
+						,true));
+					};return $0;
+				})($[20] || _2($,20,$[0])),
+				
+				(function tagLoop($0) {
+					var t0;
+					for (let i = 0, items = iter$(Array.from(new Array(17))), len = $0.taglen = items.length; i < len; i++) {
+						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
+							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+							,2)
+						,2)).end((
+							t0.$.A.set('id',("zombie-move-" + i)).end((
+								t0.$.B.set('href',("textures/zombie/move/skeleton-move_" + i + ".png")).end()
+							,true))
+						,true));
+					};return $0;
+				})($[21] || _2($,21,$[0])),
+				
+				(function tagLoop($0) {
+					var t0;
+					for (let i = 0, items = iter$(Array.from(new Array(9))), len = $0.taglen = items.length; i < len; i++) {
+						(t0 = $0[i] || (t0=_1('svg:defs',$0,i)).setContent(
+							t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
+								t0.$.B || _1('svg:image',t0.$,'B','A').set('width',"100").set('height',"100")
+							,2)
+						,2)).end((
+							t0.$.A.set('id',("zombie-attack-" + i)).end((
+								t0.$.B.set('href',("textures/zombie/attack/skeleton-attack_" + i + ".png")).end()
+							,true))
+						,true));
+					};return $0;
+				})($[22] || _2($,22,$[0])),
+				
+				(Object.keys(self.imagesLoaded()).length == 440 && Object.keys(self.audiosLoaded()).length == 27) ? Imba.static([
+					($[23] || _1('svg:g',$,23,0)).set('transform',(("translate(" + (x - self.player().pos().x) + ", " + (y - self.player().pos().y) + ")"))).setContent([
+						($[24] || _1(Ground,$,24,23)).setPlayer(self.player()).end(),
+						($[25] || _1(Survival,$,25,23)).setPlayer(self.player()).setGame(self.game()).end(),
+						(function tagLoop($0) {
+							for (let i = 0, items = iter$(self.zombies()), len = $0.taglen = items.length; i < len; i++) {
+								($0[i] || _1(Undead,$0,i)).setZombies(self.zombies()).setZombie(items[i]).setPlayer(self.player()).setGame(self.game()).end();
+							};return $0;
+						})($[26] || _2($,26,$[23])),
+						(function tagLoop($0) {
+							var $$ = $0.$iter();
+							for (let i = 0, items = iter$(self.player().bullets()), len = items.length, bullet; i < len; i++) {
+								bullet = items[i];
+								if (bullet) { $$.push(($0[i] || _1(Projectile,$0,i)).setBullet(bullet).setPlayer(self.player()).setZombies(self.zombies()).setGame(self.game()).end()) };
+							};return $$;
+						})($[27] || _3($,27,$[23]))
+					
+					
+					
+					
+					],1).end(),
+					($[28] || _1(Hud,$,28,0)).setPlayer(self.player()).setGame(self.game()).end(),
+					($[29] || _1(Aim,$,29,0)).setCrosshair(self.crosshair()).end()
+				],2,1) : Imba.static([
+					($[30] || _1('svg:g',$,30,0).setContent(
+						$[31] || _1('svg:text',$,31,30).set('fill',"black")
+					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
+						$[31].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 8.8 + Object.keys(self.audiosLoaded()).length / 0.54)) + "%").end()
+					,true)),
+					($[32] || _1('svg:g',$,32,0).setContent(
+						$[33] || _1('svg:text',$,33,32).set('fill',"black").setText("Tip: ZoomOut to 80%")
+					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2 + 100) + ") scale(1, -1)")).end((
+						$[33].end()
+					,true))
+				],2,2)
+			],1).end()
+		,true));
+	};
+})
+exports.App = App;
 
 
 /***/ })
