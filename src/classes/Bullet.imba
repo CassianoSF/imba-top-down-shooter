@@ -29,7 +29,7 @@ export class Bullet
                 deleteBullet
                 return
             # close range
-            elif player.angleToZombie(zombie) < 80 and zombie.distanceToPlayer < 100 and distanceToZombie(zombie, game) < 700
+            elif player.angleToZombie(zombie) < 70 and zombie.distanceToPlayer < 130 and distanceToZombie(zombie, game) < 700
                 zombie.takeHit(self)
                 deleteBullet
                 return

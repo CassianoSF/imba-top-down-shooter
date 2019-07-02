@@ -7,6 +7,7 @@ export class Gun
     prop name
     prop power
     prop accuracy
+    prop shoot-sounds
 
     def initialize
         for k, v of ($1) 

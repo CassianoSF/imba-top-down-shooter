@@ -222,7 +222,7 @@ export tag App
                 feet-animation
                 <Loader>
 
-                if Object.keys(images-loaded):length == 440 and Object.keys(audios-loaded):length == 27
+                if Object.keys(images-loaded):length == 440 and Object.keys(audios-loaded):length == Object.keys(audios):length
                     <svg:g transform=("translate({x - player.pos:x}, {y - player.pos:y})")>
                         <Ground player=player>
                         <Survival player=player game=game>

@@ -384,9 +384,12 @@ let audios = {
 	theme0: new Audio('sounds/theme0.mp3'),
 	theme2: new Audio('sounds/theme2.mp3'),
 	theme3: new Audio('sounds/theme3.mp3'),
-	shotgun_shot: new Audio('sounds/shotgun_shot.wav'),
+	shotgunShot: new Audio('sounds/shotgun_shot.wav'),
 	shotgun_pump: new Audio('sounds/shotgun_pump.wav'),
-	shotgun_reload: new Audio('sounds/shotgun_reload.wav')
+	shotgun_reload: new Audio('sounds/shotgun_reload.wav'),
+	shotgun0: new Audio('sounds/shotgun0.wav'),
+	shotgun1: new Audio('sounds/shotgun1.wav'),
+	pistol: new Audio('sounds/pistol.wav')
 };
 
 for (let j = 0, items = iter$(Object.keys(Array.from(new Array(10)))), len = items.length, i; j < len; j++) {
@@ -794,7 +797,10 @@ let guns = {
 		damage: 25,
 		reloadTime: 1200,
 		power: 10,
-		accuracy: 30}
+		accuracy: 30,
+		shootSounds: [
+			{src: audios.pistol.src,volume: 1}
+		]}
 	),
 	
 	rifle: new Gun(
@@ -805,7 +811,10 @@ let guns = {
 		damage: 10,
 		reloadTime: 2000,
 		power: 15,
-		accuracy: 10}
+		accuracy: 10,
+		shootSounds: [
+			{src: audios.shotgunShot.src,volume: 0.6}
+		]}
 	),
 	
 	shotgun: new Gun(
@@ -816,7 +825,10 @@ let guns = {
 		damage: 25,
 		reloadTime: 3000,
 		power: 25,
-		accuracy: 8}
+		accuracy: 8,
+		shootSounds: [
+			{src: audios.shotgun0.src,volume: 1}
+		]}
 	),
 	
 	flashlight: new Gun(
@@ -871,6 +883,8 @@ for (let j = 0, items = iter$(Array.from(new Array(70))), len = items.length; j 
 		player: player}
 	));
 };
+
+player.setZombies(zombies);
 
 Imba.mount((_1(App)).setCrosshair(crosshair).setZombies(zombies).setPlayer(player).setGuns(guns).setAnimations(animations).setAudios(audios).setBoxes(boxes).setBarrels(barrels).setGame(game).end());
 
@@ -4747,7 +4761,7 @@ Game.prototype.initListners = function (){
 		if (e.button == 0) { self.keys().leftbutton = true };
 		if (e.button == 2) { self.keys().rightbutton = true };
 		if (e.button == 0) { self.player().shoot() };
-		if (e.button == 2) { return self.player().attack(self.zombies()) };
+		if (e.button == 2) { return self.player().attack() };
 	});
 	
 	document.addEventListener('mouseup',function(e) {
@@ -4759,7 +4773,6 @@ Game.prototype.initListners = function (){
 		return e.preventDefault();
 	});
 };
-
 
 Game.prototype.aim = function (e){
 	var v_;
@@ -4828,6 +4841,8 @@ Player.prototype.feetAnimations = function(v){ return this._feetAnimations; }
 Player.prototype.setFeetAnimations = function(v){ this._feetAnimations = v; return this; };
 Player.prototype.game = function(v){ return this._game; }
 Player.prototype.setGame = function(v){ this._game = v; return this; };
+Player.prototype.zombies = function(v){ return this._zombies; }
+Player.prototype.setZombies = function(v){ this._zombies = v; return this; };
 Player.prototype.__bullets = {'default': [],name: 'bullets'};
 Player.prototype.bullets = function(v){ return this._bullets; }
 Player.prototype.setBullets = function(v){ this._bullets = v; return this; }
@@ -4851,6 +4866,7 @@ Player.prototype.attacking = function(v){ return this._attacking; }
 Player.prototype.setAttacking = function(v){ this._attacking = v; return this; };
 Player.prototype.takingHit = function(v){ return this._takingHit; }
 Player.prototype.setTakingHit = function(v){ this._takingHit = v; return this; };
+
 
 Player.prototype.takeHit = function (damage){
 	var self = this, v_;
@@ -4913,9 +4929,8 @@ Player.prototype.move = function (directions){
 Player.prototype.angleToZombie = function (zombie){
 	let dx = this.pos().x + this.game().width() / 2 - zombie.pos().x;
 	let dy = this.pos().y + this.game().height() / 2 - zombie.pos().y;
-	return (((this.rotation() + (Math.atan2(dx,dy) / 3.1415 * 180.0) + 200) % 360) ** 2) ** 0.5;
+	return (((this.rotation() + (Math.atan2(dx,dy) / 3.1415 * 180.0) + 150) % 360) ** 2) ** 0.5;
 };
-
 
 Player.prototype.bulletInitPos = function (){
 	if ((this.rotation() < 360 && this.rotation() > 280) || (this.rotation() < 180 && this.rotation() > 90)) {
@@ -4953,8 +4968,9 @@ Player.prototype.shoot = function (){
 	if (!(self.gun().ammo() || self.reloading())) self.reload();
 	if (['flashlight','knife'].includes(self.gun().name())) { return self.attack() };
 	if (self.gun().ammo() && self.canShoot() && !(self.reloading())) {
-		let audio = new Audio('sounds/shotgun_shot.wav');
-		audio.volume = 0.6;
+		let shot = self.gun().shootSounds()[~~(Math.random() * self.gun().shootSounds().length)];
+		let audio = new Audio(shot.src);
+		audio.volume = shot.volume;
 		audio.play();
 		if (self.gun().name() == 'shotgun') {
 			for (let j = 0, items = [0,0,0,0,0,0], len = items.length; j < len; j++) {
@@ -4966,22 +4982,13 @@ Player.prototype.shoot = function (){
 		(gun_ = self.gun()).setAmmo(gun_.ammo() - 1);
 		self.setCanShoot(false);
 		self.setShooting(true);
-		if (self.gun().name() == 'shotgun') {
-			let audio2 = new Audio('sounds/shotgun_pump.wav');
-			audio2.play();
-			window.setTimeout(function() { var v_;
-			return audio2.pause() && (((v_ = audio2),delete audio2, v_)); },1500);
-		};
-		
 		self.setAnimation(self.animations()[self.gun().name()].shoot);
-		window.setTimeout(function() { var v_;
-		return (((v_ = audio),delete audio, v_)); },10000);
 		window.setTimeout(function() { return (self.setCanShoot(true),true); },1000 / self.gun().rate());
 		return window.setTimeout(function() { return (self.setShooting(false),false); },30);
 	};
 };
 
-Player.prototype.attack = function (zombies){
+Player.prototype.attack = function (){
 	var self = this;
 	if (self.canAttack()) {
 		let audio = new Audio(("sounds/melee" + (~~(Math.random() * 3)) + ".wav"));
@@ -4996,7 +5003,7 @@ Player.prototype.attack = function (zombies){
 			let damage = 5;
 			if (self.gun().name() == 'knife') { let damage = 25 };
 			let res = [];
-			for (let i = 0, items = iter$(zombies), len = items.length, zombie; i < len; i++) {
+			for (let i = 0, items = iter$(self.zombies()), len = items.length, zombie; i < len; i++) {
 				zombie = items[i];
 				res.push((zombie.distanceToPlayer() < 120 && self.angleToZombie(zombie) < 180) && (
 					zombie.takeHit({damage: function() { return damage; },power: function() { return 50; }})
@@ -5098,7 +5105,7 @@ Bullet.prototype.update = function (zombies,game,player){
 			zombie.takeHit(this);
 			this.deleteBullet();
 			return;
-		} else if (player.angleToZombie(zombie) < 80 && zombie.distanceToPlayer() < 100 && this.distanceToZombie(zombie,game) < 700) {
+		} else if (player.angleToZombie(zombie) < 70 && zombie.distanceToPlayer() < 130 && this.distanceToZombie(zombie,game) < 700) {
 			zombie.takeHit(this);
 			this.deleteBullet();
 			return;
@@ -5151,6 +5158,8 @@ Gun.prototype.power = function(v){ return this._power; }
 Gun.prototype.setPower = function(v){ this._power = v; return this; };
 Gun.prototype.accuracy = function(v){ return this._accuracy; }
 Gun.prototype.setAccuracy = function(v){ this._accuracy = v; return this; };
+Gun.prototype.shootSounds = function(v){ return this._shootSounds; }
+Gun.prototype.setShootSounds = function(v){ this._shootSounds = v; return this; };
 
 
 
@@ -5924,7 +5933,7 @@ var App = Imba.defineTag('App', function(tag){
 				self.feetAnimation(),
 				($[1] || _1(Loader,$,1,0)).end(),
 				
-				(Object.keys(self.imagesLoaded()).length == 440 && Object.keys(self.audiosLoaded()).length == 27) ? Imba.static([
+				(Object.keys(self.imagesLoaded()).length == 440 && Object.keys(self.audiosLoaded()).length == Object.keys(self.audios()).length) ? Imba.static([
 					($[2] || _1('svg:g',$,2,0)).set('transform',(("translate(" + (x - self.player().pos().x) + ", " + (y - self.player().pos().y) + ")"))).setContent([
 						($[3] || _1(Ground,$,3,2)).setPlayer(self.player()).end(),
 						($[4] || _1(Survival,$,4,2)).setPlayer(self.player()).setGame(self.game()).end(),

@@ -40,8 +40,8 @@ export class Game
         document.addEventListener 'mousedown' do |e|
             keys['leftbutton'] = yes if e:button == 0
             keys['rightbutton'] = yes if e:button == 2
-            player.shoot           if e:button == 0
-            player.attack(zombies) if e:button == 2
+            player.shoot  if e:button == 0
+            player.attack if e:button == 2
 
         document.addEventListener 'mouseup' do |e|
             keys['rightbutton'] = no if e:button == 2
@@ -49,7 +49,6 @@ export class Game
 
         document.addEventListener 'contextmenu', do |e|
             e.preventDefault
-
 
     def aim e
         crosshair.x = e:x

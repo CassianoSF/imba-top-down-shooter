@@ -12,9 +12,12 @@ let audios =
     theme0:            Audio.new('sounds/theme0.mp3')
     theme2:            Audio.new('sounds/theme2.mp3')
     theme3:            Audio.new('sounds/theme3.mp3')
-    shotgun_shot:      Audio.new('sounds/shotgun_shot.wav')
+    shotgun-shot:      Audio.new('sounds/shotgun_shot.wav')
     shotgun_pump:      Audio.new('sounds/shotgun_pump.wav')
     shotgun_reload:    Audio.new('sounds/shotgun_reload.wav')
+    shotgun0:          Audio.new('sounds/shotgun0.wav')
+    shotgun1:          Audio.new('sounds/shotgun1.wav')
+    pistol:            Audio.new('sounds/pistol.wav')
 
 for i in Object.keys(Array.from(Array.new(10)))
     audios["survivor_yell{i}"] = Audio.new("sounds/survivor_yell/3yell{i}.wav")
@@ -339,6 +342,9 @@ let guns =
         reload-time: 1200
         power: 10
         accuracy: 30
+        shoot-sounds: [
+            {src: audios:pistol:src, volume: 1}
+        ]
 
     rifle: Gun.new
         name: :rifle
@@ -349,6 +355,9 @@ let guns =
         reload-time: 2000
         power: 15
         accuracy: 10
+        shoot-sounds: [
+            {src: audios:shotgun-shot:src, volume: 0.6}
+        ]
 
     shotgun: Gun.new
         name: :shotgun
@@ -359,6 +368,9 @@ let guns =
         reload-time: 3000
         power: 25
         accuracy: 8
+        shoot-sounds: [
+            {src: audios:shotgun0:src, volume: 1}
+        ]
 
     flashlight: Gun.new
         name: :flashlight
@@ -405,6 +417,8 @@ for i in Array.from(Array.new(70))
         game: game
         zombies: zombies
         player: player
+
+player.zombies = zombies
 
 Imba.mount <App 
     crosshair=crosshair

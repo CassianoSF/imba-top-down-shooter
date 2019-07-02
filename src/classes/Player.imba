@@ -15,6 +15,7 @@ export class Player
     prop feet-animation
     prop feet-animations
     prop game
+    prop zombies
     prop bullets default: []
     prop life default: 100
     prop blood-rotation
@@ -25,6 +26,7 @@ export class Player
     prop running
     prop attacking
     prop taking-hit
+
 
     def takeHit damage
         unless taking-hit
@@ -67,8 +69,7 @@ export class Player
     def angleToZombie zombie
         let dx = pos:x + game.width/2 - zombie.pos:x
         let dy = pos:y + game.height/2 - zombie.pos:y
-        (((rotation + (Math.atan2(dx, dy)/3.1415*180.0) +200) % 360)**2)**0.5
-
+        (((rotation + (Math.atan2(dx, dy)/3.1415*180.0) +150) % 360)**2)**0.5
 
     def bulletInitPos
         if (rotation < 360 and rotation > 280) or (rotation < 180 and rotation > 90)
@@ -100,8 +101,9 @@ export class Player
         reload unless gun.ammo or reloading
         return attack if [:flashlight, :knife].includes gun.name
         if gun.ammo and can-shoot and !reloading
-            let audio = Audio.new('sounds/shotgun_shot.wav')
-            audio:volume = 0.6
+            let shot = gun.shoot-sounds[~~(Math.random * gun.shoot-sounds:length)]
+            let audio = Audio.new shot:src
+            audio:volume = shot:volume
             audio.play
             if gun.name == :shotgun
                 for i in [0,0,0,0,0,0]
@@ -111,17 +113,11 @@ export class Player
             gun.ammo -= 1
             can-shoot = no
             shooting = yes
-            if gun.name == :shotgun
-                let audio2 = Audio.new('sounds/shotgun_pump.wav')
-                audio2.play
-                window.setTimeout((do audio2.pause and delete audio2), 1500)
-
             animation = animations[gun.name]:shoot
-            window.setTimeout((do delete audio),    10000)
             window.setTimeout((do can-shoot = yes), 1000/gun.rate)
             window.setTimeout((do shooting = no),30)
 
-    def attack zombies
+    def attack
         if can-attack
             let audio = Audio.new("sounds/melee{~~(Math.random * 3)}.wav")
             audio:volume = 0.6
