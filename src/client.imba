@@ -315,7 +315,7 @@ let guns =
         rate: 2
         damage: 25
         reload-time: 1200
-        power: 5
+        power: 10
         accuracy: 30
 
     rifle: Gun.new
@@ -325,7 +325,7 @@ let guns =
         rate: 10
         damage: 10
         reload-time: 2000
-        power: 8
+        power: 15
         accuracy: 10
 
     shotgun: Gun.new
@@ -370,8 +370,8 @@ for i in Array.from(Array.new(70))
     zombies.push Zombie.new 
         id: Math.random
         pos: 
-            x: Math.random * 1000 
-            y: Math.random * 1000 
+            x: player.pos:x + Math.random * 4000 - 2000 + window:innerWidth/2
+            y: player.pos:y + Math.random * 4000 - 2000 + window:innerHeight/2
         rotation: Math.random*360
         animation: animations:zombie:idle
         animations: animations:zombie
@@ -508,7 +508,7 @@ tag App
 
         let shot = Audio.new('sounds/shotgun_shot.wav')
         shot:oncanplaythrough = do shot-loaded = true
-            
+
         @theme-start = no
         schedule interval: 16
         document.addEventListener 'keydown', do |e|
@@ -522,7 +522,7 @@ tag App
                 theme1:onended = (do theme2.play)
                 theme2:onended = (do theme3.play)
                 theme3:onended = (do theme0.play)
-                theme0.play
+                # theme0.play
                 @theme-start=yes
 
         document.addEventListener 'keyup', do |e|
@@ -584,24 +584,23 @@ tag App
         images_loaded += 1
 
     def loadSurvivalAnimations
-            # SUVIVAL ANIMATIONS
-            for gun, anims of animations:player
-                for action, anim of anims
-                    for a, i in Array.from(Array.new(anim.size))
-                        <svg:defs>
-                            <svg:pattern id="{anim.name}-{i}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
-                                <svg:image href="{anim.path}{i}.png" width="100" height="100">
+        for gun, anims of animations:player
+            for action, anim of anims
+                for a, i in Array.from(Array.new(anim.size))
+                    <svg:defs>
+                        <svg:pattern id="{anim.name}-{i}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
+                            <svg:image href="{anim.path}{i}.png" width="100" height="100">
 
     def loadFeetAnimations
-        for name, anim in animations:feet
+        for name, anim of animations:feet
             for a, i in Array.from(Array.new(anim.size))
                 <svg:defs>
                     <svg:pattern id="{anim.name}-{i}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                         <svg:image href="{anim.path}{i}.png" width="100" height="100">
 
     def render
-        let x = player.shooting ? 2 : 0
-        let y = player.shooting ? 2 : 0
+        let x = player.shooting ? Math.random*15 - 7.5 : 0
+        let y = player.shooting ? Math.random*15 - 7.5 : 0
         <self .container>
             <svg:svg .game transform="scale(1,-1)">
                 survival-animations
@@ -655,7 +654,7 @@ tag App
                         <svg:pattern id="zombie-attack-{i}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                             <svg:image href="textures/zombie/attack/skeleton-attack_{i}.png" width="100" height="100">
 
-                if Object.keys(images-loaded):length == 363 and shot-loaded
+                if Object.keys(images-loaded):length == 440 and shot-loaded
                     <svg:g transform=("translate({x - player.pos:x}, {y - player.pos:y})")>
                         <Ground player=player>
                         <Survival player=player game=game>
@@ -672,6 +671,6 @@ tag App
                 else
                     <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2}) scale(1, -1)">
                         <svg:text fill="black">
-                            "LOADING...."
+                            "LOADING.... {~~(Object.keys(images-loaded):length/4.4)}%"
 Imba.mount <App>
 

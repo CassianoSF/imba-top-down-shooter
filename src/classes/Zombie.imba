@@ -19,6 +19,8 @@ export class Zombie
     prop game
 
     def takeHit hit
+        let audio = Audio.new("sounds/zombie_hit/{~~(Math.random * 4)}.wav")
+        audio.play
         pos:x -= Math.sin((angleToPlayer + 90 ) * 3.1415 / 180) * hit.power
         pos:y -= -Math.cos((angleToPlayer + 90 ) * 3.1415 / 180) * hit.power
         unless taking-hit
@@ -65,8 +67,8 @@ export class Zombie
         zombies.push Zombie.new 
             id: Math.random
             pos: 
-                x: Math.random * 3000 
-                y: Math.random * 3000 
+                x: player.pos:x + Math.random * 2000 - 1000 + window:innerWidth/2
+                y: player.pos:y + Math.random * 2000 - 1000 + window:innerHeight/2
             rotation: Math.random * 360
             animation: animations:idle
             animations: animations
@@ -82,15 +84,16 @@ export class Zombie
 
     def update player, game, zombies
         return deleteZombie if life < 0 
-        switch state
-            when :aggro
-                execAggro
-            when :attack
-                execAttack
-            when :random
-                execRandom
-            when :walk-arround
-                execWalkArround
+        if distanceToPlayer < (game.width**2 + game.height**2)**0.5 * 2
+            switch state
+                when :aggro
+                    execAggro
+                when :attack
+                    execAttack
+                when :random
+                    execRandom
+                when :walk-arround
+                    execWalkArround
 
     def execAggro
         if distanceToPlayer < 100
@@ -106,6 +109,8 @@ export class Zombie
         
     def execAttack
         if distanceToPlayer < 100 and !attacking
+            let audio = Audio.new("sounds/zombie-attack{~~(Math.random * 3)}.ogg")
+            audio.play
             attacking = true
             animation = animations:attack
             window.setTimeout((do 

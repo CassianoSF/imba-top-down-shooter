@@ -28,6 +28,10 @@ export class Player
 
     def takeHit damage
         unless taking-hit
+            let audio = Audio.new("sounds/survivor_yell/3yell{~~(Math.random * 10)}.wav")
+            audio.play
+            let audio = Audio.new("sounds/zombie_hit/{~~(Math.random * 4)}.wav")
+            audio.play
             blood-rotation = Math.random * 360
             taking-hit = ~~(Math.random * 2 + 1)
             window.setTimeout((do taking-hit = no), 1200)
@@ -67,7 +71,7 @@ export class Player
 
 
     def bulletInitPos
-        if (rotation < 360 and rotation > 280) or (rotation < 180 and rotation > 120)
+        if (rotation < 360 and rotation > 280) or (rotation < 180 and rotation > 90)
             return {
                 x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
                 y: Math.cos((rotation + 90)* 3.1415 / 180) * 50 - pos:y
@@ -117,19 +121,23 @@ export class Player
 
     def attack zombies
         if can-attack
-            let damage = 5
-            let damage = 25 if gun.name == :knife
-            for zombie in zombies
-                if zombie.distanceToPlayer < 120 and angleToZombie(zombie) < 180
-                    zombie.takeHit({damage: (do damage), power: (do 50)})
-
+            let audio = Audio.new("sounds/melee{~~(Math.random * 3)}.wav")
+            audio.play
+            window.setTimeout((do delete audio), 1500)
             can-attack = no
             attacking = yes
             animation = animations[gun.name]:attack
             window.setTimeout(( do
+                let damage = 5
+                let damage = 25 if gun.name == :knife
+                for zombie in zombies
+                    if zombie.distanceToPlayer < 120 and angleToZombie(zombie) < 180
+                        zombie.takeHit({damage: (do damage), power: (do 50)})
+            ), 10 * 15 * 1)
+            window.setTimeout(( do
                 can-attack = yes
                 attacking = no
-            ), 10 * 15 * 2)
+            ), 10 * 15 * 3.8)
 
     def reload
         if gun.ammo != gun.cap and !reloading

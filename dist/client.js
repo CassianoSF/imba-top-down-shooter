@@ -753,7 +753,7 @@ let guns = {
 		rate: 2,
 		damage: 25,
 		reloadTime: 1200,
-		power: 5,
+		power: 10,
 		accuracy: 30}
 	),
 	
@@ -764,7 +764,7 @@ let guns = {
 		rate: 10,
 		damage: 10,
 		reloadTime: 2000,
-		power: 8,
+		power: 15,
 		accuracy: 10}
 	),
 	
@@ -815,8 +815,8 @@ for (let j = 0, items = iter$(Array.from(new Array(70))), len = items.length; j 
 	zombies.push(new Zombie(
 		{id: Math.random(),
 		pos: {
-			x: Math.random() * 1000,
-			y: Math.random() * 1000
+			x: player.pos().x + Math.random() * 4000 - 2000 + window.innerWidth / 2,
+			y: player.pos().y + Math.random() * 4000 - 2000 + window.innerHeight / 2
 		},
 		rotation: Math.random() * 360,
 		animation: animations.zombie.idle,
@@ -1085,7 +1085,7 @@ var App = Imba.defineTag('App', function(tag){
 				theme1.onended = function() { return theme2.play(); };
 				theme2.onended = function() { return theme3.play(); };
 				theme3.onended = function() { return theme0.play(); };
-				theme0.play();
+				
 				return self._themeStart = true;
 			};
 		});
@@ -1163,7 +1163,6 @@ var App = Imba.defineTag('App', function(tag){
 	};
 	
 	tag.prototype.loadSurvivalAnimations = function (){
-		// SUVIVAL ANIMATIONS
 		var dict, t0;
 		let res = [];
 		for (let gun in dict = animations.player){
@@ -1191,10 +1190,11 @@ var App = Imba.defineTag('App', function(tag){
 	};
 	
 	tag.prototype.loadFeetAnimations = function (){
-		var t0;
+		var dict, t0;
 		let res = [];
-		for (let anim = 0, items = iter$(animations.feet), len = items.length; anim < len; anim++) {
-			let res1 = [];
+		for (let name in dict = animations.feet){
+			let anim;
+			anim = dict[name];let res1 = [];
 			for (let i = 0, items = iter$(Array.from(new Array(anim.size()))), len = items.length; i < len; i++) {
 				res1.push((t0 = (t0=_1('svg:defs')).setContent(
 					t0.$.A || _1('svg:pattern',t0.$,'A',t0).set('patternUnits',"userSpaceOnUse").set('width',"100").set('height',"100").set('patternContentUnits',"userSpaceOnUse").setContent(
@@ -1213,8 +1213,8 @@ var App = Imba.defineTag('App', function(tag){
 	
 	tag.prototype.render = function (){
 		var $ = this.$;
-		let x = player.shooting() ? 2 : 0;
-		let y = player.shooting() ? 2 : 0;
+		let x = player.shooting() ? (Math.random() * 15 - 7.5) : 0;
+		let y = player.shooting() ? (Math.random() * 15 - 7.5) : 0;
 		return this.$open(0).flag('container').setChildren(
 			$[0] || _1('svg:svg',$,0,this).flag('game').set('transform',"scale(1,-1)")
 		,2).synced((
@@ -1346,7 +1346,7 @@ var App = Imba.defineTag('App', function(tag){
 					};return $0;
 				})($[22] || _2($,22,$[0])),
 				
-				(Object.keys(this.imagesLoaded()).length == 363 && this.shotLoaded()) ? Imba.static([
+				(Object.keys(this.imagesLoaded()).length == 440 && this.shotLoaded()) ? Imba.static([
 					($[23] || _1('svg:g',$,23,0)).set('transform',(("translate(" + (x - player.pos().x) + ", " + (y - player.pos().y) + ")"))).setContent([
 						($[24] || _1(Ground,$,24,23)).setPlayer(player).end(),
 						($[25] || _1(Survival,$,25,23)).setPlayer(player).setGame(game).end(),
@@ -1371,9 +1371,9 @@ var App = Imba.defineTag('App', function(tag){
 					($[29] || _1(Aim,$,29,0)).setCrosshair(crosshair).end()
 				],2,1) : (
 					($[30] || _1('svg:g',$,30,0).setContent(
-						$[31] || _1('svg:text',$,31,30).set('fill',"black").setText("LOADING....")
+						$[31] || _1('svg:text',$,31,30).set('fill',"black")
 					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
-						$[31].end()
+						$[31].setText("LOADING.... " + (~~(Object.keys(this.imagesLoaded()).length / 4.4)) + "%").end()
 					,true))
 				)
 			],1).end()
@@ -5292,6 +5292,10 @@ Player.prototype.setTakingHit = function(v){ this._takingHit = v; return this; }
 Player.prototype.takeHit = function (damage){
 	var self = this, v_;
 	if (!(self.takingHit())) {
+		let audio = new Audio(("sounds/survivor_yell/3yell" + (~~(Math.random() * 10)) + ".wav"));
+		audio.play();
+		audio = new Audio(("sounds/zombie_hit/" + (~~(Math.random() * 4)) + ".wav"));
+		audio.play();
 		self.setBloodRotation(Math.random() * 360);
 		self.setTakingHit(~~(Math.random() * 2 + 1));
 		window.setTimeout(function() { return (self.setTakingHit(false),false); },1200);
@@ -5351,7 +5355,7 @@ Player.prototype.angleToZombie = function (zombie){
 
 
 Player.prototype.bulletInitPos = function (){
-	if ((this.rotation() < 360 && this.rotation() > 280) || (this.rotation() < 180 && this.rotation() > 120)) {
+	if ((this.rotation() < 360 && this.rotation() > 280) || (this.rotation() < 180 && this.rotation() > 90)) {
 		return {
 			x: Math.sin((this.rotation() + 90) * 3.1415 / 180) * 100 + this.pos().x,
 			y: Math.cos((this.rotation() + 90) * 3.1415 / 180) * 50 - this.pos().y
@@ -5415,22 +5419,29 @@ Player.prototype.shoot = function (){
 Player.prototype.attack = function (zombies){
 	var self = this;
 	if (self.canAttack()) {
-		let damage = 5;
-		if (self.gun().name() == 'knife') { let damage = 25 };
-		for (let i = 0, items = iter$(zombies), len = items.length, zombie; i < len; i++) {
-			zombie = items[i];
-			if (zombie.distanceToPlayer() < 120 && self.angleToZombie(zombie) < 180) {
-				zombie.takeHit({damage: function() { return damage; },power: function() { return 50; }});
-			};
-		};
-		
+		let audio = new Audio(("sounds/melee" + (~~(Math.random() * 3)) + ".wav"));
+		audio.play();
+		window.setTimeout(function() { var v_;
+		return (((v_ = audio),delete audio, v_)); },1500);
 		self.setCanAttack(false);
 		self.setAttacking(true);
 		self.setAnimation(self.animations()[self.gun().name()].attack);
+		window.setTimeout(function() {
+			let damage = 5;
+			if (self.gun().name() == 'knife') { let damage = 25 };
+			let res = [];
+			for (let i = 0, items = iter$(zombies), len = items.length, zombie; i < len; i++) {
+				zombie = items[i];
+				res.push((zombie.distanceToPlayer() < 120 && self.angleToZombie(zombie) < 180) && (
+					zombie.takeHit({damage: function() { return damage; },power: function() { return 50; }})
+				));
+			};
+			return res;
+		},10 * 15 * 1);
 		return window.setTimeout(function() {
 			self.setCanAttack(true);
 			return (self.setAttacking(false),false);
-		},10 * 15 * 2);
+		},10 * 15 * 3.8);
 	};
 };
 
@@ -5683,6 +5694,8 @@ Zombie.prototype.setGame = function(v){ this._game = v; return this; };
 
 Zombie.prototype.takeHit = function (hit){
 	var self = this, v_;
+	let audio = new Audio(("sounds/zombie_hit/" + (~~(Math.random() * 4)) + ".wav"));
+	audio.play();
 	self.pos().x -= Math.sin((self.angleToPlayer() + 90) * 3.1415 / 180) * hit.power();
 	self.pos().y -= -Math.cos((self.angleToPlayer() + 90) * 3.1415 / 180) * hit.power();
 	if (!(self.takingHit())) {
@@ -5741,8 +5754,8 @@ Zombie.prototype.deleteZombie = function (){
 	this.zombies().push(new Zombie(
 		{id: Math.random(),
 		pos: {
-			x: Math.random() * 3000,
-			y: Math.random() * 3000
+			x: this.player().pos().x + Math.random() * 2000 - 1000 + window.innerWidth / 2,
+			y: this.player().pos().y + Math.random() * 2000 - 1000 + window.innerHeight / 2
 		},
 		rotation: Math.random() * 360,
 		animation: this.animations().idle,
@@ -5761,23 +5774,25 @@ Zombie.prototype.deleteZombie = function (){
 
 Zombie.prototype.update = function (player,game,zombies){
 	if (this.life() < 0) { return this.deleteZombie() };
-	switch (this.state()) {
-		case 'aggro': {
-			return this.execAggro();
-			break;
-		}
-		case 'attack': {
-			return this.execAttack();
-			break;
-		}
-		case 'random': {
-			return this.execRandom();
-			break;
-		}
-		case 'walkArround': {
-			return this.execWalkArround();
-			break;
-		}
+	if (this.distanceToPlayer() < (game.width() ** 2 + game.height() ** 2) ** 0.5 * 2) {
+		switch (this.state()) {
+			case 'aggro': {
+				return this.execAggro();
+				break;
+			}
+			case 'attack': {
+				return this.execAttack();
+				break;
+			}
+			case 'random': {
+				return this.execRandom();
+				break;
+			}
+			case 'walkArround': {
+				return this.execWalkArround();
+				break;
+			}
+		};
 	};
 };
 
@@ -5800,6 +5815,8 @@ Zombie.prototype.execAggro = function (){
 Zombie.prototype.execAttack = function (){
 	var self = this, v_;
 	if (self.distanceToPlayer() < 100 && !(self.attacking())) {
+		let audio = new Audio(("sounds/zombie-attack" + (~~(Math.random() * 3)) + ".ogg"));
+		audio.play();
 		self.setAttacking(true);
 		self.setAnimation(self.animations().attack);
 		return window.setTimeout(function() {
