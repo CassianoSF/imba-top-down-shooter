@@ -415,23 +415,25 @@ for (let j = 0, items = iter$(Object.keys(Array.from(new Array(3)))), len = item
 
 let barrels = [];
 
-for (let j = 0, items = iter$(Array.from(new Array(30))), len = items.length; j < len; j++) {
+for (let j = 0, items = iter$(Array.from(new Array(100))), len = items.length; j < len; j++) {
 	barrels.push(
-		{x: Math.random() * 2000,
-		y: Math.random() * 2000,
+		{x: Math.random() * 5000 - 2000,
+		y: Math.random() * 5000,
 		rotation: Math.random() * 360,
-		id: Math.random()}
+		id: Math.random(),
+		size: 30}
 	);
 };
 
 let boxes = [];
 
-for (let j = 0, items = iter$(Array.from(new Array(30))), len = items.length; j < len; j++) {
+for (let j = 0, items = iter$(Array.from(new Array(100))), len = items.length; j < len; j++) {
 	boxes.push(
-		{x: Math.random() * 2000,
-		y: Math.random() * 2000,
+		{x: Math.random() * 5000 - 2000,
+		y: Math.random() * 5000,
 		rotation: Math.random() * 360,
-		id: Math.random()}
+		id: Math.random(),
+		size: 70}
 	);
 };
 
@@ -858,7 +860,9 @@ let player = new Player(
 	animations: animations.player,
 	feetAnimation: animations.feet.idle,
 	feetAnimations: animations.feet,
-	game: game}
+	game: game,
+	boxes: boxes,
+	barrels: barrels}
 );
 
 game.setPlayer(player);
@@ -876,11 +880,14 @@ for (let j = 0, items = iter$(Array.from(new Array(70))), len = items.length; j 
 		animations: animations.zombie,
 		state: 'random',
 		life: 100,
+		maxLife: 100,
 		speed: 1,
-		maxSpeed: 6,
+		maxSpeed: 5,
 		game: game,
 		zombies: zombies,
-		player: player}
+		player: player,
+		boxes: boxes,
+		barrels: barrels}
 	));
 };
 
@@ -4843,6 +4850,10 @@ Player.prototype.game = function(v){ return this._game; }
 Player.prototype.setGame = function(v){ this._game = v; return this; };
 Player.prototype.zombies = function(v){ return this._zombies; }
 Player.prototype.setZombies = function(v){ this._zombies = v; return this; };
+Player.prototype.barrels = function(v){ return this._barrels; }
+Player.prototype.setBarrels = function(v){ this._barrels = v; return this; };
+Player.prototype.boxes = function(v){ return this._boxes; }
+Player.prototype.setBoxes = function(v){ this._boxes = v; return this; };
 Player.prototype.__bullets = {'default': [],name: 'bullets'};
 Player.prototype.bullets = function(v){ return this._bullets; }
 Player.prototype.setBullets = function(v){ this._bullets = v; return this; }
@@ -4882,6 +4893,28 @@ Player.prototype.takeHit = function (damage){
 	return (self.setLife(v_ = self.life() - damage),v_);
 };
 
+Player.prototype.distanceTo = function (obj){
+	let dx = obj.x - this.pos().x - this.game().width() / 2;
+	let dy = obj.y - this.pos().y - this.game().height() / 2;
+	return (dy ** 2 + dx ** 2) ** 0.5;
+};
+
+Player.prototype.colisionObj = function (){
+	for (let i = 0, items = iter$(this.barrels()), len = items.length, barrel; i < len; i++) {
+		barrel = items[i];
+		if (this.distanceTo(barrel) < barrel.size) {
+			return true;
+		};
+	};
+	for (let i = 0, items = iter$(this.boxes()), len = items.length, box; i < len; i++) {
+		box = items[i];
+		if (this.distanceTo(box) < box.size) {
+			return true;
+		};
+	};
+	return false;
+};
+
 Player.prototype.move = function (directions){
 	var v_;
 	if (this.running() && directions.length) { (this.setFeetAnimation(v_ = this.feetAnimations().run),v_) };
@@ -4902,28 +4935,51 @@ Player.prototype.move = function (directions){
 		step *= 2;
 	};
 	
-	let res = [];
 	for (let i = 0, items = iter$(directions), len = items.length; i < len; i++) {
 		switch (items[i]) {
 			case 'left': {
-				res.push((this.pos().x -= step));
+				this.pos().x -= step;
 				break;
 			}
 			case 'right': {
-				res.push((this.pos().x += step));
+				this.pos().x += step;
 				break;
 			}
 			case 'down': {
-				res.push((this.pos().y -= step));
+				this.pos().y -= step;
 				break;
 			}
 			case 'up': {
-				res.push((this.pos().y += step));
+				this.pos().y += step;
 				break;
 			}
 		};
 	};
-	return res;
+	
+	if (this.colisionObj()) {
+		let res = [];
+		for (let i = 0, items = iter$(directions), len = items.length; i < len; i++) {
+			switch (items[i]) {
+				case 'left': {
+					res.push((this.pos().x += step));
+					break;
+				}
+				case 'right': {
+					res.push((this.pos().x -= step));
+					break;
+				}
+				case 'down': {
+					res.push((this.pos().y += step));
+					break;
+				}
+				case 'up': {
+					res.push((this.pos().y -= step));
+					break;
+				}
+			};
+		};
+		return res;
+	};
 };
 
 Player.prototype.angleToZombie = function (zombie){
@@ -5059,7 +5115,7 @@ function Bullet(_0){
 		let v;
 		v = dict[k];if (_0) { this[("_" + k)] = (_0)[k] };
 	};
-	this.fly(this.player());
+	this.fly();
 };
 exports.Bullet = Bullet; // export class 
 Bullet.prototype.power = function(v){ return this._power; }
@@ -5114,7 +5170,7 @@ Bullet.prototype.update = function (zombies,game,player){
 	return res;
 };
 
-Bullet.prototype.fly = function (player){
+Bullet.prototype.fly = function (){
 	var self = this;
 	return window.setTimeout(function() {
 		self.pos().x += Math.sin((self.direction() + 90) * 3.1415 / 180) * 60;
@@ -5123,7 +5179,7 @@ Bullet.prototype.fly = function (player){
 			self.deleteBullet();
 			return;
 		};
-		return self.fly(player);
+		return self.fly();
 	},16);;
 };
 
@@ -5237,6 +5293,8 @@ Zombie.prototype.animations = function(v){ return this._animations; }
 Zombie.prototype.setAnimations = function(v){ this._animations = v; return this; };
 Zombie.prototype.life = function(v){ return this._life; }
 Zombie.prototype.setLife = function(v){ this._life = v; return this; };
+Zombie.prototype.maxLife = function(v){ return this._maxLife; }
+Zombie.prototype.setMaxLife = function(v){ this._maxLife = v; return this; };
 Zombie.prototype.speed = function(v){ return this._speed; }
 Zombie.prototype.setSpeed = function(v){ this._speed = v; return this; };
 Zombie.prototype.maxSpeed = function(v){ return this._maxSpeed; }
@@ -5259,11 +5317,19 @@ Zombie.prototype.takingHit = function(v){ return this._takingHit; }
 Zombie.prototype.setTakingHit = function(v){ this._takingHit = v; return this; };
 Zombie.prototype.attacking = function(v){ return this._attacking; }
 Zombie.prototype.setAttacking = function(v){ this._attacking = v; return this; };
+Zombie.prototype.__colisionTimes = {'default': 0,name: 'colisionTimes'};
+Zombie.prototype.colisionTimes = function(v){ return this._colisionTimes; }
+Zombie.prototype.setColisionTimes = function(v){ this._colisionTimes = v; return this; }
+Zombie.prototype._colisionTimes = 0;
 
 Zombie.prototype.player = function(v){ return this._player; }
 Zombie.prototype.setPlayer = function(v){ this._player = v; return this; };
 Zombie.prototype.zombies = function(v){ return this._zombies; }
 Zombie.prototype.setZombies = function(v){ this._zombies = v; return this; };
+Zombie.prototype.barrels = function(v){ return this._barrels; }
+Zombie.prototype.setBarrels = function(v){ this._barrels = v; return this; };
+Zombie.prototype.boxes = function(v){ return this._boxes; }
+Zombie.prototype.setBoxes = function(v){ this._boxes = v; return this; };
 Zombie.prototype.game = function(v){ return this._game; }
 Zombie.prototype.setGame = function(v){ this._game = v; return this; };
 
@@ -5300,8 +5366,21 @@ Zombie.prototype.distanceToZombie = function (zombie){
 };
 
 Zombie.prototype.moveForward = function (){
-	this.pos().x += Math.sin((this.rotation() + 90) * 3.1415 / 180) * this.speed();
-	return this.pos().y += -Math.cos((this.rotation() + 90) * 3.1415 / 180) * this.speed();
+	var self = this, v_;
+	if (self.colideObj()) {
+		self.setColisionTimes(self.colisionTimes() + 1);
+		self.pos().x -= Math.sin((self.rotation() + 90) * 3.1415 / 180) * self.speed();
+		self.pos().y -= -Math.cos((self.rotation() + 90) * 3.1415 / 180) * self.speed();
+		if (self.colisionTimes() > 20) {
+			self.setState('walkArroundObject');
+			window.setTimeout(function() { var v_;
+			return (self.setState(v_ = 'random'),v_); },1000);
+			return (self.setColisionTimes(v_ = 0),v_);
+		};
+	} else {
+		self.pos().x += Math.sin((self.rotation() + 90) * 3.1415 / 180) * self.speed();
+		return self.pos().y += -Math.cos((self.rotation() + 90) * 3.1415 / 180) * self.speed();
+	};
 };
 
 Zombie.prototype.moveBackward = function (){
@@ -5309,7 +5388,13 @@ Zombie.prototype.moveBackward = function (){
 	return this.pos().y -= -Math.cos((this.rotation() + 90) * 3.1415 / 180) * this.speed();
 };
 
-Zombie.prototype.colide = function (){
+Zombie.prototype.distanceTo = function (obj){
+	let dx = obj.x - this.pos().x;
+	let dy = obj.y - this.pos().y;
+	return (dy ** 2 + dx ** 2) ** 0.5;
+};
+
+Zombie.prototype.colideZombie = function (){
 	for (let i = 0, items = iter$(this.zombies()), len = items.length, zombie; i < len; i++) {
 		zombie = items[i];
 		if (this.distanceToZombie(zombie) < 30 && zombie != this) {
@@ -5319,9 +5404,25 @@ Zombie.prototype.colide = function (){
 	return false;
 };
 
+Zombie.prototype.colideObj = function (){
+	for (let i = 0, items = iter$(this.barrels()), len = items.length, barrel; i < len; i++) {
+		barrel = items[i];
+		if (this.distanceTo(barrel) < 50) {
+			return true;
+		};
+	};
+	for (let i = 0, items = iter$(this.boxes()), len = items.length, box; i < len; i++) {
+		box = items[i];
+		if (this.distanceTo(box) < 50) {
+			return true;
+		};
+	};
+	return false;
+};
+
 Zombie.prototype.playerDetected = function (){
 	let angleDiff = this.angleToPlayer() - this.rotation();
-	return (angleDiff ** 2) ** 0.5 < 30 && this.distanceToPlayer() < 1000 || this.distanceToPlayer() < 100;
+	return (angleDiff ** 2) ** 0.5 < 30 && this.distanceToPlayer() < 3000 || this.distanceToPlayer() < 100;
 };
 
 
@@ -5336,13 +5437,17 @@ Zombie.prototype.deleteZombie = function (){
 		animation: this.animations().idle,
 		animations: this.animations(),
 		state: 'random',
-		life: this.speed() * 20,
-		speed: this.speed(),
-		maxSpeed: this.speed() + 1,
+		life: this.maxLife() + 20,
+		maxLife: this.maxLife() + 20,
+		speed: this.speed() + 0.2,
+		maxSpeed: this.speed() + 0.2,
 		game: this.game(),
+		player: this.player(),
 		zombies: this.zombies(),
-		player: this.player()}
+		boxes: this.boxes(),
+		barrels: this.barrels()}
 	));
+	
 	var index = this.zombies().indexOf(this);
 	if ((index !== -1)) { return this.zombies().splice(index,1) };
 };
@@ -5363,8 +5468,12 @@ Zombie.prototype.update = function (player,game,zombies){
 				return this.execRandom();
 				break;
 			}
-			case 'walkArround': {
-				return this.execWalkArround();
+			case 'walkArroundZombie': {
+				return this.execWalkArroundZombie();
+				break;
+			}
+			case 'walkArroundObject': {
+				return this.execWalkArroundObject();
 				break;
 			}
 		};
@@ -5373,10 +5482,10 @@ Zombie.prototype.update = function (player,game,zombies){
 
 Zombie.prototype.execAggro = function (){
 	var self = this, v_;
-	if (self.distanceToPlayer() < 100) {
+	if (self.distanceToPlayer() < 50) {
 		return (self.setState(v_ = 'attack'),v_);
-	} else if (self.colide()) {
-		self.setState('walkArround');
+	} else if (self.colideZombie()) {
+		self.setState('walkArroundZombie');
 		return window.setTimeout(function() { var $1;
 		return (self.setState($1 = 'aggro'),$1); },300);
 	} else {
@@ -5401,8 +5510,8 @@ Zombie.prototype.execAttack = function (){
 				self.player().takeHit(self.damage());
 			};
 			self.setAttacking(false);
-			if (self.colide()) {
-				self.setState('walkArround');
+			if (self.colideZombie()) {
+				self.setState('walkArroundZombie');
 				return window.setTimeout(function() { var v_;
 				return (self.setState(v_ = 'aggro'),v_); },300);
 			} else {
@@ -5435,7 +5544,7 @@ Zombie.prototype.execRandom = function (){
 	};
 };
 
-Zombie.prototype.execWalkArround = function (){
+Zombie.prototype.execWalkArroundZombie = function (){
 	var self = this;
 	if (!(self.alreadyTurned())) {
 		self.setAlreadyTurned(true);
@@ -5446,6 +5555,16 @@ Zombie.prototype.execWalkArround = function (){
 	return self.moveForward();
 };
 
+Zombie.prototype.execWalkArroundObject = function (){
+	var self = this;
+	if (!(self.alreadyTurned())) {
+		self.setAlreadyTurned(true);
+		self.setSpeed(3);
+		self.setRotation(self.rotation() + [90,135,180,-135,-90][~~(Math.random() * 4)]);
+		window.setTimeout(function() { return (self.setAlreadyTurned(false),false); },1000);
+	};
+	return self.moveForward();
+};
 
 
 
@@ -5923,8 +6042,8 @@ var App = Imba.defineTag('App', function(tag){
 	
 	tag.prototype.render = function (){
 		var $ = this.$, self = this;
-		let x = self.player().shooting() ? (Math.random() * 15 - 7.5) : 0;
-		let y = self.player().shooting() ? (Math.random() * 15 - 7.5) : 0;
+		let x = self.player().shooting() ? (Math.random() * self.player().gun().power() - self.player().gun().power() / 2) : 0;
+		let y = self.player().shooting() ? (Math.random() * self.player().gun().power() - self.player().gun().power() / 2) : 0;
 		return self.$open(0).flag('container').setChildren(
 			$[0] || _1('svg:svg',$,0,self).flag('game').set('transform',"scale(1,-1)")
 		,2).synced((
@@ -5936,38 +6055,44 @@ var App = Imba.defineTag('App', function(tag){
 				(Object.keys(self.imagesLoaded()).length == 440 && Object.keys(self.audiosLoaded()).length == Object.keys(self.audios()).length) ? Imba.static([
 					($[2] || _1('svg:g',$,2,0)).set('transform',(("translate(" + (x - self.player().pos().x) + ", " + (y - self.player().pos().y) + ")"))).setContent([
 						($[3] || _1(Ground,$,3,2)).setPlayer(self.player()).end(),
-						($[4] || _1(Survival,$,4,2)).setPlayer(self.player()).setGame(self.game()).end(),
+						(function tagLoop($0) {
+							for (let i = 0, items = iter$(self.game().boxes()), len = $0.taglen = items.length; i < len; i++) {
+								($0[i] || _1(Box,$0,i)).setBox(items[i]).end();
+							};return $0;
+						})($[4] || _2($,4,$[2])),
+						(function tagLoop($0) {
+							for (let i = 0, items = iter$(self.game().barrels()), len = $0.taglen = items.length; i < len; i++) {
+								($0[i] || _1(Barrel,$0,i)).setBarrel(items[i]).end();
+							};return $0;
+						})($[5] || _2($,5,$[2])),
+						($[6] || _1(Survival,$,6,2)).setPlayer(self.player()).setGame(self.game()).end(),
 						(function tagLoop($0) {
 							var $$ = $0.$iter();
 							for (let i = 0, items = iter$(self.zombies()), len = items.length, zombie; i < len; i++) {
 								zombie = items[i];
 								if (zombie) { $$.push(($0[i] || _1(Undead,$0,i)).setZombies(self.zombies()).setZombie(zombie).setPlayer(self.player()).setGame(self.game()).end()) };
 							};return $$;
-						})($[5] || _3($,5,$[2])),
+						})($[7] || _3($,7,$[2])),
 						(function tagLoop($0) {
 							var $$ = $0.$iter();
 							for (let i = 0, items = iter$(self.player().bullets()), len = items.length, bullet; i < len; i++) {
 								bullet = items[i];
 								if (bullet) { $$.push(($0[i] || _1(Projectile,$0,i)).setBullet(bullet).setPlayer(self.player()).setZombies(self.zombies()).setGame(self.game()).end()) };
 							};return $$;
-						})($[6] || _3($,6,$[2]))
-					
-					
-					
-					
+						})($[8] || _3($,8,$[2]))
 					],1).end(),
-					($[7] || _1(Hud,$,7,0)).setPlayer(self.player()).setGame(self.game()).end(),
-					($[8] || _1(Aim,$,8,0)).setCrosshair(self.crosshair()).end()
+					($[9] || _1(Hud,$,9,0)).setPlayer(self.player()).setGame(self.game()).end(),
+					($[10] || _1(Aim,$,10,0)).setCrosshair(self.crosshair()).end()
 				],2,1) : Imba.static([
-					($[9] || _1('svg:g',$,9,0).setContent(
-						$[10] || _1('svg:text',$,10,9).set('fill',"black")
-					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
-						$[10].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 440 * 40 + Object.keys(self.audiosLoaded()).length / Object.keys(self.audios()).length * 60)) + "%").end()
-					,true)),
 					($[11] || _1('svg:g',$,11,0).setContent(
-						$[12] || _1('svg:text',$,12,11).set('fill',"black").setText("Tip: ZoomOut to 80%")
+						$[12] || _1('svg:text',$,12,11).set('fill',"black")
+					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
+						$[12].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 440 * 40 + Object.keys(self.audiosLoaded()).length / Object.keys(self.audios()).length * 60)) + "%").end()
+					,true)),
+					($[13] || _1('svg:g',$,13,0).setContent(
+						$[14] || _1('svg:text',$,14,13).set('fill',"black").setText("Tip: ZoomOut to 80%")
 					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2 + 100) + ") scale(1, -1)")).end((
-						$[12].end()
+						$[14].end()
 					,true))
 				],2,2)
 			],1).end()

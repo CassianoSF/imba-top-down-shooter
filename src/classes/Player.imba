@@ -16,6 +16,8 @@ export class Player
     prop feet-animations
     prop game
     prop zombies
+    prop barrels
+    prop boxes
     prop bullets default: []
     prop life default: 100
     prop blood-rotation
@@ -38,6 +40,20 @@ export class Player
             taking-hit = ~~(Math.random * 2 + 1)
             window.setTimeout((do taking-hit = no), 1200)
         life -= damage
+
+    def distanceTo obj
+        let dx = obj:x - pos:x - game.width/2
+        let dy = obj:y - pos:y - game.height/2
+        (dy**2 + dx**2)**0.5
+
+    def colisionObj
+        for barrel in barrels
+            if distanceTo(barrel) < barrel:size
+                return true
+        for box in boxes
+            if distanceTo(box) < box:size
+                return true
+        return no
 
     def move directions
         feet-animation = feet-animations:run if running and directions:length
@@ -65,6 +81,18 @@ export class Player
                     pos:y -= step        
                 when :up
                     pos:y += step
+
+        if colisionObj
+            for d in directions
+                switch d
+                    when :left
+                        pos:x += step
+                    when :right
+                        pos:x -= step
+                    when :down
+                        pos:y += step        
+                    when :up
+                        pos:y -= step
 
     def angleToZombie zombie
         let dx = pos:x + game.width/2 - zombie.pos:x

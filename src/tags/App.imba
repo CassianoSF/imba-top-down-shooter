@@ -214,8 +214,8 @@ export tag App
                         <svg:image href="{anim.path}{i}.png" width="100" height="100">
 
     def render
-        let x = player.shooting ? Math.random*15 - 7.5 : 0
-        let y = player.shooting ? Math.random*15 - 7.5 : 0
+        let x = player.shooting ? Math.random * player.gun.power - player.gun.power/2 : 0
+        let y = player.shooting ? Math.random * player.gun.power - player.gun.power/2 : 0
         <self .container>
             <svg:svg .game transform="scale(1,-1)">
                 survival-animations
@@ -225,15 +225,15 @@ export tag App
                 if Object.keys(images-loaded):length == 440 and Object.keys(audios-loaded):length == Object.keys(audios):length
                     <svg:g transform=("translate({x - player.pos:x}, {y - player.pos:y})")>
                         <Ground player=player>
+                        for box in game.boxes
+                            <Box box=box>
+                        for barrel in game.barrels
+                            <Barrel barrel=barrel>
                         <Survival player=player game=game>
                         for zombie in zombies
                             <Undead zombies=zombies zombie=zombie player=player game=game> if zombie
                         for bullet in player.bullets
                             <Projectile bullet=bullet player=player zombies=zombies game=game> if bullet
-                        # for box in game.boxes
-                        #     <Box box=box>
-                        # for barrel in game.barrels
-                        #     <Barrel barrel=barrel>
                     <Hud player=player game=game>
                     <Aim crosshair=crosshair>
                 else

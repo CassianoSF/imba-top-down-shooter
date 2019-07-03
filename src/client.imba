@@ -32,21 +32,23 @@ for i in Object.keys(Array.from(Array.new(3)))
 
 let barrels = []
 
-for i in Array.from(Array.new(30))
+for i in Array.from(Array.new(100))
     barrels.push 
-        x: Math.random * 2000
-        y: Math.random * 2000
+        x: Math.random * 5000 - 2000
+        y: Math.random * 5000
         rotation: Math.random * 360
         id: Math.random
+        size: 30
 
 let boxes = []
 
-for i in Array.from(Array.new(30))
+for i in Array.from(Array.new(100))
     boxes.push
-        x: Math.random * 2000
-        y: Math.random * 2000
+        x: Math.random * 5000 - 2000
+        y: Math.random * 5000
         rotation: Math.random * 360
         id: Math.random
+        size: 70
 
 let crosshair = Crosshair.new(x:0, y:0)
 
@@ -397,6 +399,8 @@ let player = Player.new
     feet-animation: animations:feet:idle
     feet-animations: animations:feet
     game: game
+    boxes: boxes
+    barrels: barrels
 
 game.player = player
 
@@ -412,11 +416,14 @@ for i in Array.from(Array.new(70))
         animations: animations:zombie
         state: :random
         life: 100
+        max-life: 100
         speed: 1
-        max-speed: 6
+        max-speed: 5
         game: game
         zombies: zombies
         player: player
+        boxes: boxes
+        barrels: barrels
 
 player.zombies = zombies
 

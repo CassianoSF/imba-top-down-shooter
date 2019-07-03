@@ -34,17 +34,17 @@ export class Bullet
                 deleteBullet
                 return
 
-    def fly player
+    def fly
         window.setTimeout( (do
             pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 60
             pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 60
             if distanceToPlayer > 5000
                 deleteBullet
                 return
-            fly player
+            fly
         ), 16);
 
     def initialize
         for k, v of ($1) 
             self["_{k}"] = ($1)[k] if $1
-        fly player
+        fly
