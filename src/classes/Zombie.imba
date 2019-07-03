@@ -30,7 +30,8 @@ export class Zombie
         unless taking-hit
             life -= hit.damage
             taking-hit = ~~(Math.random * 5 + 1)
-            window.setTimeout((do taking-hit = no), 50)
+            setTimeout(&, 50) do 
+                taking-hit = no
         state = :aggro
 
     def distanceToPlayer
@@ -55,7 +56,7 @@ export class Zombie
             pos:y -= -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
             if colision-times > 20
                 state = :walk-arround-object
-                window.setTimeout((do state = :random), 1000)
+                setTimeout((do state = :random), 1000)
                 colision-times = 0
         else
             pos:x += Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
@@ -133,7 +134,7 @@ export class Zombie
             state = :attack
         elif colideZombie
             state = :walk-arround-zombie
-            window.setTimeout((do state = :aggro), 300)
+            setTimeout((do state = :aggro), 300)
         else
             speed = max-speed
             rotation = angleToPlayer 
@@ -147,16 +148,16 @@ export class Zombie
             audio.play
             attacking = true
             animation = animations:attack
-            window.setTimeout((do 
+            setTimeout(&, 300) do 
                 if distanceToPlayer < 100
                     player.takeHit(damage)
                 attacking = false
                 if colideZombie
                     state = :walk-arround-zombie
-                    window.setTimeout((do state = :aggro), 300)
+                    setTimeout(&, 300) do 
+                        state = :aggro
                 else
                     state = :aggro
-            ), 300)
         elif !attacking
             state = :aggro
 
@@ -182,7 +183,8 @@ export class Zombie
             already-turned = true
             speed = 3
             rotation += [30, 50, 70, 90, -90, -70, -50, -30][~~(Math.random * 7)]
-            window.setTimeout((do already-turned = false), 1000)
+            setTimeout(&, 1000) do
+                already-turned = false
         moveForward  
 
     def execWalkArroundObject
@@ -190,7 +192,8 @@ export class Zombie
             already-turned = true
             speed = 3
             rotation += [90, 135, 180, -135, -90][~~(Math.random * 4)]
-            window.setTimeout((do already-turned = false), 1000)
+            setTimeout(&, 1000) do
+                already-turned = false
         moveForward 
 
     def initialize player, game, zombies

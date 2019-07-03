@@ -810,7 +810,7 @@ let guns = {
 		ammo: 30,
 		cap: 30,
 		rate: 10,
-		damage: 10,
+		damage: 25,
 		reloadTime: 2000,
 		power: 15,
 		accuracy: 10,
@@ -824,7 +824,7 @@ let guns = {
 		ammo: 4,
 		cap: 4,
 		rate: 0.75,
-		damage: 25,
+		damage: 35,
 		reloadTime: 3000,
 		power: 25,
 		accuracy: 8,
@@ -4888,7 +4888,7 @@ Player.prototype.takeHit = function (damage){
 		audio.play();
 		self.setBloodRotation(Math.random() * 360);
 		self.setTakingHit(~~(Math.random() * 2 + 1));
-		window.setTimeout(function() { return (self.setTakingHit(false),false); },1200);
+		setTimeout(function() { return (self.setTakingHit(false),false); },1200);
 	};
 	return (self.setLife(v_ = self.life() - damage),v_);
 };
@@ -5039,8 +5039,8 @@ Player.prototype.shoot = function (){
 		self.setCanShoot(false);
 		self.setShooting(true);
 		self.setAnimation(self.animations()[self.gun().name()].shoot);
-		window.setTimeout(function() { return (self.setCanShoot(true),true); },1000 / self.gun().rate());
-		return window.setTimeout(function() { return (self.setShooting(false),false); },30);
+		setTimeout(function() { return (self.setCanShoot(true),true); },1000 / self.gun().rate());
+		return setTimeout(function() { return (self.setShooting(false),false); },30);
 	};
 };
 
@@ -5050,12 +5050,12 @@ Player.prototype.attack = function (){
 		let audio = new Audio(("sounds/melee" + (~~(Math.random() * 3)) + ".wav"));
 		audio.volume = 0.6;
 		audio.play();
-		window.setTimeout(function() { var v_;
+		setTimeout(function() { var v_;
 		return (((v_ = audio),delete audio, v_)); },1500);
 		self.setCanAttack(false);
 		self.setAttacking(true);
 		self.setAnimation(self.animations()[self.gun().name()].attack);
-		window.setTimeout(function() {
+		setTimeout(function() {
 			let damage = 5;
 			if (self.gun().name() == 'knife') { let damage = 25 };
 			let res = [];
@@ -5067,7 +5067,7 @@ Player.prototype.attack = function (){
 			};
 			return res;
 		},10 * 15 * 1);
-		return window.setTimeout(function() {
+		return setTimeout(function() {
 			self.setCanAttack(true);
 			return (self.setAttacking(false),false);
 		},10 * 15 * 3.8);
@@ -5085,7 +5085,7 @@ Player.prototype.reload = function (){
 		self.setCanShoot(false);
 		self.setReloading(true);
 		self.setAnimation(self.animations()[self.gun().name()].reload);
-		return window.setTimeout(function() {
+		return setTimeout(function() {
 			var v_, $1, cap_;
 			self.setReloading(false);
 			(((v_ = audio),delete audio, v_));
@@ -5342,7 +5342,9 @@ Zombie.prototype.takeHit = function (hit){
 	if (!(self.takingHit())) {
 		self.setLife(self.life() - hit.damage());
 		self.setTakingHit(~~(Math.random() * 5 + 1));
-		window.setTimeout(function() { return (self.setTakingHit(false),false); },50);
+		setTimeout(function() {
+			return (self.setTakingHit(false),false);
+		},50);
 	};
 	return (self.setState(v_ = 'aggro'),v_);
 };
@@ -5373,7 +5375,7 @@ Zombie.prototype.moveForward = function (){
 		self.pos().y -= -Math.cos((self.rotation() + 90) * 3.1415 / 180) * self.speed();
 		if (self.colisionTimes() > 20) {
 			self.setState('walkArroundObject');
-			window.setTimeout(function() { var v_;
+			setTimeout(function() { var v_;
 			return (self.setState(v_ = 'random'),v_); },1000);
 			return (self.setColisionTimes(v_ = 0),v_);
 		};
@@ -5486,7 +5488,7 @@ Zombie.prototype.execAggro = function (){
 		return (self.setState(v_ = 'attack'),v_);
 	} else if (self.colideZombie()) {
 		self.setState('walkArroundZombie');
-		return window.setTimeout(function() { var $1;
+		return setTimeout(function() { var $1;
 		return (self.setState($1 = 'aggro'),$1); },300);
 	} else {
 		self.setSpeed(self.maxSpeed());
@@ -5504,7 +5506,7 @@ Zombie.prototype.execAttack = function (){
 		audio.play();
 		self.setAttacking(true);
 		self.setAnimation(self.animations().attack);
-		return window.setTimeout(function() {
+		return setTimeout(function() {
 			var v_;
 			if (self.distanceToPlayer() < 100) {
 				self.player().takeHit(self.damage());
@@ -5512,8 +5514,10 @@ Zombie.prototype.execAttack = function (){
 			self.setAttacking(false);
 			if (self.colideZombie()) {
 				self.setState('walkArroundZombie');
-				return window.setTimeout(function() { var v_;
-				return (self.setState(v_ = 'aggro'),v_); },300);
+				return setTimeout(function() {
+					var v_;
+					return (self.setState(v_ = 'aggro'),v_);
+				},300);
 			} else {
 				return (self.setState(v_ = 'aggro'),v_);
 			};
@@ -5550,7 +5554,9 @@ Zombie.prototype.execWalkArroundZombie = function (){
 		self.setAlreadyTurned(true);
 		self.setSpeed(3);
 		self.setRotation(self.rotation() + [30,50,70,90,-90,-70,-50,-30][~~(Math.random() * 7)]);
-		window.setTimeout(function() { return (self.setAlreadyTurned(false),false); },1000);
+		setTimeout(function() {
+			return (self.setAlreadyTurned(false),false);
+		},1000);
 	};
 	return self.moveForward();
 };
@@ -5561,7 +5567,9 @@ Zombie.prototype.execWalkArroundObject = function (){
 		self.setAlreadyTurned(true);
 		self.setSpeed(3);
 		self.setRotation(self.rotation() + [90,135,180,-135,-90][~~(Math.random() * 4)]);
-		window.setTimeout(function() { return (self.setAlreadyTurned(false),false); },1000);
+		setTimeout(function() {
+			return (self.setAlreadyTurned(false),false);
+		},1000);
 	};
 	return self.moveForward();
 };

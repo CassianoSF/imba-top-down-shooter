@@ -38,7 +38,7 @@ export class Player
             audio.play
             blood-rotation = Math.random * 360
             taking-hit = ~~(Math.random * 2 + 1)
-            window.setTimeout((do taking-hit = no), 1200)
+            setTimeout(&, 1200) do taking-hit = no
         life -= damage
 
     def distanceTo obj
@@ -142,29 +142,27 @@ export class Player
             can-shoot = no
             shooting = yes
             animation = animations[gun.name]:shoot
-            window.setTimeout((do can-shoot = yes), 1000/gun.rate)
-            window.setTimeout((do shooting = no),30)
+            setTimeout(&, 1000/gun.rate) do can-shoot = yes
+            setTimeout(&, 30) do shooting = no 
 
     def attack
         if can-attack
             let audio = Audio.new("sounds/melee{~~(Math.random * 3)}.wav")
             audio:volume = 0.6
             audio.play
-            window.setTimeout((do delete audio), 1500)
+            setTimeout(&, 1500) do delete audio
             can-attack = no
             attacking = yes
             animation = animations[gun.name]:attack
-            window.setTimeout(( do
+            setTimeout(&, 10 * 15 * 1) do
                 let damage = 5
                 let damage = 25 if gun.name == :knife
                 for zombie in zombies
                     if zombie.distanceToPlayer < 120 and angleToZombie(zombie) < 180
                         zombie.takeHit({damage: (do damage), power: (do 50)})
-            ), 10 * 15 * 1)
-            window.setTimeout(( do
+            setTimeout(&, 10 * 15 * 3.8) do
                 can-attack = yes
                 attacking = no
-            ), 10 * 15 * 3.8)
 
     def reload
         if gun.ammo != gun.cap and !reloading
@@ -176,7 +174,7 @@ export class Player
             can-shoot = no
             reloading = yes
             animation = animations[gun.name]:reload
-            window.setTimeout((do
+            setTimeout(&, gun.reload-time) do
                 reloading = no
                 delete audio
                 audio2.pause
@@ -186,7 +184,6 @@ export class Player
                 else
                     can-shoot = yes
                     gun.ammo = gun.cap
-            ), gun.reload-time)
 
     def initialize
         for k, v of ($1) 

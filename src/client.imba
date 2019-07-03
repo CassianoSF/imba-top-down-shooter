@@ -353,7 +353,7 @@ let guns =
         ammo: 30
         cap: 30
         rate: 10
-        damage: 10
+        damage: 25
         reload-time: 2000
         power: 15
         accuracy: 10
@@ -366,7 +366,7 @@ let guns =
         ammo: 4
         cap: 4
         rate: 0.75
-        damage: 25
+        damage: 35
         reload-time: 3000
         power: 25
         accuracy: 8
