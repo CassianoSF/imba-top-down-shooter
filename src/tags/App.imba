@@ -14,7 +14,7 @@ tag Undead < svg:g
                     <svg:g transform=("rotate(-90) translate({-100}, {-50})")>
                         <svg:rect height=100 width=100 fill="url(#blood-splash-{zombie.taking-hit})">
 
-tag Survival < svg:g
+tag Survivor < svg:g
     attr transform
     prop player
     prop game
@@ -23,8 +23,14 @@ tag Survival < svg:g
         <self transform="translate({ window:innerWidth/2 + player.pos:x}, { window:innerHeight/2 + player.pos:y}) rotate({player.rotation})">
             <Shot gun=player.gun> if player.shooting
             <svg:g transform="translate({-50}, {-50})">
-                <svg:rect transform="scale({player.feet-animation.adjust:scale}) translate({player.feet-animation.adjust:translate})" height=100 width=100 fill="url(#{player.feet-animation.name}-{~~(game.time/player.feet-animation.frame-length) % player.feet-animation.size})">
-                <svg:rect transform="scale({player.animation.adjust:scale}) translate({player.animation.adjust:translate})" height=100 width=100 fill="url(#{player.animation.name}-{~~(game.time/player.animation.frame-length) % player.animation.size})">
+                <svg:rect 
+                    height=100 width=100 
+                    transform="scale({player.feet-animation.adjust:scale}) translate({player.feet-animation.adjust:translate})"
+                    fill="url(#{player.feet-animation.name}-{~~(game.time/player.feet-animation.frame-length) % player.feet-animation.size})">
+                <svg:rect 
+                    height=100 width=100 
+                    transform="scale({player.animation.adjust:scale}) translate({player.animation.adjust:translate})"
+                    fill="url(#{player.animation.name}-{~~(game.time/player.animation.frame-length) % player.animation.size})">
 
 tag Ground < svg:g
     prop player
@@ -79,9 +85,19 @@ tag Hud < svg:g
 
     def render
         <self>
+            <svg:g transform="translate({game.width - 300}, {game.height/10})">
+                <svg:g transform="scale(1,-1)">
+                    <svg:text .noselect fill="yellow" font-family="MenofNihilist" font-size="50">
+                        "life {player.life}"
+                <svg:g transform="scale(1,-1) translate(0,50)">
+                    <svg:text .noselect fill=(player.gun.ammo < player.gun.cap/3 ? "red" : "yellow") font-family="MenofNihilist" font-size="50">
+                        "ammo {player.gun.ammo}"
             if player.taking-hit
                 <svg:g transform="translate({game.width/2}, {game.height/2})">
-                    <svg:rect transform=("rotate({player.blood-rotation})") .blood-hud height=game.height/1.5 width=game.width/1.5 fill="url(#blood-hud-{player.taking-hit})">
+                    <svg:rect .blood-hud 
+                        transform=("rotate({player.blood-rotation})") 
+                        height=game.height/1.5 width=game.width/1.5 
+                        fill="url(#blood-hud-{player.taking-hit})">
 
 tag Barrel < svg:g
     attr transform
@@ -170,7 +186,7 @@ export tag App
     prop game
 
     def mount
-        survival-animations = loadSurvivalAnimations
+        survival-animations = loadSurvivorAnimations
         feet-animation = loadFeetAnimations
         render
         let images = Array.from(document.getElementsByTagName('image'))
@@ -198,7 +214,7 @@ export tag App
         game.time += 1
         render
 
-    def loadSurvivalAnimations
+    def loadSurvivorAnimations
         for gun, anims of animations:player
             for action, anim of anims
                 for a, i in Array.from(Array.new(anim.size))
@@ -229,7 +245,7 @@ export tag App
                             <Box box=box>
                         for barrel in game.barrels
                             <Barrel barrel=barrel>
-                        <Survival player=player game=game>
+                        <Survivor player=player game=game>
                         for zombie in zombies
                             <Undead zombies=zombies zombie=zombie player=player game=game> if zombie
                         for bullet in player.bullets
@@ -237,9 +253,15 @@ export tag App
                     <Hud player=player game=game>
                     <Aim crosshair=crosshair>
                 else
-                    <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2}) scale(1, -1)">
-                        <svg:text fill="black">
+                    <svg:g transform="translate({window:innerWidth/4},{window:innerHeight/2}) scale(1, -1)">
+                        <svg:text fill="red" font-family="MenofNihilist" font-size="150">
+                            "Zombie Shooter"
+                    <svg:g transform="translate({window:innerWidth/3},{window:innerHeight/3}) scale(1, -1)">
+                        <svg:text fill="red" font-family="MenofNihilist" font-size="90">
                             "LOADING.... {~~(Object.keys(images-loaded):length/440 * 40 + Object.keys(audios-loaded):length/Object.keys(audios):length * 60)}%"
-                    <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/2 + 100}) scale(1, -1)">
-                        <svg:text fill="black">
+                    <svg:g transform="translate({window:innerWidth/2},{window:innerHeight/4}) scale(1, -1)">
+                        <svg:text fill="red" font-family="MenofNihilist" font-size="15">
                             "Tip: ZoomOut to 80%"
+                    <svg:g transform="translate({window:innerWidth - 200},{window:innerHeight - 200}) scale(1, -1)">
+                        <svg:text fill="red" font-family="MenofNihilist" font-size="15">
+                            "built with imba"

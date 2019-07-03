@@ -5616,7 +5616,7 @@ var Undead = Imba.defineTag('Undead', 'svg:g', function(tag){
 	};
 });
 
-var Survival = Imba.defineTag('Survival', 'svg:g', function(tag){
+var Survivor = Imba.defineTag('Survivor', 'svg:g', function(tag){
 	tag.prototype.transform = function(v){ return this.getAttribute('transform'); }
 	tag.prototype.setTransform = function(v){ this.setAttribute('transform',v); return this; };
 	tag.prototype.player = function(v){ return this._player; }
@@ -5738,15 +5738,30 @@ var Hud = Imba.defineTag('Hud', 'svg:g', function(tag){
 	
 	tag.prototype.render = function (){
 		var $ = this.$;
-		return this.$open(0).setChildren(
+		return this.$open(0).setChildren([
+			($[0] || _1('svg:g',$,0,this).setContent([
+				_1('svg:g',$,1,0).set('transform',"scale(1,-1)").setContent(
+					$[2] || _1('svg:text',$,2,1).flag('noselect').set('fill',"yellow").set('font-family',"MenofNihilist").set('font-size',"50")
+				,2),
+				_1('svg:g',$,3,0).set('transform',"scale(1,-1) translate(0,50)").setContent(
+					$[4] || _1('svg:text',$,4,3).flag('noselect').set('font-family',"MenofNihilist").set('font-size',"50")
+				,2)
+			],2)).set('transform',("translate(" + (this.game().width() - 300) + ", " + (this.game().height() / 10) + ")")).end((
+				$[1].end((
+					$[2].setText("life " + (this.player().life())).end()
+				,true)),
+				$[3].end((
+					$[4].set('fill',((this.player().gun().ammo() < this.player().gun().cap() / 3) ? "red" : "yellow")).setText("ammo " + (this.player().gun().ammo())).end()
+				,true))
+			,true)),
 			this.player().takingHit() ? (
-				($[0] || _1('svg:g',$,0,this).setContent(
-					$[1] || _1('svg:rect',$,1,0).flag('blood-hud')
+				($[5] || _1('svg:g',$,5,this).setContent(
+					$[6] || _1('svg:rect',$,6,5).flag('blood-hud')
 				,2)).set('transform',("translate(" + (this.game().width() / 2) + ", " + (this.game().height() / 2) + ")")).end((
-					$[1].set('transform',(("rotate(" + (this.player().bloodRotation()) + ")"))).set('height',this.game().height() / 1.5).set('width',this.game().width() / 1.5).set('fill',("url(#blood-hud-" + (this.player().takingHit()) + ")")).end()
+					$[6].set('transform',(("rotate(" + (this.player().bloodRotation()) + ")"))).set('height',this.game().height() / 1.5).set('width',this.game().width() / 1.5).set('fill',("url(#blood-hud-" + (this.player().takingHit()) + ")")).end()
 				,true))
 			) : void(0)
-		,3).synced();
+		],1).synced();
 	};
 });
 
@@ -5964,7 +5979,7 @@ var App = Imba.defineTag('App', function(tag){
 	
 	tag.prototype.mount = function (){
 		var self = this, dict;
-		self.setSurvivalAnimations(self.loadSurvivalAnimations());
+		self.setSurvivalAnimations(self.loadSurvivorAnimations());
 		self.setFeetAnimation(self.loadFeetAnimations());
 		self.render();
 		let images = Array.from(document.getElementsByTagName('image'));
@@ -5999,7 +6014,7 @@ var App = Imba.defineTag('App', function(tag){
 		return this.render();
 	};
 	
-	tag.prototype.loadSurvivalAnimations = function (){
+	tag.prototype.loadSurvivorAnimations = function (){
 		var dict, t0;
 		let res = [];
 		for (let gun in dict = this.animations().player){
@@ -6073,7 +6088,7 @@ var App = Imba.defineTag('App', function(tag){
 								($0[i] || _1(Barrel,$0,i)).setBarrel(items[i]).end();
 							};return $0;
 						})($[5] || _2($,5,$[2])),
-						($[6] || _1(Survival,$,6,2)).setPlayer(self.player()).setGame(self.game()).end(),
+						($[6] || _1(Survivor,$,6,2)).setPlayer(self.player()).setGame(self.game()).end(),
 						(function tagLoop($0) {
 							var $$ = $0.$iter();
 							for (let i = 0, items = iter$(self.zombies()), len = items.length, zombie; i < len; i++) {
@@ -6093,14 +6108,24 @@ var App = Imba.defineTag('App', function(tag){
 					($[10] || _1(Aim,$,10,0)).setCrosshair(self.crosshair()).end()
 				],2,1) : Imba.static([
 					($[11] || _1('svg:g',$,11,0).setContent(
-						$[12] || _1('svg:text',$,12,11).set('fill',"black")
-					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
-						$[12].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 440 * 40 + Object.keys(self.audiosLoaded()).length / Object.keys(self.audios()).length * 60)) + "%").end()
+						$[12] || _1('svg:text',$,12,11).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"150").setText("Zombie Shooter")
+					,2)).set('transform',("translate(" + (window.innerWidth / 4) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
+						$[12].end()
 					,true)),
 					($[13] || _1('svg:g',$,13,0).setContent(
-						$[14] || _1('svg:text',$,14,13).set('fill',"black").setText("Tip: ZoomOut to 80%")
-					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 2 + 100) + ") scale(1, -1)")).end((
-						$[14].end()
+						$[14] || _1('svg:text',$,14,13).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"90")
+					,2)).set('transform',("translate(" + (window.innerWidth / 3) + "," + (window.innerHeight / 3) + ") scale(1, -1)")).end((
+						$[14].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 440 * 40 + Object.keys(self.audiosLoaded()).length / Object.keys(self.audios()).length * 60)) + "%").end()
+					,true)),
+					($[15] || _1('svg:g',$,15,0).setContent(
+						$[16] || _1('svg:text',$,16,15).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"15").setText("Tip: ZoomOut to 80%")
+					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 4) + ") scale(1, -1)")).end((
+						$[16].end()
+					,true)),
+					($[17] || _1('svg:g',$,17,0).setContent(
+						$[18] || _1('svg:text',$,18,17).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"15").setText("built with imba")
+					,2)).set('transform',("translate(" + (window.innerWidth - 200) + "," + (window.innerHeight - 200) + ") scale(1, -1)")).end((
+						$[18].end()
 					,true))
 				],2,2)
 			],1).end()
