@@ -83,7 +83,7 @@ export class Zombie
 
     def colideObj
         for obj in game.sectors[sector]
-            if distanceToX(obj) < obj:size and distanceToY(obj)
+            if distanceToX(obj) < obj:size and distanceToY(obj) < obj:size
                 return true
         return no
 
