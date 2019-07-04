@@ -14,6 +14,7 @@ export class Zombie
     prop already-turned
     prop taking-hit
     prop attacking
+    prop sector
     prop colision-times default: 0
 
     prop player
@@ -35,13 +36,13 @@ export class Zombie
         state = :aggro
 
     def distanceToPlayer
-        let dx = player.pos:x - pos:x + game.width/2
-        let dy = player.pos:y - pos:y + game.height/2
+        let dx = player.pos:x - pos:x
+        let dy = player.pos:y - pos:y
         (dy**2 + dx**2)**0.5
 
     def angleToPlayer
-        let dx = player.pos:x - pos:x + game.width/2
-        let dy = player.pos:y - pos:y + game.height/2
+        let dx = player.pos:x - pos:x
+        let dy = player.pos:y - pos:y
         -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
 
     def distanceToZombie zombie
@@ -78,11 +79,8 @@ export class Zombie
         return no
 
     def colideObj
-        for barrel in barrels
-            if distanceTo(barrel) < 50
-                return true
-        for box in boxes
-            if distanceTo(box) < 50
+        for obj in game.sectors[sector]
+            if distanceTo(obj) < obj:size
                 return true
         return no
 
@@ -95,8 +93,8 @@ export class Zombie
         zombies.push Zombie.new 
             id: Math.random
             pos: 
-                x: player.pos:x + Math.random * 2000 - 1000 + window:innerWidth/2
-                y: player.pos:y + Math.random * 2000 - 1000 + window:innerHeight/2
+                x: player.pos:x + Math.random * 2000 - 1000
+                y: player.pos:y + Math.random * 2000 - 1000
             rotation: Math.random * 360
             animation: animations:idle
             animations: animations
@@ -114,7 +112,8 @@ export class Zombie
         var index = zombies.indexOf(self)
         zombies.splice(index, 1) if (index !== -1)
 
-    def update player, game, zombies
+    def update
+        sector = "x{~~(pos:x/100)}y{~~(pos:y/100)}"
         return deleteZombie if life < 0 
         if distanceToPlayer < (game.width**2 + game.height**2)**0.5 * 2
             switch state

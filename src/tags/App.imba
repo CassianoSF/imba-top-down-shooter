@@ -6,7 +6,6 @@ tag Undead < svg:g
     prop zombies
 
     def render
-        zombie.update player, game, zombies
         <self transform=("translate({zombie.pos:x},{zombie.pos:y}) rotate({zombie.rotation})")>
             <svg:g transform="translate({-50}, {-50})">
                 <svg:rect transform="scale({zombie.animation.adjust:scale}) translate({zombie.animation.adjust:translate})" height=100 width=100 fill="url(#zombie-{zombie.animation.path}-{~~(game.time/zombie.animation.frame-length % zombie.animation.size)})">
@@ -20,7 +19,7 @@ tag Survivor < svg:g
     prop game
 
     def render
-        <self transform="translate({ window:innerWidth/2 + player.pos:x}, { window:innerHeight/2 + player.pos:y}) rotate({player.rotation})">
+        <self transform="translate({player.pos:x}, {player.pos:y}) rotate({player.rotation})">
             <Shot gun=player.gun> if player.shooting
             <svg:g transform="translate({-50}, {-50})">
                 <svg:rect 
@@ -63,8 +62,7 @@ tag Projectile < svg:g
     prop game
 
     def render
-        bullet.update zombies, game, player
-        <self transform="translate({ window:innerWidth/2 + bullet.pos:x}, { window:innerHeight/2 - bullet.pos:y}) rotate({bullet.direction})">
+        <self transform="translate({bullet.pos:x}, {bullet.pos:y}) rotate({bullet.direction})">
             <svg:rect height=1 width=50 fill="yellow">
 
 tag Aim < svg:g
@@ -200,18 +198,7 @@ export tag App
         game.initListners
 
     def tick
-        player.shoot  if game.keys:leftbutton
-        player.attack if game.keys:rightbutton
-        game.width = window:innerWidth
-        game.height = window:innerHeight
-        let directions = []
-        directions.push :left  if game.keys:KeyA
-        directions.push :right if game.keys:KeyD
-        directions.push :down  if game.keys:KeyS
-        directions.push :up    if game.keys:KeyW
-        player.running = game.keys:ShiftLeft
-        player.move directions
-        game.time += 1
+        game.update
         render
 
     def loadSurvivorAnimations
@@ -239,7 +226,7 @@ export tag App
                 <Loader>
 
                 if Object.keys(images-loaded):length == 440 and Object.keys(audios-loaded):length == Object.keys(audios):length
-                    <svg:g transform=("translate({x - player.pos:x}, {y - player.pos:y})")>
+                    <svg:g transform=("translate({x - player.pos:x + game.width/2}, {y - player.pos:y + game.height/2})")>
                         <Ground player=player>
                         for box in game.boxes
                             <Box box=box>

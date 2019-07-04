@@ -42,8 +42,8 @@ export class Player
         life -= damage
 
     def distanceTo obj
-        let dx = obj:x - pos:x - game.width/2
-        let dy = obj:y - pos:y - game.height/2
+        let dx = obj:x - pos:x
+        let dy = obj:y - pos:y
         (dy**2 + dx**2)**0.5
 
     def colisionObj
@@ -95,20 +95,20 @@ export class Player
                         pos:y -= step
 
     def angleToZombie zombie
-        let dx = pos:x + game.width/2 - zombie.pos:x
-        let dy = pos:y + game.height/2 - zombie.pos:y
+        let dx = pos:x - zombie.pos:x
+        let dy = pos:y - zombie.pos:y
         (((rotation + (Math.atan2(dx, dy)/3.1415*180.0) +150) % 360)**2)**0.5
 
     def bulletInitPos
         if (rotation < 360 and rotation > 280) or (rotation < 180 and rotation > 90)
             return {
-                x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
-                y: Math.cos((rotation + 90)* 3.1415 / 180) * 50 - pos:y
+                x: Math.cos((rotation)* 3.1415 / 180) * 100 + pos:x
+                y: Math.sin((rotation)* 3.1415 / 180) * 50 + pos:y
             }
         else
             return {
-                x: Math.sin((rotation + 90)* 3.1415 / 180) * 100 + pos:x
-                y: Math.cos((rotation + 90)* 3.1415 / 180) * 150 - pos:y
+                x: Math.cos((rotation)* 3.1415 / 180) * 100 + pos:x
+                y: Math.sin((rotation)* 3.1415 / 180) * 150 + pos:y
             }
 
     def generateBullet

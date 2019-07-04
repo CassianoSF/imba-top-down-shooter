@@ -8,6 +8,8 @@ export class Game
     prop theme-started
     prop player
     prop crosshair
+    prop zombies
+    prop sectors
 
     def startTheme
         return if theme-started
@@ -50,6 +52,8 @@ export class Game
         document.addEventListener 'contextmenu', do |e|
             e.preventDefault
 
+        player.pos = {x: game.width, y: game.height}
+
     def aim e
         crosshair.x = e:x
         crosshair.y = -e:y
@@ -66,6 +70,26 @@ export class Game
 
     def keyup e
         keys[e:code] = no
+
+
+    def update
+        for zombie in zombies
+            zombie.update if zombie
+        for bullet in player.bullets
+            bullet.update zombies, self, player if bullet
+
+        player.shoot  if keys:leftbutton
+        player.attack if keys:rightbutton
+        width = window:innerWidth
+        height = window:innerHeight
+        let directions = []
+        directions.push :left  if keys:KeyA
+        directions.push :right if keys:KeyD
+        directions.push :down  if keys:KeyS
+        directions.push :up    if keys:KeyW
+        player.running = keys:ShiftLeft
+        player.move directions
+        time += 1
 
     def initialize 
         for k, v of ($1) 

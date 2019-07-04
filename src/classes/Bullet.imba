@@ -7,13 +7,13 @@ export class Bullet
     prop i default: 0
 
     def distanceToZombie zombie, game
-        let dx = zombie.pos:x - (pos:x + game.width/2)
-        let dy = zombie.pos:y - (-pos:y + game.height/2)
+        let dx = zombie.pos:x - pos:x
+        let dy = zombie.pos:y - pos:y
         (dy**2 + dx**2)**0.5
 
     def distanceToPlayer
-        let dx = player.pos:x - (pos:x)
-        let dy = player.pos:y - (-pos:y)
+        let dx = player.pos:x - pos:x
+        let dy = player.pos:y - pos:y
         (dy**2 + dx**2)**0.5
 
     def deleteBullet
@@ -36,8 +36,8 @@ export class Bullet
 
     def fly
         window.setTimeout( (do
-            pos:x += Math.sin((direction + 90 ) * 3.1415 / 180) * 60
-            pos:y += Math.cos((direction + 90 ) * 3.1415 / 180) * 60
+            pos:x += Math.cos((direction) * 3.1415 / 180) * 60
+            pos:y += Math.sin((direction) * 3.1415 / 180) * 60
             if distanceToPlayer > 5000
                 deleteBullet
                 return
