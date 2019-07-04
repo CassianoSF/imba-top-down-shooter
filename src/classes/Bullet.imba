@@ -6,15 +6,17 @@ export class Bullet
     prop pos
     prop i default: 0
 
-    def distanceToZombie zombie, game
-        let dx = zombie.pos:x - pos:x
-        let dy = zombie.pos:y - pos:y
-        (dy**2 + dx**2)**0.5
+    def distanceToZombieX zombie, game
+        ((zombie.pos:x - pos:x)**2)**0.5
 
-    def distanceToPlayer
-        let dx = player.pos:x - pos:x
-        let dy = player.pos:y - pos:y
-        (dy**2 + dx**2)**0.5
+    def distanceToZombieY zombie, game
+        ((zombie.pos:y - pos:y)**2)**0.5
+
+    def distanceToPlayerX
+        ((player.pos:x - pos:x)**2)**0.5
+    
+    def distanceToPlayerY
+        ((player.pos:y - pos:y)**2)**0.5
 
     def deleteBullet
         var index = player.bullets.indexOf(self)
@@ -24,12 +26,12 @@ export class Bullet
     def update zombies, game, player
         for zombie in zombies
             # long range
-            if distanceToZombie(zombie, game) < 50 
+            if distanceToZombieX(zombie, game) < 50 and distanceToZombieY(zombie, game) < 50 
                 zombie.takeHit(self)
                 deleteBullet
                 return
             # close range
-            elif player.angleToZombie(zombie) < 70 and zombie.distanceToPlayer < 130 and distanceToZombie(zombie, game) < 700
+            elif player.angleToZombie(zombie) < 70 and zombie.distanceToPlayerX < 130 and zombie.distanceToPlayerY < 130 and distanceToZombieX(zombie, game) < 700 and distanceToZombieY(zombie, game) < 700
                 zombie.takeHit(self)
                 deleteBullet
                 return
@@ -38,7 +40,7 @@ export class Bullet
         window.setTimeout( (do
             pos:x += Math.cos((direction) * 3.1415 / 180) * 60
             pos:y += Math.sin((direction) * 3.1415 / 180) * 60
-            if distanceToPlayer > 5000
+            if distanceToPlayerX > 5000 and distanceToPlayerY > 5000
                 deleteBullet
                 return
             fly

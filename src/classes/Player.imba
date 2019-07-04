@@ -41,17 +41,18 @@ export class Player
             setTimeout(&, 1200) do taking-hit = no
         life -= damage
 
-    def distanceTo obj
-        let dx = obj:x - pos:x
-        let dy = obj:y - pos:y
-        (dy**2 + dx**2)**0.5
+    def distanceToX obj
+        ((obj:x - pos:x)**2)**0.5
+
+    def distanceToY obj
+        ((obj:y - pos:y)**2)**0.5
 
     def colisionObj
         for barrel in barrels
-            if distanceTo(barrel) < barrel:size
+            if distanceToX(barrel) < barrel:size and distanceToY(barrel) < barrel:size
                 return true
         for box in boxes
-            if distanceTo(box) < box:size
+            if distanceToX(box) < box:size and distanceToY(box) < box:size
                 return true
         return no
 
@@ -158,7 +159,7 @@ export class Player
                 let damage = 5
                 let damage = 25 if gun.name == :knife
                 for zombie in zombies
-                    if zombie.distanceToPlayer < 120 and angleToZombie(zombie) < 180
+                    if zombie.distanceToPlayerX < 120 and zombie.distanceToPlayerY < 120 and angleToZombie(zombie) < 180
                         zombie.takeHit({damage: (do damage), power: (do 50)})
             setTimeout(&, 10 * 15 * 3.8) do
                 can-attack = yes

@@ -35,10 +35,11 @@ export class Zombie
                 taking-hit = no
         state = :aggro
 
-    def distanceToPlayer
-        let dx = player.pos:x - pos:x
-        let dy = player.pos:y - pos:y
-        (dy**2 + dx**2)**0.5
+    def distanceToPlayerX
+        ((player.pos:x - pos:x)**2)**0.5
+
+    def distanceToPlayerY
+        ((player.pos:y - pos:y)**2)**0.5
 
     def angleToPlayer
         let dx = player.pos:x - pos:x
@@ -67,11 +68,12 @@ export class Zombie
         pos:x -= Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
         pos:y -= -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
 
-    def distanceTo obj
-        let dx = obj:x - pos:x
-        let dy = obj:y - pos:y
-        (dy**2 + dx**2)**0.5
-
+    def distanceToX obj
+        ((obj:x - pos:x)**2)**0.5
+        
+    def distanceToY obj
+        ((obj:y - pos:y)**2)**0.5
+        
     def colideZombie
         for zombie in zombies
             if distanceToZombie(zombie) < 30 and zombie != self
@@ -80,13 +82,13 @@ export class Zombie
 
     def colideObj
         for obj in game.sectors[sector]
-            if distanceTo(obj) < obj:size
+            if distanceToX(obj) < obj:size and distanceToY(obj)
                 return true
         return no
 
     def playerDetected
         let angle-diff = angleToPlayer - rotation
-        (angle-diff**2)**0.5 < 30 and distanceToPlayer < 3000 or distanceToPlayer < 100 
+        (angle-diff**2)**0.5 < 30 and distanceToPlayerX < 3000 and distanceToPlayerY < 3000 or (distanceToPlayerX < 100 and distanceToPlayerY < 100)
 
 
     def deleteZombie
@@ -115,7 +117,7 @@ export class Zombie
     def update
         sector = "x{~~(pos:x/100)}y{~~(pos:y/100)}"
         return deleteZombie if life < 0 
-        if distanceToPlayer < (game.width**2 + game.height**2)**0.5 * 2
+        if distanceToPlayerX < game.width and distanceToPlayerY < game.height
             switch state
                 when :aggro
                     execAggro
@@ -129,7 +131,7 @@ export class Zombie
                     execWalkArroundObject
 
     def execAggro
-        if distanceToPlayer < 50
+        if distanceToPlayerX < 50 and distanceToPlayerY < 50
             state = :attack
         elif colideZombie
             state = :walk-arround-zombie
@@ -141,14 +143,14 @@ export class Zombie
             moveForward  
         
     def execAttack
-        if distanceToPlayer < 100 and !attacking
+        if distanceToPlayerX < 100 and distanceToPlayerY < 100 and !attacking
             let audio = Audio.new("sounds/zombie-attack{~~(Math.random * 3)}.ogg")
             audio:volume = 0.6
             audio.play
             attacking = true
             animation = animations:attack
             setTimeout(&, 300) do 
-                if distanceToPlayer < 100
+                if distanceToPlayerX < 100 and distanceToPlayerY < 100
                     player.takeHit(damage)
                 attacking = false
                 if colideZombie
@@ -161,7 +163,7 @@ export class Zombie
             state = :aggro
 
     def execRandom
-        if distanceToPlayer < 40
+        if distanceToPlayerX < 40 and distanceToPlayerY < 40
             state = :attack
         
         elif playerDetected

@@ -52,8 +52,6 @@ export class Game
         document.addEventListener 'contextmenu', do |e|
             e.preventDefault
 
-        player.pos = {x: game.width, y: game.height}
-
     def aim e
         crosshair.x = e:x
         crosshair.y = -e:y
