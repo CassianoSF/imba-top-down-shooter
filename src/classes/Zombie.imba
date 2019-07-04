@@ -46,10 +46,11 @@ export class Zombie
         let dy = player.pos:y - pos:y
         -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
 
-    def distanceToZombie zombie
-        let dx = zombie.pos:x - pos:x
-        let dy = zombie.pos:y - pos:y
-        (dy**2 + dx**2)**0.5
+    def distanceToZombieX zombie
+        ((zombie.pos:x - pos:x)**2)**0.5
+
+    def distanceToZombieY zombie
+        ((zombie.pos:y - pos:y)**2)**0.5
 
     def moveForward
         if colideObj
@@ -76,7 +77,7 @@ export class Zombie
         
     def colideZombie
         for zombie in zombies
-            if distanceToZombie(zombie) < 30 and zombie != self
+            if distanceToZombieX(zombie) < 30 and distanceToZombieY(zombie) < 30 and zombie != self
                 return true
         return no
 
