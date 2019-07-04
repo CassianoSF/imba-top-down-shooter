@@ -5469,7 +5469,7 @@ Zombie.prototype.colideZombie = function (){
 Zombie.prototype.colideObj = function (){
 	for (let i = 0, items = iter$(this.game().sectors()[this.sector()]), len = items.length, obj; i < len; i++) {
 		obj = items[i];
-		if (this.distanceToX(obj) < obj.size && this.distanceToY(obj)) {
+		if (this.distanceToX(obj) < obj.size && this.distanceToY(obj) < obj.size) {
 			return true;
 		};
 	};
