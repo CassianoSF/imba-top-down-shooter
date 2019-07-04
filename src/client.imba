@@ -340,18 +340,18 @@ let guns =
         name: :knife
         ammo: 0
         cap: 0
-        rate: 2
+        rate: 1.5
         damage: 25
         reload-time: 0
         power: 10
 
     handgun: Gun.new
         name: :handgun
-        ammo: 10
-        cap: 10
-        rate: 2
+        ammo: 15
+        cap: 15
+        rate: 3
         damage: 25
-        reload-time: 1200
+        reload-time: 1000
         power: 10
         accuracy: 30
         shoot-sounds: [
@@ -362,9 +362,9 @@ let guns =
         name: :rifle
         ammo: 30
         cap: 30
-        rate: 10
+        rate: 15
         damage: 25
-        reload-time: 2000
+        reload-time: 1500
         power: 15
         accuracy: 10
         shoot-sounds: [
@@ -373,11 +373,11 @@ let guns =
 
     shotgun: Gun.new
         name: :shotgun
-        ammo: 4
-        cap: 4
-        rate: 0.75
+        ammo: 8
+        cap: 8
+        rate: 1.2
         damage: 35
-        reload-time: 3000
+        reload-time: 2500
         power: 25
         accuracy: 8
         shoot-sounds: [
