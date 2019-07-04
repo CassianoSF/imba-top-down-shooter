@@ -36,10 +36,10 @@ export class Zombie
         state = :aggro
 
     def distanceToPlayerX
-        ((player.pos:x - pos:x)**2)**0.5
+        Math.abs (player.pos:x - pos:x)
 
     def distanceToPlayerY
-        ((player.pos:y - pos:y)**2)**0.5
+        Math.abs (player.pos:y - pos:y)
 
     def angleToPlayer
         let dx = player.pos:x - pos:x
@@ -47,10 +47,10 @@ export class Zombie
         -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
 
     def distanceToZombieX zombie
-        ((zombie.pos:x - pos:x)**2)**0.5
+        Math.abs (zombie.pos:x - pos:x)
 
     def distanceToZombieY zombie
-        ((zombie.pos:y - pos:y)**2)**0.5
+        Math.abs (zombie.pos:y - pos:y)
 
     def moveForward
         if colideObj
@@ -70,10 +70,10 @@ export class Zombie
         pos:y -= -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
 
     def distanceToX obj
-        ((obj:x - pos:x)**2)**0.5
+        Math.abs (obj:x - pos:x)
         
     def distanceToY obj
-        ((obj:y - pos:y)**2)**0.5
+        Math.abs (obj:y - pos:y)
         
     def colideZombie
         for zombie in zombies
@@ -89,7 +89,7 @@ export class Zombie
 
     def playerDetected
         let angle-diff = angleToPlayer - rotation
-        (angle-diff**2)**0.5 < 30 and distanceToPlayerX < 3000 and distanceToPlayerY < 3000 or (distanceToPlayerX < 100 and distanceToPlayerY < 100)
+        Math.abs angle-diff < 30 and distanceToPlayerX < 3000 and distanceToPlayerY < 3000 or (distanceToPlayerX < 100 and distanceToPlayerY < 100)
 
 
     def deleteZombie

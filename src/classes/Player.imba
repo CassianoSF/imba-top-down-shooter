@@ -42,10 +42,10 @@ export class Player
         life -= damage
 
     def distanceToX obj
-        ((obj:x - pos:x)**2)**0.5
+        Math.abs(obj:x - pos:x)
 
     def distanceToY obj
-        ((obj:y - pos:y)**2)**0.5
+        Math.abs(obj:y - pos:y)
 
     def colisionObj
         for barrel in barrels
@@ -98,7 +98,7 @@ export class Player
     def angleToZombie zombie
         let dx = pos:x - zombie.pos:x
         let dy = pos:y - zombie.pos:y
-        (((rotation + (Math.atan2(dx, dy)/3.1415*180.0) +150) % 360)**2)**0.5
+        Math.abs(rotation + (Math.atan2(dx, dy)/3.1415*180.0) +150) % 360
 
     def bulletInitPos
         if (rotation < 360 and rotation > 280) or (rotation < 180 and rotation > 90)

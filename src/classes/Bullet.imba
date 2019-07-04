@@ -7,16 +7,16 @@ export class Bullet
     prop i default: 0
 
     def distanceToZombieX zombie, game
-        ((zombie.pos:x - pos:x)**2)**0.5
+        Math.abs(zombie.pos:x - pos:x)
 
     def distanceToZombieY zombie, game
-        ((zombie.pos:y - pos:y)**2)**0.5
+        Math.abs(zombie.pos:y - pos:y)
 
     def distanceToPlayerX
-        ((player.pos:x - pos:x)**2)**0.5
+        Math.abs(player.pos:x - pos:x)
     
     def distanceToPlayerY
-        ((player.pos:y - pos:y)**2)**0.5
+        Math.abs(player.pos:y - pos:y)
 
     def deleteBullet
         var index = player.bullets.indexOf(self)
