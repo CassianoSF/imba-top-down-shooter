@@ -14,7 +14,7 @@ export class Zombie
     prop already-turned
     prop taking-hit
     prop attacking
-    prop sector
+    # prop sector
     prop colision-times default: 0
 
     prop player
@@ -82,6 +82,7 @@ export class Zombie
         return no
 
     def colideObj
+        let sector = "x{~~(pos:x/500)}y{~~(pos:y/500)}"
         for obj in game.sectors[sector]
             if distanceToX(obj) < obj:size and distanceToY(obj) < obj:size
                 return true
@@ -114,9 +115,9 @@ export class Zombie
 
         var index = zombies.indexOf(self)
         zombies.splice(index, 1) if (index !== -1)
+        player.reputation += 10
 
     def update
-        sector = "x{~~(pos:x/100)}y{~~(pos:y/100)}"
         return deleteZombie if life < 0 
         if distanceToPlayerX < game.width and distanceToPlayerY < game.height
             switch state
@@ -184,7 +185,7 @@ export class Zombie
         unless already-turned
             already-turned = true
             speed = 3
-            rotation += [30, 50, 70, 90, -90, -70, -50, -30][~~(Math.random * 7)]
+            rotation += [30, 50, 70, 90, -90, -70, -50, -30][~~(Math.random * 8)]
             setTimeout(&, 1000) do
                 already-turned = false
         moveForward  
@@ -193,12 +194,12 @@ export class Zombie
         unless already-turned
             already-turned = true
             speed = 3
-            rotation += [90, 135, 180, -135, -90][~~(Math.random * 4)]
+            rotation += [90, 135, 180, -135, -90][~~(Math.random * 5)]
             setTimeout(&, 1000) do
                 already-turned = false
         moveForward 
 
-    def initialize player, game, zombies
+    def initialize
         for k, v of ($1) 
             self["_{k}"] = ($1)[k] if $1
 

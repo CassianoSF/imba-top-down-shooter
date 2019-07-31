@@ -54,12 +54,12 @@ let crosshair = Crosshair.new(x:0, y:0)
 
 let sectors = {}
 for box in boxes
-    sectors["x{~~(box:x/100)}y{~~(box:y/100)}"] || = []
-    sectors["x{~~(box:x/100)}y{~~(box:y/100)}"].push(box)
+    sectors["x{~~(box:x/500)}y{~~(box:y/500)}"] ||= []
+    sectors["x{~~(box:x/500)}y{~~(box:y/500)}"].push(box)
 
 for barrel in barrels
-    sectors["x{~~(barrel:x/100)}y{~~(barrel:y/100)}"] || = []
-    sectors["x{~~(barrel:x/100)}y{~~(barrel:y/100)}"].push(barrel)
+    sectors["x{~~(barrel:x/500)}y{~~(barrel:y/500)}"] ||= []
+    sectors["x{~~(barrel:x/500)}y{~~(barrel:y/500)}"].push(barrel)
 
 let game = Game.new 
     keys: {}
@@ -68,6 +68,7 @@ let game = Game.new
     boxes: boxes
     crosshair: crosshair
     sectors: sectors
+    menu: yes
 
 let animations = 
     player:

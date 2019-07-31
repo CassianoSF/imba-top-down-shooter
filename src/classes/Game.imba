@@ -10,6 +10,7 @@ export class Game
     prop crosshair
     prop zombies
     prop sectors
+    prop menu
 
     def startTheme
         return if theme-started
@@ -30,22 +31,28 @@ export class Game
 
     def initListners
         document.addEventListener 'keydown', do |e|
+            return if menu
             keydown e
             startTheme
 
         document.addEventListener 'keyup', do |e|
+            if e:code == :Escape
+                menu = !menu
+            return if menu
             keyup e
 
         document.addEventListener 'mousemove', do |e|
             aim e
 
         document.addEventListener 'mousedown' do |e|
+            return if menu
             keys['leftbutton'] = yes if e:button == 0
             keys['rightbutton'] = yes if e:button == 2
             player.shoot  if e:button == 0
             player.attack if e:button == 2
 
         document.addEventListener 'mouseup' do |e|
+            return if menu
             keys['rightbutton'] = no if e:button == 2
             keys['leftbutton'] = no if e:button == 0
 
@@ -58,6 +65,7 @@ export class Game
         player.rotation = ((Math.atan2(e:x - window:innerWidth/2, e:y - window:innerHeight/2)/3.1415*180.0 - 90) + 720) % 360 
 
     def keydown e
+        return if menu
         player.changeGun :knife      if e:code == :Digit1 and player.invertory:knife
         player.changeGun :handgun    if e:code == :Digit2 and player.invertory:handgun
         player.changeGun :rifle      if e:code == :Digit3 and player.invertory:rifle
@@ -71,6 +79,7 @@ export class Game
 
 
     def update
+        return if menu
         for zombie in zombies
             zombie.update if zombie
         for bullet in player.bullets

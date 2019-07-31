@@ -9,7 +9,7 @@ export class Player
     prop can-attack
     prop speed
     prop running
-    prop reputation
+    prop reputation default: 0
     prop animation
     prop animations
     prop feet-animation
@@ -48,11 +48,9 @@ export class Player
         Math.abs(obj:y - pos:y)
 
     def colisionObj
-        for barrel in barrels
-            if distanceToX(barrel) < barrel:size and distanceToY(barrel) < barrel:size
-                return true
-        for box in boxes
-            if distanceToX(box) < box:size and distanceToY(box) < box:size
+        let sector = "x{~~(pos:x/500)}y{~~(pos:y/500)}"
+        for obj in game.sectors[sector]
+            if distanceToX(obj) < obj:size and distanceToY(obj) < obj:size
                 return true
         return no
 

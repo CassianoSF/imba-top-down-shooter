@@ -10,7 +10,7 @@ tag Undead < svg:g
             <svg:g transform="translate({-50}, {-50})">
                 <svg:rect transform="scale({zombie.animation.adjust:scale}) translate({zombie.animation.adjust:translate})" height=100 width=100 fill="url(#zombie-{zombie.animation.path}-{~~(game.time/zombie.animation.frame-length % zombie.animation.size)})">
                 if zombie.taking-hit
-                    <svg:g transform=("rotate(-90) translate({-100}, {-50})")>
+                    <svg:g transform=("rotate(-90) translate({[-100,-110, -120, -130, -140, -150][~~(Math.random * 5)]}, {-50})")>
                         <svg:rect height=100 width=100 fill="url(#blood-splash-{zombie.taking-hit})">
 
 tag Survivor < svg:g
@@ -84,6 +84,9 @@ tag Hud < svg:g
     def render
         <self>
             <svg:g transform="translate({game.width - 300}, {game.height/10})">
+                <svg:g transform="scale(1,-1) translate(-200,{150 - game.height })">
+                    <svg:text .noselect fill="yellow" font-family="MenofNihilist" font-size="50">
+                        "reputation {player.reputation}"
                 <svg:g transform="scale(1,-1)">
                     <svg:text .noselect fill="yellow" font-family="MenofNihilist" font-size="50">
                         "life {player.life}"
@@ -167,6 +170,92 @@ tag Loader < svg:g
                     <svg:pattern id="zombie-attack-{i}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                         <svg:image href="textures/zombie/attack/skeleton-attack_{i}.png" width="100" height="100">
 
+
+
+
+tag Menu
+    prop game
+
+    def close
+        game.menu = false
+
+    def render
+        <self>
+            <div .modal .fadeIn .animated .show style="display: block;">
+                <div .modal-lg .modal-dialog>
+                    <div  .modal-content .model-form-content .animated .fadeInUp .fadeOutDown=(@closing)>
+                        <div .modal-header>
+                            <h5 .modal-title>
+                                "MENU"
+                        # <div .modal-body>
+                        #     <div .card>
+                        #         <div .card-body>
+                        #             <div .form-group>
+                        #                 <div .row>
+                        #                     <div .col>
+                        #                         <button type="button" .btn .btn-lg .btn-dark>
+                        #                             'Upgrade'
+                        #                         <p>
+                        #                             "$500"
+                        #             <div .form-group>
+                        #                 <div .row>
+                        #                     <div .col>
+                        #                         <img style="height: auto; width: auto;max-width: 200px; max-height: 100px" src="images/1911.png">
+                        #                     <div .col>
+                        #                         <button type="button" .btn .btn-lg .btn-dark>
+                        #                             'Buy Ammo'
+                        #                         <p>
+                        #                             "$500"
+                        #                     <div .col>
+                        #                         <button type="button" .btn .btn-lg .btn-dark>
+                        #                             'Upgrade'
+                        #                         <p>
+                        #                             "$500"
+                        #             <div .form-group>
+                        #                 <div .row>
+                        #                     <div .col>
+                        #                         <img style="height: auto; width: auto;max-width: 200px; max-height: 100px" src="images/shotgun.png">
+                        #                     <div .col>
+                        #                         <button type="button" .btn .btn-lg .btn-dark>
+                        #                             'Buy Ammo'
+                        #                         <p>
+                        #                             "$500"
+                        #                     <div .col>
+                        #                         <button type="button" .btn .btn-lg .btn-dark>
+                        #                             'Upgrade'
+                        #                         <p>
+                        #                             "$500"
+                        #             <div .form-group>
+                        #                 <div .row>
+                        #                     <div .col>
+                        #                         <img style="height: auto; width: auto;max-width: 200px; max-height: 100px" src="images/ak47.png">
+                        #                     <div .col>
+                        #                         <button type="button" .btn .btn-lg .btn-dark>
+                        #                             'Buy Ammo'
+                        #                         <p>
+                        #                             "$500"
+                        #                     <div .col>
+                        #                         <button type="button" .btn .btn-lg .btn-dark>
+                        #                             'Upgrade'
+                        #                         <p>
+                        #                             "$500"
+                        #             <div .form-group>
+                        #                 <div .row>
+                        #                     <div .col>
+                        #                         <button type="button" .btn .btn-lg .btn-dark>
+                        #                             '+ Life'
+                        #                         <p>
+                        #                             "$500"
+                        #                     <div .col>
+                        #                         <button type="button" .btn .btn-lg .btn-dark>
+                        #                             '+ Speed'
+                        #                         <p>
+                        #                             "$500"
+
+                        <div .modal-footer>
+                            <button type="button" .btn .btn-link :tap.close>
+                                'Close'
+
 export tag App
     prop survival-animations
     prop feet-animation
@@ -216,16 +305,21 @@ export tag App
                     <svg:pattern id="{anim.name}-{i}" patternUnits="userSpaceOnUse" width="100" height="100" patternContentUnits="userSpaceOnUse">
                         <svg:image href="{anim.path}{i}.png" width="100" height="100">
 
+
+    def isNotLoading
+        Object.keys(images-loaded):length == 440 and Object.keys(audios-loaded):length == Object.keys(audios):length
+
     def render
         let x = player.shooting ? Math.random * player.gun.power - player.gun.power/2 : 0
         let y = player.shooting ? Math.random * player.gun.power - player.gun.power/2 : 0
         <self .container>
+            <Menu game=game> if game.menu and isNotLoading
             <svg:svg .game transform="scale(1,-1)">
                 survival-animations
                 feet-animation
                 <Loader>
 
-                if Object.keys(images-loaded):length == 440 and Object.keys(audios-loaded):length == Object.keys(audios):length
+                if isNotLoading
                     <svg:g transform=("translate({x - player.pos:x + game.width/2}, {y - player.pos:y + game.height/2})")>
                         <Ground player=player>
                         for box in game.boxes
