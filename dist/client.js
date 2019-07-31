@@ -442,14 +442,14 @@ let crosshair = new Crosshair({x: 0,y: 0});
 let sectors = {};
 for (let i = 0, len = boxes.length, box; i < len; i++) {
 	box = boxes[i];
-	sectors[$1 = ("x" + (~~(box.x / 100)) + "y" + (~~(box.y / 100)))] || (sectors[$1] = []);
-	sectors[("x" + (~~(box.x / 100)) + "y" + (~~(box.y / 100)))].push(box);
+	sectors[$1 = ("x" + (~~(box.x / 500)) + "y" + (~~(box.y / 500)))] || (sectors[$1] = []);
+	sectors[("x" + (~~(box.x / 500)) + "y" + (~~(box.y / 500)))].push(box);
 };
 
 for (let i = 0, len = barrels.length, barrel; i < len; i++) {
 	barrel = barrels[i];
-	sectors[$2 = ("x" + (~~(barrel.x / 100)) + "y" + (~~(barrel.y / 100)))] || (sectors[$2] = []);
-	sectors[("x" + (~~(barrel.x / 100)) + "y" + (~~(barrel.y / 100)))].push(barrel);
+	sectors[$2 = ("x" + (~~(barrel.x / 500)) + "y" + (~~(barrel.y / 500)))] || (sectors[$2] = []);
+	sectors[("x" + (~~(barrel.x / 500)) + "y" + (~~(barrel.y / 500)))].push(barrel);
 };
 
 let game = new Game(
@@ -458,7 +458,8 @@ let game = new Game(
 	barrels: barrels,
 	boxes: boxes,
 	crosshair: crosshair,
-	sectors: sectors}
+	sectors: sectors,
+	menu: true}
 );
 
 let animations = {
@@ -4750,6 +4751,8 @@ Game.prototype.zombies = function(v){ return this._zombies; }
 Game.prototype.setZombies = function(v){ this._zombies = v; return this; };
 Game.prototype.sectors = function(v){ return this._sectors; }
 Game.prototype.setSectors = function(v){ this._sectors = v; return this; };
+Game.prototype.menu = function(v){ return this._menu; }
+Game.prototype.setMenu = function(v){ this._menu = v; return this; };
 
 Game.prototype.startTheme = function (){
 	if (this.themeStarted()) { return };
@@ -4772,11 +4775,16 @@ Game.prototype.startTheme = function (){
 Game.prototype.initListners = function (){
 	var self = this;
 	document.addEventListener('keydown',function(e) {
+		if (self.menu()) { return };
 		self.keydown(e);
 		return self.startTheme();
 	});
 	
 	document.addEventListener('keyup',function(e) {
+		if (e.code == 'Escape') {
+			self.setMenu(!(self.menu()));
+		};
+		if (self.menu()) { return };
 		return self.keyup(e);
 	});
 	
@@ -4785,6 +4793,7 @@ Game.prototype.initListners = function (){
 	});
 	
 	document.addEventListener('mousedown',function(e) {
+		if (self.menu()) { return };
 		if (e.button == 0) { self.keys().leftbutton = true };
 		if (e.button == 2) { self.keys().rightbutton = true };
 		if (e.button == 0) { self.player().shoot() };
@@ -4792,6 +4801,7 @@ Game.prototype.initListners = function (){
 	});
 	
 	document.addEventListener('mouseup',function(e) {
+		if (self.menu()) { return };
 		if (e.button == 2) { self.keys().rightbutton = false };
 		if (e.button == 0) { return self.keys().leftbutton = false };
 	});
@@ -4809,6 +4819,7 @@ Game.prototype.aim = function (e){
 };
 
 Game.prototype.keydown = function (e){
+	if (this.menu()) { return };
 	if (e.code == 'Digit1' && this.player().invertory().knife) { this.player().changeGun('knife') };
 	if (e.code == 'Digit2' && this.player().invertory().handgun) { this.player().changeGun('handgun') };
 	if (e.code == 'Digit3' && this.player().invertory().rifle) { this.player().changeGun('rifle') };
@@ -4825,6 +4836,7 @@ Game.prototype.keyup = function (e){
 
 Game.prototype.update = function (){
 	var v_;
+	if (this.menu()) { return };
 	for (let i = 0, items = iter$(this.zombies()), len = items.length, zombie; i < len; i++) {
 		zombie = items[i];
 		if (zombie) { zombie.update() };
@@ -4882,8 +4894,10 @@ Player.prototype.speed = function(v){ return this._speed; }
 Player.prototype.setSpeed = function(v){ this._speed = v; return this; };
 Player.prototype.running = function(v){ return this._running; }
 Player.prototype.setRunning = function(v){ this._running = v; return this; };
+Player.prototype.__reputation = {'default': 0,name: 'reputation'};
 Player.prototype.reputation = function(v){ return this._reputation; }
-Player.prototype.setReputation = function(v){ this._reputation = v; return this; };
+Player.prototype.setReputation = function(v){ this._reputation = v; return this; }
+Player.prototype._reputation = 0;
 Player.prototype.animation = function(v){ return this._animation; }
 Player.prototype.setAnimation = function(v){ this._animation = v; return this; };
 Player.prototype.animations = function(v){ return this._animations; }
@@ -4948,15 +4962,10 @@ Player.prototype.distanceToY = function (obj){
 };
 
 Player.prototype.colisionObj = function (){
-	for (let i = 0, items = iter$(this.barrels()), len = items.length, barrel; i < len; i++) {
-		barrel = items[i];
-		if (this.distanceToX(barrel) < barrel.size && this.distanceToY(barrel) < barrel.size) {
-			return true;
-		};
-	};
-	for (let i = 0, items = iter$(this.boxes()), len = items.length, box; i < len; i++) {
-		box = items[i];
-		if (this.distanceToX(box) < box.size && this.distanceToY(box) < box.size) {
+	let sector = ("x" + (~~(this.pos().x / 500)) + "y" + (~~(this.pos().y / 500)));
+	for (let i = 0, items = iter$(this.game().sectors()[sector]), len = items.length, obj; i < len; i++) {
+		obj = items[i];
+		if (this.distanceToX(obj) < obj.size && this.distanceToY(obj) < obj.size) {
 			return true;
 		};
 	};
@@ -5327,11 +5336,11 @@ Crosshair.prototype.setY = function(v){ this._y = v; return this; };
 /***/ (function(module, exports) {
 
 function iter$(a){ return a ? (a.toArray ? a.toArray() : a) : []; };
-function Zombie(player,game,zombies){
+function Zombie(_0){
 	var dict;
-	for (let k in dict = (player)){
+	for (let k in dict = (_0)){
 		let v;
-		v = dict[k];if (player) { this[("_" + k)] = (player)[k] };
+		v = dict[k];if (_0) { this[("_" + k)] = (_0)[k] };
 	};
 };
 exports.Zombie = Zombie; // export class 
@@ -5369,8 +5378,7 @@ Zombie.prototype.takingHit = function(v){ return this._takingHit; }
 Zombie.prototype.setTakingHit = function(v){ this._takingHit = v; return this; };
 Zombie.prototype.attacking = function(v){ return this._attacking; }
 Zombie.prototype.setAttacking = function(v){ this._attacking = v; return this; };
-Zombie.prototype.sector = function(v){ return this._sector; }
-Zombie.prototype.setSector = function(v){ this._sector = v; return this; };
+
 Zombie.prototype.__colisionTimes = {'default': 0,name: 'colisionTimes'};
 Zombie.prototype.colisionTimes = function(v){ return this._colisionTimes; }
 Zombie.prototype.setColisionTimes = function(v){ this._colisionTimes = v; return this; }
@@ -5467,7 +5475,8 @@ Zombie.prototype.colideZombie = function (){
 };
 
 Zombie.prototype.colideObj = function (){
-	for (let i = 0, items = iter$(this.game().sectors()[this.sector()]), len = items.length, obj; i < len; i++) {
+	let sector = ("x" + (~~(this.pos().x / 500)) + "y" + (~~(this.pos().y / 500)));
+	for (let i = 0, items = iter$(this.game().sectors()[sector]), len = items.length, obj; i < len; i++) {
 		obj = items[i];
 		if (this.distanceToX(obj) < obj.size && this.distanceToY(obj) < obj.size) {
 			return true;
@@ -5483,6 +5492,7 @@ Zombie.prototype.playerDetected = function (){
 
 
 Zombie.prototype.deleteZombie = function (){
+	var player_, v_;
 	this.zombies().push(new Zombie(
 		{id: Math.random(),
 		pos: {
@@ -5505,11 +5515,11 @@ Zombie.prototype.deleteZombie = function (){
 	));
 	
 	var index = this.zombies().indexOf(this);
-	if ((index !== -1)) { return this.zombies().splice(index,1) };
+	if ((index !== -1)) { this.zombies().splice(index,1) };
+	return ((player_ = this.player()).setReputation(v_ = player_.reputation() + 10),v_);
 };
 
 Zombie.prototype.update = function (){
-	this.setSector(("x" + (~~(this.pos().x / 100)) + "y" + (~~(this.pos().y / 100))));
 	if (this.life() < 0) { return this.deleteZombie() };
 	if (this.distanceToPlayerX() < this.game().width() && this.distanceToPlayerY() < this.game().height()) {
 		switch (this.state()) {
@@ -5608,7 +5618,7 @@ Zombie.prototype.execWalkArroundZombie = function (){
 	if (!(self.alreadyTurned())) {
 		self.setAlreadyTurned(true);
 		self.setSpeed(3);
-		self.setRotation(self.rotation() + [30,50,70,90,-90,-70,-50,-30][~~(Math.random() * 7)]);
+		self.setRotation(self.rotation() + [30,50,70,90,-90,-70,-50,-30][~~(Math.random() * 8)]);
 		setTimeout(function() {
 			return (self.setAlreadyTurned(false),false);
 		},1000);
@@ -5621,7 +5631,7 @@ Zombie.prototype.execWalkArroundObject = function (){
 	if (!(self.alreadyTurned())) {
 		self.setAlreadyTurned(true);
 		self.setSpeed(3);
-		self.setRotation(self.rotation() + [90,135,180,-135,-90][~~(Math.random() * 4)]);
+		self.setRotation(self.rotation() + [90,135,180,-135,-90][~~(Math.random() * 5)]);
 		setTimeout(function() {
 			return (self.setAlreadyTurned(false),false);
 		},1000);
@@ -5661,7 +5671,7 @@ var Undead = Imba.defineTag('Undead', 'svg:g', function(tag){
 				this.zombie().takingHit() ? (
 					($[2] || _1('svg:g',$,2,0).setContent(
 						$[3] || _1('svg:rect',$,3,2).set('height',100).set('width',100)
-					,2)).set('transform',(("rotate(-90) translate(" + (-100) + ", " + (-50) + ")"))).end((
+					,2)).set('transform',(("rotate(-90) translate(" + ([-100,-110,-120,-130,-140,-150][~~(Math.random() * 5)]) + ", " + (-50) + ")"))).end((
 						$[3].set('fill',("url(#blood-splash-" + (this.zombie().takingHit()) + ")")).end()
 					,true))
 				) : void(0)
@@ -5793,25 +5803,31 @@ var Hud = Imba.defineTag('Hud', 'svg:g', function(tag){
 		var $ = this.$;
 		return this.$open(0).setChildren([
 			($[0] || _1('svg:g',$,0,this).setContent([
-				_1('svg:g',$,1,0).set('transform',"scale(1,-1)").setContent(
+				_1('svg:g',$,1,0).setContent(
 					$[2] || _1('svg:text',$,2,1).flag('noselect').set('fill',"yellow").set('font-family',"MenofNihilist").set('font-size',"50")
 				,2),
-				_1('svg:g',$,3,0).set('transform',"scale(1,-1) translate(0,50)").setContent(
-					$[4] || _1('svg:text',$,4,3).flag('noselect').set('font-family',"MenofNihilist").set('font-size',"50")
+				_1('svg:g',$,3,0).set('transform',"scale(1,-1)").setContent(
+					$[4] || _1('svg:text',$,4,3).flag('noselect').set('fill',"yellow").set('font-family',"MenofNihilist").set('font-size',"50")
+				,2),
+				_1('svg:g',$,5,0).set('transform',"scale(1,-1) translate(0,50)").setContent(
+					$[6] || _1('svg:text',$,6,5).flag('noselect').set('font-family',"MenofNihilist").set('font-size',"50")
 				,2)
 			],2)).set('transform',("translate(" + (this.game().width() - 300) + ", " + (this.game().height() / 10) + ")")).end((
-				$[1].end((
-					$[2].setText("life " + (this.player().life())).end()
+				$[1].set('transform',("scale(1,-1) translate(-200," + (150 - this.game().height()) + ")")).end((
+					$[2].setText("reputation " + (this.player().reputation())).end()
 				,true)),
 				$[3].end((
-					$[4].set('fill',((this.player().gun().ammo() < this.player().gun().cap() / 3) ? "red" : "yellow")).setText("ammo " + (this.player().gun().ammo())).end()
+					$[4].setText("life " + (this.player().life())).end()
+				,true)),
+				$[5].end((
+					$[6].set('fill',((this.player().gun().ammo() < this.player().gun().cap() / 3) ? "red" : "yellow")).setText("ammo " + (this.player().gun().ammo())).end()
 				,true))
 			,true)),
 			this.player().takingHit() ? (
-				($[5] || _1('svg:g',$,5,this).setContent(
-					$[6] || _1('svg:rect',$,6,5).flag('blood-hud')
+				($[7] || _1('svg:g',$,7,this).setContent(
+					$[8] || _1('svg:rect',$,8,7).flag('blood-hud')
 				,2)).set('transform',("translate(" + (this.game().width() / 2) + ", " + (this.game().height() / 2) + ")")).end((
-					$[6].set('transform',(("rotate(" + (this.player().bloodRotation()) + ")"))).set('height',this.game().height() / 1.5).set('width',this.game().width() / 1.5).set('fill',("url(#blood-hud-" + (this.player().takingHit()) + ")")).end()
+					$[8].set('transform',(("rotate(" + (this.player().bloodRotation()) + ")"))).set('height',this.game().height() / 1.5).set('width',this.game().width() / 1.5).set('fill',("url(#blood-hud-" + (this.player().takingHit()) + ")")).end()
 				,true))
 			) : void(0)
 		],1).synced();
@@ -5997,6 +6013,107 @@ var Loader = Imba.defineTag('Loader', 'svg:g', function(tag){
 	};
 });
 
+
+
+
+var Menu = Imba.defineTag('Menu', function(tag){
+	tag.prototype.game = function(v){ return this._game; }
+	tag.prototype.setGame = function(v){ this._game = v; return this; };
+	
+	tag.prototype.close = function (){
+		return (this.game().setMenu(false),false);
+	};
+	
+	tag.prototype.render = function (){
+		var $ = this.$;
+		return this.$open(0).setChildren(
+			$[0] || _1('div',$,0,this).flag('modal').flag('fadeIn').flag('animated').flag('show').setStyle("display: block;").setContent(
+				$[1] || _1('div',$,1,0).flag('modal-lg').flag('modal-dialog').setContent(
+					$[2] || _1('div',$,2,1).flag('modal-content').flag('model-form-content').flag('animated').flag('fadeInUp').setContent([
+						_1('div',$,3,2).flag('modal-header').setContent(
+							$[4] || _1('h5',$,4,3).flag('modal-title').setText("MENU")
+						,2),
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						_1('div',$,5,2).flag('modal-footer').setContent(
+							$[6] || _1('button',$,6,5).setType("button").flag('btn').flag('btn-link').on$(0,['tap','close'],this).setText('Close')
+						,2)
+					],2)
+				,2)
+			,2)
+		,2).synced((
+			$[0].end((
+				$[2].flagIf('fadeOutDown',(this._closing)).end((
+					$[6].end()
+				,true))
+			,true))
+		,true));
+	};
+});
+
 var App = Imba.defineTag('App', function(tag){
 	tag.prototype.survivalAnimations = function(v){ return this._survivalAnimations; }
 	tag.prototype.setSurvivalAnimations = function(v){ this._survivalAnimations = v; return this; };
@@ -6104,73 +6221,77 @@ var App = Imba.defineTag('App', function(tag){
 		return res;
 	};
 	
+	
+	tag.prototype.isNotLoading = function (){
+		return Object.keys(this.imagesLoaded()).length == 440 && Object.keys(this.audiosLoaded()).length == Object.keys(this.audios()).length;
+	};
+	
 	tag.prototype.render = function (){
 		var $ = this.$, self = this;
 		let x = self.player().shooting() ? (Math.random() * self.player().gun().power() - self.player().gun().power() / 2) : 0;
 		let y = self.player().shooting() ? (Math.random() * self.player().gun().power() - self.player().gun().power() / 2) : 0;
-		return self.$open(0).flag('container').setChildren(
-			$[0] || _1('svg:svg',$,0,self).flag('game').set('transform',"scale(1,-1)")
-		,2).synced((
-			$[0].setContent([
+		return self.$open(0).flag('container').setChildren([
+			(self.game().menu() && self.isNotLoading()) ? (($[0] || _1(Menu,$,0,self)).setGame(self.game()).end()) : void(0),
+			($[1] || _1('svg:svg',$,1,self).flag('game').set('transform',"scale(1,-1)")).setContent([
 				self.survivalAnimations(),
 				self.feetAnimation(),
-				($[1] || _1(Loader,$,1,0)).end(),
+				($[2] || _1(Loader,$,2,1)).end(),
 				
-				(Object.keys(self.imagesLoaded()).length == 440 && Object.keys(self.audiosLoaded()).length == Object.keys(self.audios()).length) ? Imba.static([
-					($[2] || _1('svg:g',$,2,0)).set('transform',(("translate(" + (x - self.player().pos().x + self.game().width() / 2) + ", " + (y - self.player().pos().y + self.game().height() / 2) + ")"))).setContent([
-						($[3] || _1(Ground,$,3,2)).setPlayer(self.player()).end(),
+				self.isNotLoading() ? Imba.static([
+					($[3] || _1('svg:g',$,3,1)).set('transform',(("translate(" + (x - self.player().pos().x + self.game().width() / 2) + ", " + (y - self.player().pos().y + self.game().height() / 2) + ")"))).setContent([
+						($[4] || _1(Ground,$,4,3)).setPlayer(self.player()).end(),
 						(function tagLoop($0) {
 							for (let i = 0, items = iter$(self.game().boxes()), len = $0.taglen = items.length; i < len; i++) {
 								($0[i] || _1(Box,$0,i)).setBox(items[i]).end();
 							};return $0;
-						})($[4] || _2($,4,$[2])),
+						})($[5] || _2($,5,$[3])),
 						(function tagLoop($0) {
 							for (let i = 0, items = iter$(self.game().barrels()), len = $0.taglen = items.length; i < len; i++) {
 								($0[i] || _1(Barrel,$0,i)).setBarrel(items[i]).end();
 							};return $0;
-						})($[5] || _2($,5,$[2])),
-						($[6] || _1(Survivor,$,6,2)).setPlayer(self.player()).setGame(self.game()).end(),
+						})($[6] || _2($,6,$[3])),
+						($[7] || _1(Survivor,$,7,3)).setPlayer(self.player()).setGame(self.game()).end(),
 						(function tagLoop($0) {
 							var $$ = $0.$iter();
 							for (let i = 0, items = iter$(self.zombies()), len = items.length, zombie; i < len; i++) {
 								zombie = items[i];
 								if (zombie) { $$.push(($0[i] || _1(Undead,$0,i)).setZombies(self.zombies()).setZombie(zombie).setPlayer(self.player()).setGame(self.game()).end()) };
 							};return $$;
-						})($[7] || _3($,7,$[2])),
+						})($[8] || _3($,8,$[3])),
 						(function tagLoop($0) {
 							var $$ = $0.$iter();
 							for (let i = 0, items = iter$(self.player().bullets()), len = items.length, bullet; i < len; i++) {
 								bullet = items[i];
 								if (bullet) { $$.push(($0[i] || _1(Projectile,$0,i)).setBullet(bullet).setPlayer(self.player()).setZombies(self.zombies()).setGame(self.game()).end()) };
 							};return $$;
-						})($[8] || _3($,8,$[2]))
+						})($[9] || _3($,9,$[3]))
 					],1).end(),
-					($[9] || _1(Hud,$,9,0)).setPlayer(self.player()).setGame(self.game()).end(),
-					($[10] || _1(Aim,$,10,0)).setCrosshair(self.crosshair()).end()
+					($[10] || _1(Hud,$,10,1)).setPlayer(self.player()).setGame(self.game()).end(),
+					($[11] || _1(Aim,$,11,1)).setCrosshair(self.crosshair()).end()
 				],2,1) : Imba.static([
-					($[11] || _1('svg:g',$,11,0).setContent(
-						$[12] || _1('svg:text',$,12,11).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"150").setText("Zombie Shooter")
+					($[12] || _1('svg:g',$,12,1).setContent(
+						$[13] || _1('svg:text',$,13,12).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"150").setText("Zombie Shooter")
 					,2)).set('transform',("translate(" + (window.innerWidth / 4) + "," + (window.innerHeight / 2) + ") scale(1, -1)")).end((
-						$[12].end()
+						$[13].end()
 					,true)),
-					($[13] || _1('svg:g',$,13,0).setContent(
-						$[14] || _1('svg:text',$,14,13).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"90")
+					($[14] || _1('svg:g',$,14,1).setContent(
+						$[15] || _1('svg:text',$,15,14).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"90")
 					,2)).set('transform',("translate(" + (window.innerWidth / 3) + "," + (window.innerHeight / 3) + ") scale(1, -1)")).end((
-						$[14].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 440 * 40 + Object.keys(self.audiosLoaded()).length / Object.keys(self.audios()).length * 60)) + "%").end()
+						$[15].setText("LOADING.... " + (~~(Object.keys(self.imagesLoaded()).length / 440 * 40 + Object.keys(self.audiosLoaded()).length / Object.keys(self.audios()).length * 60)) + "%").end()
 					,true)),
-					($[15] || _1('svg:g',$,15,0).setContent(
-						$[16] || _1('svg:text',$,16,15).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"15").setText("Tip: ZoomOut to 80%")
+					($[16] || _1('svg:g',$,16,1).setContent(
+						$[17] || _1('svg:text',$,17,16).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"15").setText("Tip: ZoomOut to 80%")
 					,2)).set('transform',("translate(" + (window.innerWidth / 2) + "," + (window.innerHeight / 4) + ") scale(1, -1)")).end((
-						$[16].end()
+						$[17].end()
 					,true)),
-					($[17] || _1('svg:g',$,17,0).setContent(
-						$[18] || _1('svg:text',$,18,17).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"15").setText("built with imba")
+					($[18] || _1('svg:g',$,18,1).setContent(
+						$[19] || _1('svg:text',$,19,18).set('fill',"red").set('font-family',"MenofNihilist").set('font-size',"15").setText("built with imba")
 					,2)).set('transform',("translate(" + (window.innerWidth - 200) + "," + (window.innerHeight - 200) + ") scale(1, -1)")).end((
-						$[18].end()
+						$[19].end()
 					,true))
 				],2,2)
 			],1).end()
-		,true));
+		],1).synced();
 	};
 })
 exports.App = App;
