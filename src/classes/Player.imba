@@ -1,189 +1,147 @@
-import Bullet from './Bullet'
+import GameObject from '../engine/GameObject'
 
-export class Player
-    prop invertory
-    prop gun
-    prop pos
-    prop rotation
-    prop can-shoot
-    prop can-attack
-    prop speed
-    prop running
-    prop reputation default: 0
-    prop animation
-    prop animations
-    prop feet-animation
-    prop feet-animations
-    prop game
-    prop zombies
-    prop barrels
-    prop boxes
-    prop bullets default: []
-    prop life default: 100
-    prop blood-rotation
-    prop cancel-reloading
+export default class Player < GameObject
+	def constructor inventory, animations, feet-animations
+		super
+		position = {x:0,y:0}
+		rotation = 0
+		size = 20
+		inventory = inventory
+		score = 100000
+		gun = inventory[0]
+		holsters = inventory
+		speed = 0
+		max-speed = .8
+		nearZombies = Set.new
+		nearBushes = Set.new
+		nearBarrels = Set.new
+		max-life = 100
+		life = 100
+		slots = 3
+		safe = true
+		stamina = 300
+		max-stamina = 500
+		animations = animations
+		animation = animations.rifle.idle
+		animation-state = 'idle'
 
-    prop shooting
-    prop reloading
-    prop running
-    prop attacking
-    prop taking-hit
+		feet-animations = feet-animations
+		feet-animation = feet-animations.idle
+		feet-animation-state = 'idle'
 
+	def checkShop
+		STATE.shop.open = false unless inSafeZone()
 
-    def takeHit damage
-        unless taking-hit
-            let audio = Audio.new("sounds/survivor_yell/3yell{~~(Math.random * 10)}.wav")
-            audio.play
-            let audio = Audio.new("sounds/zombie_hit/{~~(Math.random * 4)}.wav")
-            audio.play
-            blood-rotation = Math.random * 360
-            taking-hit = ~~(Math.random * 2 + 1)
-            setTimeout(&, 1200) do taking-hit = no
-        life -= damage
+	def update
+		return if dead
+		gun.update()
+		move()
+		rotate()
+		shoot()
+		updateNearObjects(STATE.bushes, nearBushes)
+		updateNearObjects(STATE.zombies, nearZombies)
+		updateNearObjects(STATE.barrels, nearBarrels)
+		checkColision(STATE.bushes)
+		checkColision(STATE.zombies)
+		checkColision(STATE.barrels)
+		checkShop()
+		if gun.reloading
+			animation-state = 'reload'
+		animation = animations[gun.name][animation-state]
+		feet-animation = feet-animations[feet-animation-state]
 
-    def distanceToX obj
-        Math.abs(obj:x - pos:x)
+	def updateNearObjects obj-sectors,prop-set
+		let x = ~~((position.x) / 1000)
+		let y = ~~((position.y) / 800)
+		prop-set.clear()
+		for i in [-1,0,1]
+			for j in [-1,0,1]
+				for val of (obj-sectors["{x + i}|{y + j}"])
+					prop-set.add(val)
 
-    def distanceToY obj
-        Math.abs(obj:y - pos:y)
+	def shoot
+		return if inSafeZone()
+		gun.fire() if STATE.mouse.press
 
-    def colisionObj
-        let sector = "x{~~(pos:x/500)}y{~~(pos:y/500)}"
-        for obj in game.sectors[sector]
-            if distanceToX(obj) < obj:size and distanceToY(obj) < obj:size
-                return true
-        return no
+	def rotate
+		let diffX = STATE.mouse.x - window.innerWidth/2
+		let diffY = STATE.mouse.y - window.innerHeight/2
+		rotation = -Math.atan2(diffX, diffY) * 57.2974694
 
-    def move directions
-        feet-animation = feet-animations:run if running and directions:length
-        feet-animation = feet-animations:walk if !running and directions:length
-        feet-animation = feet-animations:idle if !directions:length
-        let step
-        if !reloading and !shooting and !attacking 
-            animation = animations[gun.name]:move if directions:length
-            animation = animations[gun.name]:idle unless directions:length
-        if directions:length > 1
-            step = speed * 0.7
-        else
-            step = speed
+	def move
+		let slower
+		let key-count = (~~STATE.keys.KeyA + ~~STATE.keys.KeyD + ~~STATE.keys.KeyW + ~~STATE.keys.KeyS)
 
-        if running
-            step *= 2
+		# Aceleration
+		if key-count and STATE.keys.ShiftLeft and stamina
+			stamina--
+			speed += (max-speed/20) unless speed >= max-speed 
+			animation-state = 'move'
+			feet-animation-state = 'run'
+		elif key-count
+			stamina++ unless (stamina >= max-stamina or STATE.keys.ShiftLeft)
+			speed += (max-speed/20) unless speed >= max-speed / 2
+			speed -= (max-speed/20) if     speed >= max-speed / 2
+			animation-state = 'move'
+			feet-animation-state = 'walk'
+		else
+			stamina++ unless (stamina >= max-stamina or STATE.keys.ShiftLeft)
+			speed = 0
+			feet-animation-state = 'idle'
+			animation-state = 'idle'
 
-        for d in directions
-            switch d
-                when :left
-                    pos:x -= step
-                when :right
-                    pos:x += step
-                when :down
-                    pos:y -= step        
-                when :up
-                    pos:y += step
+		# Diagonal correction
+		if ((STATE.keys.KeyA or 0) + (STATE.keys.KeyD or 0) + (STATE.keys.KeyW or 0) + (STATE.keys.KeyS or 0)) > 1
+			slower = 0.707
+		else
+			slower = 1
 
-        if colisionObj
-            for d in directions
-                switch d
-                    when :left
-                        pos:x += step
-                    when :right
-                        pos:x -= step
-                    when :down
-                        pos:y += step        
-                    when :up
-                        pos:y -= step
+		position.x -= speed * STATE.delta * slower if STATE.keys.KeyA
+		position.x += speed * STATE.delta * slower if STATE.keys.KeyD
+		position.y += speed * STATE.delta * slower if STATE.keys.KeyW
+		position.y -= speed * STATE.delta * slower if STATE.keys.KeyS
 
-    def angleToZombie zombie
-        let dx = pos:x - zombie.pos:x
-        let dy = pos:y - zombie.pos:y
-        Math.abs(rotation + (Math.atan2(dx, dy)/3.1415*180.0) +150) % 360
+	def checkColision obj-sectors
+		obj-sectors[currentSector()] ||= Set.new
+		for obj of obj-sectors[currentSector()]
+			if colideCircle(obj)
+				position.x -= Math.sin((angleToObject(obj) + 90) * 0.01745) * ((obj.speed * 1.5) or speed) * STATE.delta * 1.8
+				position.y += Math.cos((angleToObject(obj) + 90) * 0.01745) * ((obj.speed * 1.5) or speed) * STATE.delta * 1.8
 
-    def bulletInitPos
-        if (rotation < 360 and rotation > 280) or (rotation < 180 and rotation > 90)
-            return {
-                x: Math.cos((rotation)* 3.1415 / 180) * 100 + pos:x
-                y: Math.sin((rotation)* 3.1415 / 180) * 50 + pos:y
-            }
-        else
-            return {
-                x: Math.cos((rotation)* 3.1415 / 180) * 100 + pos:x
-                y: Math.sin((rotation)* 3.1415 / 180) * 150 + pos:y
-            }
+	def changeGun slot
+		Audio.new('sounds/weapswitch.ogg').play()
+		if holsters[slot]
+			gun.reloading = false
+			gun = holsters[slot]
 
-    def generateBullet
-        bullets.push Bullet.new 
-            player: self
-            pos: bulletInitPos
-            direction: rotation + (Math.random * 200/gun.accuracy - 100/gun.accuracy)
-            power: gun.power
-            damage: gun.damage
+	def onKeyEvent key
+		let actions = {
+			'Digit1': do changeGun(0)
+			'Digit2': do changeGun(1)
+			'Digit3': do changeGun(2)
+			'Digit4': do changeGun(3)
+			'Digit5': do changeGun(4)
+			'KeyR': do gun.reload()
+		}
+		actions[key] and actions[key]()
 
-    def changeGun to
-        cancel-reloading = yes if reloading
-        reloading = no
-        attacking = no
-        gun = invertory[to]
+	def takeHit damage
+		return if dead
 
-    def shoot
-        reload unless gun.ammo or reloading
-        return attack if [:flashlight, :knife].includes gun.name
-        if gun.ammo and can-shoot and !reloading
-            let shot = gun.shoot-sounds[~~(Math.random * gun.shoot-sounds:length)]
-            let audio = Audio.new shot:src
-            audio:volume = shot:volume
-            audio.play
-            if gun.name == :shotgun
-                for i in [0,0,0,0,0,0]
-                    generateBullet
-            else
-                generateBullet
-            gun.ammo -= 1
-            can-shoot = no
-            shooting = yes
-            animation = animations[gun.name]:shoot
-            setTimeout(&, 1000/gun.rate) do can-shoot = yes
-            setTimeout(&, 30) do shooting = no 
+		Audio.new("sounds/survivor_yell/3yell{~~(Math.random() * 10)}.wav").play()
+		life -= damage
+		if life <= 0
+			dead = true
 
-    def attack
-        if can-attack
-            let audio = Audio.new("sounds/melee{~~(Math.random * 3)}.wav")
-            audio:volume = 0.6
-            audio.play
-            setTimeout(&, 1500) do delete audio
-            can-attack = no
-            attacking = yes
-            animation = animations[gun.name]:attack
-            setTimeout(&, 10 * 15 * 1) do
-                let damage = 5
-                let damage = 25 if gun.name == :knife
-                for zombie in zombies
-                    if zombie.distanceToPlayerX < 120 and zombie.distanceToPlayerY < 120 and angleToZombie(zombie) < 180
-                        zombie.takeHit({damage: (do damage), power: (do 50)})
-            setTimeout(&, 10 * 15 * 3.8) do
-                can-attack = yes
-                attacking = no
+	def inSafeZone
+		Math.abs(position.x) < 100 and Math.abs(position.y) < 100
 
-    def reload
-        if gun.ammo != gun.cap and !reloading
-            game.time = 0
-            let audio = Audio.new('sounds/shotgun_reload.wav')
-            let audio2 = Audio.new('sounds/shotgun_pump.wav')
-            audio.play
-            audio2.play
-            can-shoot = no
-            reloading = yes
-            animation = animations[gun.name]:reload
-            setTimeout(&, gun.reload-time) do
-                reloading = no
-                delete audio
-                audio2.pause
-                delete audio2
-                if cancel-reloading
-                    cancel-reloading = no
-                else
-                    can-shoot = yes
-                    gun.ammo = gun.cap
+	def usingGun gun
+		holsters.find(do |g| g == gun)
 
-    def initialize
-        for k, v of ($1) 
-            self["_{k}"] = ($1)[k] if $1
+	def equip gun
+		return if holsters.find(do |g| g == gun)
+		if holsters[slots - 1]
+			holsters.pop()
+		holsters.unshift(gun)
+		gun = gun

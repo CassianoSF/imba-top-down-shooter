@@ -1,0 +1,94 @@
+body {
+    margin: 0px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: none
+}
+
+@font-face {
+    font-family: Typewriter;
+    src: url("fonts/JMH Typewriter-Black.ots") format("opentype");
+}
+
+@font-face {
+    font-family: MenofNihilist;
+    src: url("fonts/MenofNihilist-Regular.ots") format("opentype");
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes bounce {
+    50% {
+        font-size: 50px;
+        color: #5F5;
+    }
+}
+
+@keyframes bounce {
+    50% {
+        font-size: 50px;
+        color: #5F5;
+    }
+}
+
+.bounce {
+    -webkit-animation-name: bounce;
+    animation-name: bounce;
+    -webkit-animation-duration: 0.5s;
+    animation-duration: 0.5s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both
+}
+
+@-webkit-keyframes fadeOutUp {
+    0% {
+        opacity: 1
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(0, -100%, 0);
+        transform: translate3d(0, -100%, 0)
+    }
+}
+
+@keyframes fadeOutUp {
+    0% {
+        opacity: 1
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(0, -100%, 0);
+        transform: translate3d(0, -100%, 0)
+    }
+}
+
+.fadeOutUp {
+    -webkit-animation-name: bounce;
+    animation-name: bounce;
+    -webkit-animation-duration: 0.5s;
+    animation-duration: 0.5s;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+    -webkit-animation-name: fadeOutUp;
+    animation-name: fadeOutUp;
+}

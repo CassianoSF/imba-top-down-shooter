@@ -1,205 +1,141 @@
-export class Zombie
-    prop pos
-    prop rotation
-    prop animation
-    prop animations
-    prop life
-    prop max-life
-    prop speed
-    prop max-speed
-    prop id
-    prop turn
-    prop state default: :random
-    prop damage default: 10
-    prop already-turned
-    prop taking-hit
-    prop attacking
-    # prop sector
-    prop colision-times default: 0
+import GameObject from '../engine/GameObject'
 
-    prop player
-    prop zombies
-    prop barrels
-    prop boxes
-    prop game
+let DRIFT = 0
+let AGGRO = 1
+let ATTACK = 2
+let DEAD = 3
 
-    def takeHit hit
-        let audio = Audio.new("sounds/zombie_hit/{~~(Math.random * 4)}.wav")
-        audio.play
-        pos:x -= Math.sin((angleToPlayer + 90 ) * 3.1415 / 180) * hit.power
-        pos:y -= -Math.cos((angleToPlayer + 90 ) * 3.1415 / 180) * hit.power
-        unless taking-hit
-            life -= hit.damage
-            taking-hit = ~~(Math.random * 5 + 1)
-            setTimeout(&, 50) do 
-                taking-hit = no
-        state = :aggro
+export default class Zombie < GameObject
+	def constructor player, day, animations
+		super
+		player = player
+		position = GameObject.randomPosition(player) 
+		rotation = Math.random() * 360
+		sector = "{~~(position.x / 1000)}|{~~(position.y / 800)}"
+		self.state = 0
+		speed = .2
+		base_speed = .2
+		max_speed = .6 + (day / 20)
+		size = 20
+		turn = 0
+		life = 50 + (day*3)
+		death = 0
+		animations = animations
+		animation = animations.idle
+		animation-STATE = 'idle'
 
-    def distanceToPlayerX
-        Math.abs (player.pos:x - pos:x)
+	def update
+		updateSector()
+		checkColisions()
+		if self.state is DEAD   then execDead()
+		if self.state is DRIFT  then execDrift()
+		if self.state is AGGRO  then execAggro()
+		if self.state is ATTACK then execAttack()
+		animation = animations[animation-STATE]
 
-    def distanceToPlayerY
-        Math.abs (player.pos:y - pos:y)
+	def execDead
+		if STATE.time - death > 5000
+			STATE.killed.delete(self)
+			delete self
 
-    def angleToPlayer
-        let dx = player.pos:x - pos:x
-        let dy = player.pos:y - pos:y
-        -(Math.atan2(dx, dy)/3.1415*180.0 - 90) % 360
+	def execAttack
+		animation-STATE = 'attack'
+		if not start_attack
+			Audio.new("sounds/zombie_attack/{~~(Math.random() * 3)}.ogg").play()
+			start_attack = STATE.time
+		if STATE.time - start_attack > 100 and playerIsClose(size * 2) and not player_beaten
+			player_beaten = yes
+			player.takeHit(10)
+		if STATE.time - start_attack > 500
+			start_attack = no
+			player_beaten = no
+			speed = 0
+			self.state = AGGRO
 
-    def distanceToZombieX zombie
-        Math.abs (zombie.pos:x - pos:x)
+	def execDrift
+		if playerDetected()
+			self.state = AGGRO
+		if STATE.time % 200 == 0
+			turn = Math.floor(Math.random() * 2)
+			speed = Math.random() * base_speed
+			if speed < 0.1
+				animation-STATE = 'idle'
+			else
+				animation-STATE = 'move'
+		if STATE.time % 3 == 0
+			if turn == 0
+				rotation += Math.random() * 3
+			elif turn == 1
+				rotation -= Math.random() * 3
+		moveForward()
 
-    def distanceToZombieY zombie
-        Math.abs (zombie.pos:y - pos:y)
+	def execAggro
+		animation-STATE = 'move'
+		if player.inSafeZone()
+			self.state = DRIFT
+		if playerIsClose(size * 2.1)
+			self.state = ATTACK
+		speed += max_speed/12 unless speed >= max_speed
+		rotation = angleToObject(player)
+		moveForward()
 
-    def moveForward
-        if colideObj
-            colision-times += 1
-            pos:x -= Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
-            pos:y -= -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
-            if colision-times > 20
-                state = :walk-arround-object
-                setTimeout((do state = :random), 1000)
-                colision-times = 0
-        else
-            pos:x += Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
-            pos:y += -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
+	def findColision obj-sectors
+		obj-sectors[sector] ||= Set.new
+		for obj of obj-sectors[sector]
+			if colideCircle(obj)
+				return obj unless obj is self
+		return no
 
-    def moveBackward
-        pos:x -= Math.sin((rotation + 90 ) * 3.1415 / 180) * speed
-        pos:y -= -Math.cos((rotation + 90 ) * 3.1415 / 180) * speed
+	def playerOnSight
+		Math.abs((angleToObject(player) - rotation) % 360) < 30
 
-    def distanceToX obj
-        Math.abs (obj:x - pos:x)
-        
-    def distanceToY obj
-        Math.abs (obj:y - pos:y)
-        
-    def colideZombie
-        for zombie in zombies
-            if distanceToZombieX(zombie) < 30 and distanceToZombieY(zombie) < 30 and zombie != self
-                return true
-        return no
+	def playerIsClose distance
+		distanceToObjectX(player) < distance and distanceToObjectY(player) < distance
 
-    def colideObj
-        let sector = "x{~~(pos:x/500)}y{~~(pos:y/500)}"
-        for obj in game.sectors[sector]
-            if distanceToX(obj) < obj:size and distanceToY(obj) < obj:size
-                return true
-        return no
+	def playerDetected
+		(playerOnSight() and playerIsClose(750) or playerIsClose(40)) and not player.inSafeZone()
 
-    def playerDetected
-        let angle-diff = angleToPlayer - rotation
-        Math.abs angle-diff < 30 and distanceToPlayerX < 3000 and distanceToPlayerY < 3000 or (distanceToPlayerX < 100 and distanceToPlayerY < 100)
+	def updateSector()
+		let temp_sector = currentSector()
+		if temp_sector != sector
+			STATE.zombies[sector] ||= Set.new
+			STATE.zombies[sector].delete(self)
+			sector = temp_sector
+			STATE.zombies[sector] ||= Set.new
+			STATE.zombies[sector].add(self)
 
+	def checkColisions
+		let obj = findColision(STATE.bushes) or findColision(STATE.barrels)
+		if obj
+			let dx = Math.sin((angleToObject(obj) + 90) * 0.01745) * speed * STATE.delta
+			let dy = Math.cos((angleToObject(obj) + 90) * 0.01745) * speed * STATE.delta
+			position.x -= dx * 1.5
+			position.y += dy * 1.5
+		let zom_col = findColision(STATE.zombies)
+		if zom_col
+			let dx = Math.sin((angleToObject(zom_col) + 90) * 0.01745) * speed * STATE.delta
+			let dy = Math.cos((angleToObject(zom_col) + 90) * 0.01745) * speed * STATE.delta
+			zom_col.position.x += dx * 0.5
+			zom_col.position.y -= dy * 0.5
+			position.x -= dx
+			position.y += dy
 
-    def deleteZombie
-        zombies.push Zombie.new 
-            id: Math.random
-            pos: 
-                x: player.pos:x + Math.random * 2000 - 1000
-                y: player.pos:y + Math.random * 2000 - 1000
-            rotation: Math.random * 360
-            animation: animations:idle
-            animations: animations
-            state: :random
-            life: max-life + 20
-            max-life: max-life + 20
-            speed: speed + 0.2
-            max-speed: speed + 0.2
-            game: game
-            player: player
-            zombies: zombies
-            boxes: boxes
-            barrels: barrels
+	def takeHit(bullet)
+		unless findColision(STATE.bushes)
+			position.x -= Math.sin((bullet.rotation - 90) * 0.01745) * bullet.power
+			position.y += Math.cos((bullet.rotation - 90) * 0.01745) * bullet.power
+		self.state = AGGRO
+		life -= bullet.damage
+		speed -= bullet.power / 30 unless speed < 0
+		unless taking_hit
+			Audio.new("sounds/zombie_hit/{~~(Math.random() * 4)}.wav").play()
+			Audio.new("sounds/zombie_sound/{~~(Math.random() * 6)}.mp3").play()
+		taking_hit = true
+		setTimeout(&, 50) do taking_hit = false
 
-        var index = zombies.indexOf(self)
-        zombies.splice(index, 1) if (index !== -1)
-        player.reputation += 10
-
-    def update
-        return deleteZombie if life < 0 
-        if distanceToPlayerX < game.width and distanceToPlayerY < game.height
-            switch state
-                when :aggro
-                    execAggro
-                when :attack
-                    execAttack
-                when :random
-                    execRandom
-                when :walk-arround-zombie
-                    execWalkArroundZombie
-                when :walk-arround-object
-                    execWalkArroundObject
-
-    def execAggro
-        if distanceToPlayerX < 50 and distanceToPlayerY < 50
-            state = :attack
-        elif colideZombie
-            state = :walk-arround-zombie
-            setTimeout((do state = :aggro), 300)
-        else
-            speed = max-speed
-            rotation = angleToPlayer 
-            animation = animations:move
-            moveForward  
-        
-    def execAttack
-        if distanceToPlayerX < 100 and distanceToPlayerY < 100 and !attacking
-            let audio = Audio.new("sounds/zombie-attack{~~(Math.random * 3)}.ogg")
-            audio:volume = 0.6
-            audio.play
-            attacking = true
-            animation = animations:attack
-            setTimeout(&, 300) do 
-                if distanceToPlayerX < 100 and distanceToPlayerY < 100
-                    player.takeHit(damage)
-                attacking = false
-                if colideZombie
-                    state = :walk-arround-zombie
-                    setTimeout(&, 300) do 
-                        state = :aggro
-                else
-                    state = :aggro
-        elif !attacking
-            state = :aggro
-
-    def execRandom
-        if distanceToPlayerX < 40 and distanceToPlayerY < 40
-            state = :attack
-        
-        elif playerDetected
-            state = :aggro
-
-        else
-            if 5000 % game.time == 0
-                turn = [:turn_left, :turn_right][~~(Math.random * 2)]
-                speed = ~~(Math.random * max-speed)
-            if turn == :turn_right
-                rotation += 1
-            if turn == :turn_left
-                rotation -= 1
-            moveForward  
-
-    def execWalkArroundZombie
-        unless already-turned
-            already-turned = true
-            speed = 3
-            rotation += [30, 50, 70, 90, -90, -70, -50, -30][~~(Math.random * 8)]
-            setTimeout(&, 1000) do
-                already-turned = false
-        moveForward  
-
-    def execWalkArroundObject
-        unless already-turned
-            already-turned = true
-            speed = 3
-            rotation += [90, 135, 180, -135, -90][~~(Math.random * 5)]
-            setTimeout(&, 1000) do
-                already-turned = false
-        moveForward 
-
-    def initialize
-        for k, v of ($1) 
-            self["_{k}"] = ($1)[k] if $1
-
+		if life <= 0
+			STATE.zombies[sector].delete(self)
+			STATE.killed.add(self)
+			self.state = DEAD
+			player.score += 90 + 10 * STATE.day
+			death = STATE.time
