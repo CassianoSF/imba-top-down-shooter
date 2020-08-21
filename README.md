@@ -1,5 +1,5 @@
 # Top Down Shooter
-![test](https://cassianosf.github.io/imba-top-down-shooter/public/img/demo.jpg)  
+![test](https://repository-images.githubusercontent.com/193925898/33871500-9bfe-11e9-9423-b56e7d8e0688)  
   
   
   
