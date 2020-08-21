@@ -3,9 +3,8 @@
   
   
   
-Game built on [imba](https://github.com/imba/imba) and under development so... expect bugs  
-A demo can be seen [here](https://cassianosf.github.io/imba-top-down-shooter/public/index.html).  
-If you have suggestions add a issue or make a pull request, help is welcome!  
+Game built in [imba](https://v2.imba.io)
+A demo can be seen [here](https://cassianosf.github.io/imba-top-down-shooter/public/index.html).
 
 
 ## Getting started
