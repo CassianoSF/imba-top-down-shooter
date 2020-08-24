@@ -9,7 +9,7 @@
       "static": "/"
     },
     "devOptions": {
-      "out": "public",
+      "out": "dist",
       "open": "none",
       "bundle": true
     },
