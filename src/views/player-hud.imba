@@ -4,7 +4,7 @@ tag fps-counter
 		update()
 
 	def update
-		fps = ~~(1/(STATE.delta/200))
+		fps = ~~(STATE.frame * 0.5 / (STATE.diff / 1000) )
 		if fps < 50 
 			color = '#F99' 
 		elif fps < 60

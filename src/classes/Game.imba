@@ -6,20 +6,13 @@ export default global class Game
 		current_date = Date.new
 		STATE.first_date = Date.new
 		STATE.last_date = Date.new
+		STATE.frame = 0
 		window.addEventListener('keydown', keydownEvent.bind(this))
 		window.addEventListener('keyup', keyupEvent.bind(this))
 		window.addEventListener('mousemove', mousemoveEvent.bind(this))
 		window.addEventListener('mousedown', mousedownEvent.bind(this))
 		window.addEventListener('mouseup', mouseupEvent.bind(this))
 		setInterval(update.bind(this), 16)
-	# 	loadAssets()
-
-
-	# def loadAssets
-	# 	setInterval(startGame.bind(this), 5000)
-	# 	audios-loaded =  {}
-	# 	for k, audio of STATE.audios
-	# 		audio:oncanplaythrough = do audios-loaded[k] = true
 
 	def playTheme
 		let theme = Audio.new("sounds/theme0{current_theme}.ogg")
@@ -39,6 +32,8 @@ export default global class Game
 
 	def update
 		current_date = Date.new
+		STATE.frame += 1
+		STATE.diff =  current_date.getTime() - STATE.first_date.getTime()
 		STATE.delta = (current_date - STATE.last_date) / 5
 		STATE.time = current_date - STATE.first_date
 		STATE.last_date = current_date
