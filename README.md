@@ -3,7 +3,7 @@
   
   
   
-Game built in [imba](https://v2.imba.io)
+Game built in [imba](https://v2.imba.io)  
 A demo can be seen [here](https://cassianosf.github.io/imba-top-down-shooter/dist/index.html).
 
 
