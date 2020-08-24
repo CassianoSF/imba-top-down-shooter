@@ -351,3 +351,4 @@ global.STATE =
 		slots: 5000
 	}
 	animations: animations
+	loading: true

@@ -6,6 +6,7 @@ tag app-root
 		arrow_path = "M0 0l254.38 454.78c-230.68,-167.78 -274.65,-164.19 -508.77,0l254.38 -454.78z"
 		player = STATE.player
 		animations = []
+		loaded = 0
 		loadAnimations()
 
 		rand-ground = []
@@ -16,8 +17,60 @@ tag app-root
 				y: Math.random() * 10000
 			})
 
+
+
 	def mount
-		STATE.game.new(self)
+		let images = document.getElementsByTagName('image')
+		let audios = [
+			Audio.new("sounds/theme01.ogg")
+			Audio.new("sounds/pistol_shot.ogg")
+			Audio.new("sounds/reload.ogg")
+			Audio.new("sounds/shotgun_shot.ogg")
+			Audio.new("sounds/reload.ogg")
+			Audio.new("sounds/rifle_shot.ogg")
+			Audio.new("sounds/reload.ogg")
+			Audio.new('sounds/weapswitch.ogg')
+			Audio.new("sounds/survivor_yell/3yell0.wav")
+			Audio.new("sounds/survivor_yell/3yell1.wav")
+			Audio.new("sounds/survivor_yell/3yell2.wav")
+			Audio.new("sounds/survivor_yell/3yell3.wav")
+			Audio.new("sounds/survivor_yell/3yell4.wav")
+			Audio.new("sounds/survivor_yell/3yell5.wav")
+			Audio.new("sounds/survivor_yell/3yell6.wav")
+			Audio.new("sounds/survivor_yell/3yell7.wav")
+			Audio.new("sounds/survivor_yell/3yell8.wav")
+			Audio.new("sounds/survivor_yell/3yell9.wav")
+			Audio.new("sounds/zombie_attack/0.ogg")
+			Audio.new("sounds/zombie_attack/1.ogg")
+			Audio.new("sounds/zombie_attack/2.ogg")
+			Audio.new("sounds/zombie_hit/0.wav")
+			Audio.new("sounds/zombie_hit/1.wav")
+			Audio.new("sounds/zombie_hit/2.wav")
+			Audio.new("sounds/zombie_hit/3.wav")
+			Audio.new("sounds/zombie_sound/0.mp3")
+			Audio.new("sounds/zombie_sound/1.mp3")
+			Audio.new("sounds/zombie_sound/2.mp3")
+			Audio.new("sounds/zombie_sound/3.mp3")
+			Audio.new("sounds/zombie_sound/4.mp3")
+			Audio.new("sounds/zombie_sound/5.mp3")
+		]
+		for img of images
+			img.onload = do 
+				loaded += 100 / (images.length + audios.length - 2)
+				checkLoading()
+
+
+		for audio in audios 
+			audio.oncanplaythrough = do 
+				loaded += 100 / (audios.length + images.length - 2)
+				checkLoading()
+				
+
+	def checkLoading
+		render()
+		if loaded > 100
+			STATE.loading = false
+			STATE.game.new(self)
 
 	def cameraPosX
 		window.innerWidth / 2 - player.position.x
@@ -101,9 +154,19 @@ tag app-root
 
 	def render
 		<self>
+			for animation in animations
+				<image[display: none] href="{animation.path}.png" width=100 height=100>
+			<image[display: none] href="textures/the_floor/the_floor/Mud.png" width=500 height=500>
+			<image[display: none] href="textures/the_floor/the_floor/Rock.png" width=500 height=500>
+			<image[display: none] href="textures/the_floor/the_floor/Forest.png" width=500 height=500>
+			<image[display: none] href="textures/the_floor/the_floor/bush.png" width=110 height=110>
+			<image[display: none] href="textures/the_floor/the_floor/barrel.png" width=40 height=40>
+			<image[display: none] href="textures/the_floor/the_floor/blood_0.png" width=100 height=100>
+			<image[display: none] href="textures/shoot/shoot/0.png" width=100 height=100>
 			if STATE.loading
-				<h1>
-					"Carregando"
+				<div[width: 100% heigth: 100vh text-align: center]>
+					<h1 [color: red ff: MenofNihilist transform: translate(0, 45vh)] >
+						"Loading {~~(loaded)}%"
 			else
 				<.darkness=(!player.gun.firing) style="transform: translate(-500vw, -150vh) rotate({-player.rotation + 90}deg)">
 				<.ui>
