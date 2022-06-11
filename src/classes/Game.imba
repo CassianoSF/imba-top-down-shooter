@@ -17,6 +17,7 @@ export default global class Game
 	def playTheme
 		let theme = Audio.new("sounds/theme0{current_theme}.ogg")
 		theme.onended = playNext.bind(this)
+		theme.volume = 0.5
 		theme.play()
 	
 	def playNext
@@ -24,6 +25,7 @@ export default global class Game
 		current_theme = 0 if current_theme == 8
 		let theme = Audio.new("sounds/theme0{current_theme}.ogg")
 		theme.onended = playNext.bind(this)
+		theme.volume = 0.5
 		theme.play()
 
 	def startGame

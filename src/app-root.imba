@@ -168,7 +168,7 @@ tag app-root
 					<h1 [color: red ff: MenofNihilist transform: translate(0, 45vh)] >
 						"Loading {~~(loaded)}%"
 			else
-				<.darkness=(!player.gun.firing) style="transform: translate(-500vw, -150vh) rotate({-player.rotation + 90}deg)">
+				# <.darkness=(!player.gun.firing) style="transform: translate(-500vw, -150vh) rotate({-player.rotation + 90}deg)">
 				<.ui>
 					<player-hud>
 					<player-store>
